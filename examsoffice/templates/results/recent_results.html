@@ -1,0 +1,22 @@
+{% block content %}
+<div id="page-body">
+    {% if object_list %}
+    <table>
+        {% for result in object_list %}
+            <tr>
+                <td>{{ result.id }}</td>
+                <td>{{ result.student_reg_no }}</td>
+                <td>{{ result.course_id__course_title }}</td>
+                <td>{{ result.course_id__course_semester }}</td>
+                <td>{{ result.course_id__course_code}}</td>
+                <td>{{ result.semester_id__desc }}</td>
+                <td>{{ result.semester_id__semester_id }}</td>
+                <td>{{ result.letter_grade }}</td>
+                <td><a href="{% url 'results:delete' result.id %}"><input type="button" value="Delete This Record"></a></td>
+            </tr>
+        {% endfor %}
+        
+    </table>
+    {% endif %}
+</div>
+{% endblock %}

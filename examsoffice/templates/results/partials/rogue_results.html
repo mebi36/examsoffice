@@ -1,0 +1,32 @@
+<div id="page-body">
+    {% if object_list %}
+    <table class="table">
+        {% for result in object_list %}
+            {% if result.semester.id.semester == result.course.course_semester.semester %}
+
+            <tr>
+                <td>{{ result.id }}</td>
+                <td>{{ result.student_reg_no }}</td>
+                <td>{{ result.course_id__course_title }}</td>
+                <td>{{ result.course_id__course_semester.semester }}</td>
+                <td>{{ result.course_id__course_code}}</td>
+                <td>{{ result.semester_id__desc }}</td>
+                <td>{{ result.semester_id__semester }}</td>
+                <td>{{ result.letter_grade }}</td>
+                <td>
+                    <input type="button" 
+                        value="Delete This Record" 
+                        hx-get="{% url 'results:delete' result.id %}"
+                        hx-confirm="Delete result?"
+                        hx-trigger="click"
+                        hx-swap="OuterHTML"
+                        hx-target="#page-body"
+                    >
+                </td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+        
+    </table>
+    {% endif %}
+</div>

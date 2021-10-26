@@ -1,0 +1,10 @@
+{% block content %}
+    <h2>Publishers</h2>
+    <ul>
+        {% for result in object_list %}
+            <li>{{ publisher.course_id__course_title }}</li>
+            <li>{{ semester_number__desc }}</li>
+            <li>{{ letter_grade }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

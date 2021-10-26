@@ -1,0 +1,13 @@
+{% block content %}
+    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+    <form action="{% url 'home:modify' result.id %}" method="POST">
+        {% csrf_token %}
+        <input type="text" name="reg"  value="{{ result.student_reg_no }}" readonly><br>
+        <input type="text" name="course_id" value="{{ result.course_id__course_title }}" readonly><br>
+        <input type="text" name="grade" value="{{ result.letter_grade }}"><br>
+        <input type="text" name="upload_date" value="{{ result.upload_date }} " readonly><br>
+        <input type="submit" value="Save Change">
+    </form>
+
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+    <div id="page-body">
+        <div class="card mx-auto w-75">
+            <form action="{% url 'results:modify' result.id %}" method="POST">
+                {% csrf_token %}
+                <div class="form-group" >
+                    <label for="reg_no">Registration Number:</label>
+                    <input type="text" class="form-control w-75" name="reg_no"  value="{{ result.student_reg_no }}" readonly><br>
+                </div>
+                <div class="form-group">
+                    <label for="course_id">Course Title:</label>
+                    <input type="text" class="form-control w-75" name="course_id" value="{{ result.course_id__course_title }}" readonly><br>
+                </div>
+                <div class="form-group">
+                    <label for="grade">Grade:</label>
+                    <input type="text" class="form-control w-75" name="grade" value="{{ result.letter_grade }}"><br>
+                </div>
+                <div class="form-group">
+                    <label for="upload_date">Upload Date:</label>
+                    <input type="text" class="form-control w-75" name="upload_date" value="{{ result.upload_date }} " readonly><br>
+                </div>
+                    <button type="submit" class="btn btn-success">
+                        <img class="img-fluid mr-2" src="{% static 'images/save.svg' %}" 
+                            alt="save-button">    Save Change</button>
+                    <!-- <input type="submit"  value="">  -->
+                    <button type="button" class="btn btn-danger"
+                            hx-get="{% url 'results:delete_student_result' result.id %}"
+                            hx-confirm="Delete result?"
+                            hx-trigger="click"
+                            hx-swap="OuterHTML"
+                            hx-target="#page-body">
+                        <img class="img-fluid mr-2" src="{% static 'images/cancel.svg' %}" alt="delete-button">
+                    Delete Result
+                    </button>
+            </form>
+    </div>
+    </div>
+{% endblock %}

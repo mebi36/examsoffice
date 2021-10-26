@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+        <div class="card w-75 mx-auto">
+            <h5 class="card-title">Student Transcripts</h5>
+            <p class="card-text">
+                Print student transcripts and academic progress reports
+            </p>
+            <a href="#" class="btn btn-success" id="go-button">
+                <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">    Go</a>    
+        </div> 
+        <div class="card w-75 mx-auto">
+            <h5 class="card-title">Modify Student Records</h5>
+            <p class="card-text">
+                Edit Student Records here
+            </p>
+            <a href="{% url 'results:student_search' %}" class="btn btn-success">
+                <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">
+                    Go</a>        
+        </div> 
+        <div class="card w-75 mx-auto">
+            <h5 class="card-title">Result Uploads</h5>
+            <p class="card-text">
+                Upload academic records
+            </p>
+            <a href="{% url 'results:upload' %}" class="btn btn-success">
+                <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">Go</a>        
+
+        </div>
+        <div class="card w-75 mx-auto">
+            <h5 class="card-title">Delete Results by Session</h5>
+            <p class="card-text">
+                Delete all results for a given session.
+            </p>
+            <a href="{% url 'results:delete_by_session' %}" class="btn btn-success" id="go-button">
+                <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">Go</a>    
+        </div>
+        <div class="card w-75 mx-auto">
+            <h5 class="card-title">View Recently Added Results</h5>
+            <p class="card-text">
+                View results that were added recently.
+            </p>
+            <a href="#" class="btn btn-success" id="go-button">
+                <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">Go</a>    
+        </div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="card mx-auto wx-75">
+    <div class="card-title"><h6>Download Result format</h6></div>
+    {% include "message_display.html" %}
+    <div class="card-body">
+        <form action="." method="post">
+        {% csrf_token %}
+            <div class="form-group">
+                <label for="result-format">Result format:</label>
+                <select name="upload_option" class="form-control wx-75" required>
+                    <option disabled selected value> -- select format -- </option>
+                    {% for upload_option in upload_options %}
+                    <option value="{{ upload_option }}">{{ upload_option }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-success" type="submit">
+                    <img src="{% static 'images/save.svg' %}" alt="save-icon" class="mr-2">
+                    Download Result Format</button>
+            </div>
+        </form>
+    </div>
+    <div class="mx-auto wx-25">
+        <a href="{% url 'results:upload_result_file' %}">
+            Proceed to Upload Page <img class="ml-1" src="{% static 'images/forward.svg' %}" alt="forward-icon">
+        </a>
+    </div>
+</div>
+{% endblock %}

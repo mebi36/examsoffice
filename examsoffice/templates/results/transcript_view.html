@@ -1,0 +1,17 @@
+{% block content %}
+    <h2>Academic Transcript of {{ result.0.student_reg_no }}</h2>
+    
+	{% regroup object_list by semester_number__desc as session_list %}
+	<ul>
+        {% for session in session_list %}
+			<li>{{ session.grouper }}
+			<ul>
+				{% for result in session.list %}
+				<li><a href="{% url 'results:result_edit' result.id %}">{{ result.course_id__course_title | upper }}: {{ result.letter_grade }}</a></li>
+				{% endfor %}
+			</ul>
+			</li>
+            <br>
+        {% endfor %}
+    </ul>
+{% endblock %}

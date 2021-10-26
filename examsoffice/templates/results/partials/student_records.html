@@ -1,0 +1,40 @@
+{% block content %}
+{% load to_underscore %}
+{% load static %}
+    <div class="button-group">
+        <a class="btn btn-success" href="{% url 'results:student_search' %}">Find Another Student</a>
+        {% if object_list%}
+            <a class="btn btn-success" href="{% url 'results:add' object_list.0.student_reg_no|to_underscore %}">
+            Add A Result For Student</a>
+            {% endif%}
+    </div>    
+    <div class="jumbotron card">
+        {% if object_list%}
+        <h5 class="card-title">Academic Records for {{ object_list.0.student_reg_no }}</h5>
+        {% if student %}
+            <h6 class="card-text">Student Name: {{ student.last_name|title }}, {{ student.first_name|title }}</h6>
+            <h6 class="card-text">Mode of Admission: {{ student.mode_of_admission.mode_of_admission }}</h6>
+        {% endif %}
+    </div>
+    {% regroup object_list by semester_number__desc as session_list %}
+    <ul>
+        {% for session in session_list %}
+            <li>{{ session.grouper }}
+            <ul>
+                {% for result in session.list %}
+                <li><a href="{% url 'results:result_edit' result.id %}">
+                    {{ result.course_id__course_code }}: 
+                    {{ result.course_id__course_title | upper }}: 
+                    {{ result.letter_grade }}</a></li>
+                {% endfor %}
+            </ul>
+            </li>
+            <br>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div>
+        <h6 class="text-warning">No academic records were found for the registration number entered.</h6>
+    </div>
+{% endif %}
+    {% endblock %}

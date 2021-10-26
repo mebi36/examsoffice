@@ -1,0 +1,27 @@
+{% load static %}
+<div id="form-body">
+    <div class="card mx-auto w-75">
+        <form hx-post="." hx-target="#form-body" hx-swap="outerHTML">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="reg_no">Enter Student Registration Number</label>
+                <input type="text" 
+                    class="form-control w-75" name="reg_no" 
+                    placeholder="Registration Number . . ." 
+                    required="required">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-success">
+                    <img class="img-fluid" src="{% static 'images/search.svg' %}" 
+                    alt="search-button">    Search
+                </button>
+            </div>
+        </form>
+            <div id="message">
+                {% if error_message %}
+                {{ error_message }}
+                {% endif %}
+            </div>
+    </div>
+</div>
+          
