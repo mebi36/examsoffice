@@ -40,6 +40,11 @@ def _is_valid_reg_no(reg_no):
 #     context_object_name = 'result'
 #     queryset = _queryset
 
+def results_menu(request):
+    """A view to display all the actions a user can perform
+        with regards to student results"""
+    
+    return render(request, 'results/menu.html', {})
 
 @login_required
 def edit_result(request, pk):
@@ -49,25 +54,22 @@ def edit_result(request, pk):
     return render(request,'results/edit_result.html',context)
 
 @login_required
-def results_menu(request):
-    """A view to display all the actions a user can perform
-        with regards to student results"""
-    
-    return render(request, 'results/menu.html', {})
-
-@login_required
 def find_student(request):
     """A view that renders a form for users to search for a
-        student with registration numbers"""
-    template_name = 'students/reg_no_search.html'
-    if request.htmx:
+        student records with registration numbers
+        
+        view should also process searching for a given name"""
+        
+    template_name = 'results/reg_no_search.html'
+    if request.method == 'POST':
         reg_no = request.POST['reg_no']
         if _is_valid_reg_no(reg_no):
-            return HttpResponseRedirect(reverse('results:student_records_partial',
+            return HttpResponseRedirect(reverse('results:student_records',
                                      kwargs={'reg_no': reg_no.replace("/","_")}))
         else:
-            context = {'error_message': 'Invalid Registration Number'}
-            return render(request, 'students/partials/reg_no_search.html',context)
+            messages.add_message(request, messages.ERROR, 
+                                    "Invalid Registration Number",
+                                    extra_tags='text-danger')
     return render(request, template_name, {})
 
 
@@ -133,6 +135,7 @@ def add_result(request, reg_no):
     
     return render(request, 'results/add_result.html', context)
 
+@login_required
 def result_add_processor(request): 
     reg_no_for_url = request.POST['reg_no'].replace("/", "_")
     if (request.POST['semester'] != None 
@@ -161,7 +164,7 @@ def result_add_processor(request):
     return HttpResponseRedirect(reverse('results:add',
                                                 kwargs={'reg_no': reg_no_for_url}))
 
-
+@login_required
 def recent_results(request):
     queryset = _queryset.order_by('-id')[:100]
     
@@ -170,6 +173,7 @@ def recent_results(request):
 
     return render(request, template, context)
 
+@login_required
 def rogue_results(request):
     queryset = ex.Result.objects.all().select_related('semester', 'course'
                         ).order_by('-id').values(
@@ -186,6 +190,7 @@ def rogue_results(request):
 
     return render(request, template, context)
 
+@login_required
 def delete_result(request, pk):
     result_details = get_object_or_404(ex.Result, id=pk)
     if result_details:
@@ -193,6 +198,7 @@ def delete_result(request, pk):
 
     return HttpResponseRedirect(reverse('results:recent_results'))
 
+@login_required
 def delete_student_result(request, pk):
     result_details = get_object_or_404(ex.Result, id=pk)
     if result_details:
@@ -209,6 +215,7 @@ def delete_student_result(request, pk):
     deletion of entire results for a particular session
 """
 
+@login_required
 def result_upload_options(request):
     RESULT_UPLOAD_OPTIONS = ('Upload results without scores', 
                              'Upload results with scores',)
@@ -234,6 +241,7 @@ def result_upload_options(request):
 
     return render(request, template_name, context)
 
+@login_required
 @never_cache
 def upload_result_file(request):
     template_name = 'results/upload_result_file.html'
@@ -355,6 +363,7 @@ def upload_result_file(request):
 
     return render(request, template_name, context)   
 
+@login_required
 def delete_by_session(request):
     template_name = 'results/delete_by_session.html'
     course_qs = ex.Course.objects.all()
@@ -386,7 +395,7 @@ def delete_by_session(request):
                             extra_tags="text-danger")
     return render(request, template_name, context)
 
-
+@login_required
 def student_transcript_generator(request, reg_no):
     template_name = 'results/transcript.html'
     reg_no = reg_no.replace('_','/')
@@ -417,6 +426,7 @@ def student_transcript_generator(request, reg_no):
         # # print(result_df)
     return render(request, template_name, {})
 
+@login_required
 def class_speadsheet_generator(request, expected_yr_of_grad):
     class_list = ex.Student.objects.all().select_related('mode_of_admission').filter(
                                     expected_year_of_graduation=expected_yr_of_grad).values_list(
