@@ -6,7 +6,6 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.views import generic
 from django.views.decorators.cache import never_cache
-import openpyxl
 import re
 import csv
 import os
@@ -35,11 +34,11 @@ def _is_valid_reg_no(reg_no):
         else:
             return False
 
-# @login_required
-class EditResultsView(generic.ListView):
-    template_name = "results/edit_results_view.html"
-    context_object_name = 'result'
-    queryset = _queryset
+# # @login_required
+# class EditResultsView(generic.ListView):
+#     template_name = "results/edit_results_view.html"
+#     context_object_name = 'result'
+#     queryset = _queryset
 
 
 @login_required
@@ -101,6 +100,11 @@ def student_records(request, reg_no):
     template_name = 'results/student_records.html'
     reg_no = reg_no.replace("_", "/")
     queryset = _queryset.filter(student_reg_no=reg_no)
+    if len(queryset) < 1:
+        messages.add_message(request, messages.ERROR, 
+                            '''No academic records were found for the 
+                                registration number entered.''',
+                                    extra_tags='text-danger')
     student_info = ex.Student.objects.get_or_create(student_reg_no=reg_no)
     student_info = ex.Student.objects.get(student_reg_no=reg_no)
     context = {'object_list': queryset, 'student': student_info,}
@@ -123,7 +127,7 @@ def add_result(request, reg_no):
         student"""
     reg_no = reg_no.replace("_", "/")
     course_qs = ex.Course.objects.all()
-    semester_qs = ex.SemesterSession.objects.all().order_by('-semester')
+    semester_qs = ex.SemesterSession.objects.all().order_by('-session')
     context = {'reg_no': reg_no, 'courses': course_qs, 'semesters': semester_qs,
                 'valid_grades': _valid_grades}
     
@@ -137,7 +141,7 @@ def result_add_processor(request):
         course = ex.Course.objects.get(id=int(request.POST['course']))
         semester = ex.SemesterSession.objects.get(
                                 id=int(request.POST['semester']))
-        if course.course_semester == semester.id:
+        if course.course_semester == semester.semester:
             result_details = ex.Result.objects.create(
                     student_reg_no=request.POST['reg_no'],
                     course=course,
