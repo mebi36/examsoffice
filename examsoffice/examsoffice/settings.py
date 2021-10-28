@@ -21,7 +21,7 @@ MEDIA_DIR = os.path.join(BASE_DIR, "media")
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ''
+SECRET_KEY = 'django-insecure-9-7ybu+vnb&1m$16)&fdpll-u&0m0hvehef2b&ks=ktztjj9^l'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -84,13 +84,13 @@ WSGI_APPLICATION = 'examsoffice.wsgi.application'
 
 #provide preferred database settings
 DATABASES = {
-    'default': {
+   'default': {
     'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    'NAME': '',
-    'HOST': '',
-    'PORT': '',
-    'USER': '',
-    'PASSWORD': '',
+    'NAME': 'student_test',
+    'HOST': 'localhost',
+    'PORT': '5432',
+    'USER': 'postgres',
+    'PASSWORD': 'blessedmeb1i',
     }
 }
 
