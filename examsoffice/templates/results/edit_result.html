@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
     <div id="page-body">
         <div class="card mx-auto w-75">
-            <form action="{% url 'results:modify' result.id %}" method="POST">
+            {% include 'message_display.html' %}
+            <form action="." method="POST">
                 {% csrf_token %}
                 <div class="form-group" >
                     <label for="reg_no">Registration Number:</label>
@@ -36,6 +37,12 @@
                     Delete Result
                     </button>
             </form>
+            <div class="mx-auto wx-25">
+                <a href="{% url 'results:menu' %}">
+                    <img class="mr-1" src="{% static 'images/back-b.svg' %}" alt="forward-icon">
+                    Return to main menu
+                </a>
+            </div>
     </div>
     </div>
 {% endblock %}

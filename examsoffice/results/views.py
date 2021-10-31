@@ -28,11 +28,6 @@ _queryset = ex.Result.objects.all().select_related('course',
 
 _valid_grades = ['A', 'B', 'C', 'D', 'E', 'F']
 
-def _is_valid_reg_no(reg_no):
-        if re.search("^[0-9]{4}\/[0-9]{6}$", reg_no) != None:
-            return True
-        else:
-            return False
 
 # # @login_required
 # class EditResultsView(generic.ListView):
@@ -48,24 +43,37 @@ def results_menu(request):
 
 @login_required
 def edit_result(request, pk):
+    if request.method == 'POST':
+        result_details = get_object_or_404(ex.Result, id=pk)
+        if (request.POST['grade'].upper() in _valid_grades and
+                request.POST['grade'].upper() != result_details.letter_grade):
+            result_details.letter_grade = request.POST['grade'].upper()
+            result_details.save()
+            messages.add_message(request, messages.SUCCESS,
+                                    "Update successful",
+                                    extra_tags="text-success")
+
     queryset = _queryset
     result_details = get_object_or_404(queryset, id=pk)
     context = { 'result': result_details }
+    
     return render(request,'results/edit_result.html',context)
 
 @login_required
 def find_student(request):
     """A view that renders a form for users to search for a
-        student records with registration numbers
+        student's academic record with his/her registration number
         
-        view should also process searching for a given name"""
-        
+        view could also be modified to process searching 
+        for a student's record given just his/her name"""
+
     template_name = 'results/reg_no_search.html'
     if request.method == 'POST':
         reg_no = request.POST['reg_no']
-        if _is_valid_reg_no(reg_no):
-            return HttpResponseRedirect(reverse('results:student_records',
-                                     kwargs={'reg_no': reg_no.replace("/","_")}))
+        if ex.Student.is_valid_reg_no(reg_no):
+            student = ex.Student.objects.get_or_create(student_reg_no=reg_no)
+            student = ex.Student.objects.get(student_reg_no=reg_no)
+            return HttpResponseRedirect(student.get_records_url())
         else:
             messages.add_message(request, messages.ERROR, 
                                     "Invalid Registration Number",
@@ -77,7 +85,7 @@ def find_student(request):
 def student_search_processor(request, reg_no):
     template_name = "results/student_records.html"
     reg_no = request.POST['reg_no']
-    if _is_valid_reg_no(reg_no):
+    if ex.Student.is_valid_reg_no(reg_no):
         object_list =  _queryset.filter(student_reg_no = reg_no)
         student_info = ex.Student.objects.get_or_create(student_reg_no=reg_no) 
         student_info = ex.Student.objects.get(student_reg_no=reg_no)
@@ -87,40 +95,35 @@ def student_search_processor(request, reg_no):
 
 
 @login_required
-def result_modify(request, pk):
-    result_details = get_object_or_404(ex.Result, id=pk)
-    if (request.POST['grade'].upper() in _valid_grades):
-        result_details.letter_grade = request.POST['grade'].upper()
-        result_details.save()
-    reg_no = request.POST['reg_no'].replace("/", "_")
-    
-    return HttpResponseRedirect(reverse('results:student_records_partial', 
-                                                kwargs={'reg_no': reg_no}))
-
-@login_required
 def student_records(request, reg_no):
     template_name = 'results/student_records.html'
     reg_no = reg_no.replace("_", "/")
-    queryset = _queryset.filter(student_reg_no=reg_no)
-    if len(queryset) < 1:
-        messages.add_message(request, messages.ERROR, 
-                            '''No academic records were found for the 
-                                registration number entered.''',
-                                    extra_tags='text-danger')
-    student_info = ex.Student.objects.get_or_create(student_reg_no=reg_no)
-    student_info = ex.Student.objects.get(student_reg_no=reg_no)
-    context = {'object_list': queryset, 'student': student_info,}
-    
-    return render(request, template_name, context)
 
-@login_required
-def student_records_partial(request, reg_no):
-    template_name = 'results/partials/student_records.html'
-    reg_no = reg_no.replace("_", "/")
-    queryset = _queryset.filter(student_reg_no=reg_no)
-    student_info = ex.Student.objects.get_or_create(student_reg_no=reg_no)
-    student_info = ex.Student.objects.get(student_reg_no=reg_no)
-    context = {'object_list': queryset, 'student': student_info,}
+    if ex.Student.is_valid_reg_no(reg_no):
+        # queryset = _queryset.filter(student_reg_no=reg_no)
+        queryset = ex.Result.objects.all().filter(student_reg_no=reg_no
+                            ).select_related('course','semester')
+    
+        if len(queryset) < 1:
+            messages.add_message(request, messages.INFO, 
+                                '''No academic records were found for the 
+                                    registration number entered.''',
+                                        extra_tags='text-danger')
+
+        if not ex.Student.objects.get(student_reg_no=reg_no):
+            ex.Student.objects.create(student_reg_no=reg_no)
+    
+        student_info = ex.Student.objects.get(student_reg_no=reg_no)
+
+        for _ in queryset:
+            print("got: ", _.get_edit_url())
+        context = {'object_list': queryset, 'student': student_info,}
+    else:
+        messages.add_message(request, messages.ERROR, 
+                                '''Invalid Student Registration Number''',
+                                    extra_tags='text-danger')
+        context = {}
+
     return render(request, template_name, context)
 
 @login_required
@@ -137,7 +140,7 @@ def add_result(request, reg_no):
 
 @login_required
 def result_add_processor(request): 
-    reg_no_for_url = request.POST['reg_no'].replace("/", "_")
+    student = ex.Student.objects.get(request.POST['reg_no'])
     if (request.POST['semester'] != None 
                     and request.POST['course'] != '' 
                     and request.POST['grade'].upper() in _valid_grades):
@@ -153,16 +156,14 @@ def result_add_processor(request):
                                                 )
             result_details.save()
     
-            return HttpResponseRedirect(reverse('results:student_records', 
-                                                kwargs={'reg_no': reg_no_for_url}))
+            return HttpResponseRedirect(student.get_records_url())
         else:
             messages.add_message(request, messages.ERROR, 'Course/Semester Mismatch!',
                                     extra_tags='text-danger')
     else:
             messages.add_message(request, messages.ERROR, 
                                 'Uknown Error, Please Try again')
-    return HttpResponseRedirect(reverse('results:add',
-                                                kwargs={'reg_no': reg_no_for_url}))
+    return HttpResponseRedirect(student.get_record_creation_url())
 
 @login_required
 def recent_results(request):
@@ -202,12 +203,12 @@ def delete_result(request, pk):
 def delete_student_result(request, pk):
     result_details = get_object_or_404(ex.Result, id=pk)
     if result_details:
-        reg_no = (result_details.student_reg_no).replace("/","_")
+        student = ex.Student.objects.get(
+                            student_reg_no=result_details.student_reg_no)
         ex.Result.objects.get(id=pk).delete()
         
 
-    return HttpResponseRedirect(reverse('results:student_records_partial', 
-                            kwargs = {'reg_no': reg_no}))
+    return HttpResponseRedirect(student.get_records_url())
 
 
 """For bulk result operations like:
@@ -278,7 +279,7 @@ def upload_result_file(request):
                                         'Grade': 'grade'}, inplace=True)
                     for index, row in df.iterrows():
                         if row['grade'].upper() in _valid_grades: 
-                            if _is_valid_reg_no(row['reg_no']):
+                            if ex.Student.is_valid_reg_no(row['reg_no']):
                                 course = ex.Course.objects.get(
                                             id=int(request.POST['course']))
                                 semester = ex.SemesterSession.objects.get(
@@ -310,7 +311,7 @@ def upload_result_file(request):
                         if isinstance(row['ca_score'], (int, float)):
                             if isinstance(row['exam_score'], (int, float)):
                                 if row['grade'].upper() in _valid_grades:
-                                    if _is_valid_reg_no(row['reg_no']):
+                                    if ex.Student.is_valid_reg_no(row['reg_no']):
                                         course = ex.Course.objects.get(
                                                     id=int(request.POST['course']))
                                         semester = ex.SemesterSession.objects.get(

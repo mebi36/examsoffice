@@ -27,7 +27,7 @@
             <li><a href="{% url 'results:result_edit' result.id %}">
                 {{ result.course_id__course_code }}: 
                 {{ result.course_id__course_title | upper }}: 
-                {{ result.letter_grade }}</a>
+                {{ result.letter_grade }}</a>{{ result.get_edit_url }}
             </li>
             {% endfor %}
         </ul>

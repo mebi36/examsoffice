@@ -1,17 +1,11 @@
 from django.db import models
 from django.db.models.deletion import CASCADE, PROTECT
 
+import re
+
+from django.urls.base import reverse
+
 # Create your models here.
-
-
-# class Tbl2DbUsers(models.Model):
-#     user_id = models.BigAutoField(db_column='UserID', primary_key=True)
-#     user_name = models.CharField(db_column='Username', max_length=25, blank=True, null=True)
-#     password = models.CharField(db_column='Password', max_length=25, blank=True, null=True)
-
-#     class Meta:
-#         managed = False
-#         db_table = 'tbl2DBUsers'
 
 
 class LecturerRole(models.Model):
@@ -47,6 +41,9 @@ class LevelOfStudy(models.Model):
     class Meta:
         managed = False
         db_table = 'tbl2Levels'
+    
+    def __str__(self):
+        return self.level_description
 
 
 class MaritalStatus(models.Model):
@@ -57,6 +54,9 @@ class MaritalStatus(models.Model):
         managed = False
         db_table = 'tbl2MaritalStatuses'
 
+    def __str__(self):
+        return self.marital_status
+
 
 class ModeOfAdmission(models.Model):
     id = models.BigAutoField(db_column='ID', primary_key=True)
@@ -66,6 +66,9 @@ class ModeOfAdmission(models.Model):
     class Meta:
         managed = False
         db_table = 'tbl2ModesOfAdmission'
+    
+    def __str__(self) -> str:
+        return self.mode_of_admission
 
 
 class ModeOfStudy(models.Model):
@@ -76,6 +79,8 @@ class ModeOfStudy(models.Model):
         managed = False
         db_table = 'tbl2ModesOfStudy'
 
+    def __str__(self):
+        return self.mode_of_study
 
 class Relationship(models.Model):
     id = models.BigAutoField(db_column='ID', primary_key=True)
@@ -84,6 +89,9 @@ class Relationship(models.Model):
     class Meta:
         managed = False
         db_table = 'tbl2Relationships'
+
+    def __str__(self):
+        return self.relationship
 
 
 class Semester(models.Model):
@@ -94,6 +102,8 @@ class Semester(models.Model):
         managed = False
         db_table = 'tbl2Semesters'
 
+    def __str__(self):
+        return self.semester
 
 class Session(models.Model):
     id = models.BigAutoField(db_column='SessionID', primary_key=True)
@@ -105,6 +115,10 @@ class Session(models.Model):
         db_table = 'tbl2Sessions'
 
 
+    def __str__(self):
+        return self.session
+
+
 class Sex(models.Model):
     id = models.BigAutoField(db_column='ID', primary_key=True)
     sex = models.CharField(db_column='Sex', max_length=255, blank=True, null=True)
@@ -113,6 +127,8 @@ class Sex(models.Model):
         managed = False
         db_table = 'tbl2Sexes'
 
+    def __str__(self):
+        return self.sex
 
 class SemesterSession(models.Model):
     id = models.BigAutoField(db_column='SemesterNumber', 
@@ -126,6 +142,10 @@ class SemesterSession(models.Model):
         managed = False
         db_table = 'tbl2SemesterCount'
         unique_together = (('session', 'semester'),)
+
+
+    def __str__(self):
+        return self.desc
 
 
 class Course(models.Model):
@@ -200,8 +220,27 @@ class Student(models.Model):
         managed = False
         db_table = 'tbl1StudentBios'
 
+    @staticmethod
+    def is_valid_reg_no(reg_no):
+        if re.search("^[0-9]{4}\/[0-9]{6}$", reg_no) != None:
+            return True
+        else:
+            return False
 
+    def get_reg_no_for_url(self):
+        return self.student_reg_no.replace("/", "_")
 
+    def get_absolute_url(self):
+        return reverse('students:edit_bio', 
+                        kwargs={'reg_no': self.get_reg_no_for_url()})
+
+    def get_records_url(self):
+        return reverse('results:student_records',
+                        kwargs={'reg_no': self.get_reg_no_for_url()})
+    
+    def get_record_creation_url(self):
+        return reverse('results:add',
+                        kwargs={'reg_no': self.get_reg_no_for_url()})
 
 class Result(models.Model):
     id = models.BigAutoField(db_column='ID', primary_key=True)
@@ -230,6 +269,9 @@ class Result(models.Model):
         managed = False
         db_table = 'tbl1StudentResults'
         unique_together = (('semester', 'student_reg_no', 'course'),)
+
+    def get_edit_url(self):
+        return reverse('results:result_edit', kwargs={'pk': self.id})
 
 
 class StudentSponsor(models.Model):
