@@ -100,7 +100,6 @@ def student_records(request, reg_no):
     reg_no = reg_no.replace("_", "/")
 
     if ex.Student.is_valid_reg_no(reg_no):
-        # queryset = _queryset.filter(student_reg_no=reg_no)
         queryset = ex.Result.objects.all().filter(student_reg_no=reg_no
                             ).select_related('course','semester')
     
@@ -115,8 +114,6 @@ def student_records(request, reg_no):
     
         student_info = ex.Student.objects.get(student_reg_no=reg_no)
 
-        for _ in queryset:
-            print("got: ", _.get_edit_url())
         context = {'object_list': queryset, 'student': student_info,}
     else:
         messages.add_message(request, messages.ERROR, 

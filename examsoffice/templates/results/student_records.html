@@ -18,16 +18,16 @@
     <h6 class="card-text">Mode of Admission: {{ student.mode_of_admission.mode_of_admission }}</h6>
     {% endif %}
     </div>
-    {% regroup object_list by semester_id__desc as session_list %}
+    {% regroup object_list by semester.desc as session_list %}
     <ul>
         {% for session in session_list %}
         <li>{{ session.grouper }}
         <ul>
             {% for result in session.list %}
-            <li><a href="{% url 'results:result_edit' result.id %}">
-                {{ result.course_id__course_code }}: 
-                {{ result.course_id__course_title | upper }}: 
-                {{ result.letter_grade }}</a>{{ result.get_edit_url }}
+            <li><a href="{{ result.get_edit_url }}">
+                {{ result.course.course_code }}: 
+                {{ result.course.course_title | upper }}: 
+                {{ result.letter_grade }}</a>
             </li>
             {% endfor %}
         </ul>
