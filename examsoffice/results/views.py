@@ -71,8 +71,7 @@ def find_student(request):
     if request.method == 'POST':
         reg_no = request.POST['reg_no']
         if ex.Student.is_valid_reg_no(reg_no):
-            student = ex.Student.objects.get_or_create(student_reg_no=reg_no)
-            student = ex.Student.objects.get(student_reg_no=reg_no)
+            student, _ = ex.Student.objects.get_or_create(student_reg_no=reg_no)
             return HttpResponseRedirect(student.get_records_url())
         else:
             messages.add_message(request, messages.ERROR, 
@@ -87,8 +86,7 @@ def student_search_processor(request, reg_no):
     reg_no = request.POST['reg_no']
     if ex.Student.is_valid_reg_no(reg_no):
         object_list =  _queryset.filter(student_reg_no = reg_no)
-        student_info = ex.Student.objects.get_or_create(student_reg_no=reg_no) 
-        student_info = ex.Student.objects.get(student_reg_no=reg_no)
+        student_info, _ = ex.Student.objects.get_or_create(student_reg_no=reg_no) 
         context = {'object_list': object_list, 'student': student_info}
     
         return render(request, template_name, context)
@@ -109,10 +107,7 @@ def student_records(request, reg_no):
                                     registration number entered.''',
                                         extra_tags='text-danger')
 
-        if not ex.Student.objects.get(student_reg_no=reg_no):
-            ex.Student.objects.create(student_reg_no=reg_no)
-    
-        student_info = ex.Student.objects.get(student_reg_no=reg_no)
+        student_info, _ = ex.Student.objects.get_or_create(student_reg_no=reg_no)
 
         context = {'object_list': queryset, 'student': student_info,}
     else:
@@ -282,11 +277,12 @@ def upload_result_file(request):
                                 semester = ex.SemesterSession.objects.get(
                                                     id=int(request.POST['semester']))
                                 result_details = ex.Result.objects.update_or_create(
-                                                    student_reg_no=row['reg_no'],
-                                                    course=course,
-                                                    semester=semester,
-                                                    defaults={'letter_grade': row['grade'].upper()}
-                                                    )
+                                                student_reg_no=row['reg_no'],
+                                                course=course,
+                                                semester=semester,
+                                                defaults={
+                                                'letter_grade': row['grade'].upper()}
+                                                )
 
                             else:
                                 invalid_result_index_list = (invalid_result_index_list +

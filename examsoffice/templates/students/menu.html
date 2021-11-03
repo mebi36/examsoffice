@@ -1,8 +1,24 @@
 {% extends 'base.html' %}
 {% load static %}
-
 {% block content %}
-{% include 'menu_base.html' with entry_title="Edit Student Bio Info" entry_description="Edit student biodata." entry_link="#" %}
-{% include 'menu_base.html' with entry_title="Edit Entire Class Info" entry_description="View and edit class information" entry_link="#" %}
-<!-- {% include 'menu_base.html' with entry_title="" entry_description="" entry_link="" entry_link_title="" %} -->
+<div class="card w-75 mx-auto">
+    <h5 class="card-title">Edit Student Bio Info</h5>
+    <p class="card-text">
+        Edit student biodata.
+    </p>
+    <a href="{% url 'students:search' %}" class="btn btn-success" id="go-button">
+        <img class="img-fluid mr-2" src="{% static 'images/forward-w.svg' %}" alt="go-button">
+        {{ entry_link_title|default:"Go" }}
+    </a>    
+</div>
+<div class="card w-75 mx-auto">
+    <h5 class="card-title">Edit Entire Class Info</h5>
+    <p class="card-text">
+        View and edit class information
+    </p>
+    <a href="#" class="btn btn-success" id="go-button">
+        <img class="img-fluid mr-2" src="{% static 'images/forward-w.svg' %}" alt="go-button">
+        {{ entry_link_title|default:"Go" }}
+    </a>    
+</div>
 {% endblock %}
