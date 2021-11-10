@@ -27,11 +27,13 @@ class Lecturer(models.Model):
     email = models.CharField(db_column='Email', max_length=255, blank=True, null=True)
     department = models.CharField(db_column='Department', max_length=255, blank=True, null=True)
     faculty = models.CharField(db_column='Faculty', max_length=255, blank=True, null=True)
-
+    head_of_dept = models.BooleanField(db_column='HeadOfDepartment', null=True, blank=True)
     class Meta:
         managed = False
         db_table = 'tbl2Lecturers'
 
+    def get_full_name(self):
+        return f"{self.title or ''} {self.first_name[0] or ''} {self.other_names[0] or ''} {self.last_name}"
 
 class LevelOfStudy(models.Model):
     level = models.BigIntegerField(db_column='Level', primary_key=True)
@@ -43,7 +45,7 @@ class LevelOfStudy(models.Model):
         db_table = 'tbl2Levels'
     
     def __str__(self):
-        return self.level_description
+        return self.level_name
 
 
 class MaritalStatus(models.Model):
@@ -185,9 +187,9 @@ class ProgramRequirement(models.Model):
 class Student(models.Model):
     id = models.BigAutoField(db_column='ID', primary_key=True)
     student_reg_no = models.CharField(db_column='StudentRegNo', unique=True, max_length=255)
-    last_name = models.CharField(db_column='LastName', max_length=255, blank=True, null=True)
-    first_name = models.CharField(db_column='FirstName', max_length=255, blank=True, null=True)
-    other_names = models.CharField(db_column='OtherNames', max_length=255, blank=True, null=True)
+    last_name = models.CharField(db_column='LastName', max_length=255, blank=True, null=True, default='--')
+    first_name = models.CharField(db_column='FirstName', max_length=255, blank=True, null=True, default='--')
+    other_names = models.CharField(db_column='OtherNames', max_length=255, blank=True, null=True, default='--')
     email = models.CharField(db_column='Email', max_length=255, blank=True, null=True)
     phone_number = models.CharField(db_column='PhoneNumber', max_length=255, blank=True, null=True)
     sex = models.ForeignKey(db_column='Sex', blank=True, null=True,to='Sex',on_delete=CASCADE)
@@ -204,7 +206,7 @@ class Student(models.Model):
     mode_of_study = models.ForeignKey(db_column='ModeOfStudy', blank=True, null=True,
                                       to='ModeOfStudy',on_delete=PROTECT)
     year_of_admission = models.CharField(db_column='YearOfAdmission', max_length=10, blank=True, null=True)
-    expected_year_of_graduation = models.CharField(db_column='ExpectedYearOfGraduation', max_length=10, blank=True, null=True)
+    expected_yr_of_grad = models.CharField(db_column='ExpectedYearOfGraduation', max_length=10, blank=True, null=True)
     graduated = models.BooleanField(db_column='Graduated', blank=True, null=True)
     address_line1 = models.CharField(db_column='AddressLine1', max_length=255, blank=True, null=True)
     address_line2 = models.CharField(db_column='AddressLine2', max_length=255, blank=True, null=True)
@@ -220,12 +222,6 @@ class Student(models.Model):
         managed = False
         db_table = 'tbl1StudentBios'
 
-    @staticmethod
-    def is_valid_reg_no(reg_no):
-        if re.search("^[0-9]{4}\/[0-9]{6}$", reg_no) != None:
-            return True
-        else:
-            return False
 
     def get_reg_no_for_url(self):
         return self.student_reg_no.replace("/", "_")
@@ -241,6 +237,40 @@ class Student(models.Model):
     def get_record_creation_url(self):
         return reverse('results:add',
                         kwargs={'reg_no': self.get_reg_no_for_url()})
+
+    def get_progress_history_url(self):
+        return reverse('students:progress_history',
+                        args=[self.get_reg_no_for_url()])
+
+    @staticmethod
+    def is_valid_reg_no(reg_no):
+        if re.search("^[0-9]{4}\/[0-9]{6}$", reg_no) != None:
+            return True
+        else:
+            return False
+    
+    @staticmethod
+    def get_weight_col(df, credit_col='credit_load',grade_col='grade'):
+        df['weight'] = df.get(credit_col) * [5 if x == 'A' else 4 
+                                    if x == 'B' else 3 if 
+                                    x == 'C' else 2 if x == 'D'
+                                    else 1 if x == 'E' else 0 
+                                    for x in df.get(grade_col)]
+        return df
+
+    def get_full_name(self):
+            full_name = ''
+            if self.last_name:
+                full_name += (self.last_name + ", ")
+            if self.first_name:
+                full_name += (self.first_name + " ")
+            if self.other_names:
+                full_name += (self.other_names)
+            return full_name.upper() or "N/A"
+    
+    def get_level_of_study(self):
+        return f"{self.current_level_of_study}/5" or "N/A"
+
 
 class Result(models.Model):
     id = models.BigAutoField(db_column='ID', primary_key=True)
@@ -310,3 +340,7 @@ class StudentProgressHistory(models.Model):
         managed = False
         db_table = 'tbl2StudentProgressHistory'
         unique_together = (('student_reg_no', 'session_id'),)
+
+
+    def get_update_url(self):
+        return reverse('students:progress_history_edit',args=[self.id])

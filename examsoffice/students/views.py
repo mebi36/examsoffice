@@ -1,11 +1,11 @@
-from django.forms import fields
-from django.forms.models import inlineformset_factory
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 from django.contrib import messages
 from django.urls import reverse
 
-from .forms import (StudentBioForm,)
+from .forms import (ProgressHistoryForm, 
+                    StudentBioForm, 
+                    )
 from results.models import (LevelOfStudy, Student,
                             StudentProgressHistory, Session,)
 
@@ -42,7 +42,8 @@ def search(request):
                 student = Student.objects.get(
                                             student_reg_no=reg_no)
             except:
-                return HttpResponseRedirect(reverse('students:create', args=[reg_no.replace('/','_')]))
+                return HttpResponseRedirect(reverse('students:create', 
+                                            args=[reg_no.replace('/','_')]))
             else:
                 return HttpResponseRedirect(student.get_absolute_url())
     else:
@@ -81,7 +82,7 @@ def edit_bio_data(request, reg_no=None):
         
         if 'next' in request.GET.keys():
             context.update(next=request.GET['next'])
-            print(request.GET['next'])
+            # print(request.GET['next'])
     # process form submission
     if request.method == 'POST':
         if Student.is_valid_reg_no(request.POST['student_reg_no']):
@@ -105,17 +106,16 @@ def edit_bio_data(request, reg_no=None):
                                     "Invalid student registration number",
                                     extra_tags='text-danger')
     context.update(form=form)
-    print(context)
+    # print(context)
     return render(request, 'students/bio_data.html', {'form': form})
 
 
 def update_progress_history(request, reg_no):
     '''This view updates a student's academic progress history.
-        to do this it accept the registration number of the student
-        it will display any existing academic history for the student
-        it will provide multiple forms for the history to be entered
     '''
+    context = {}
     reg_no = reg_no.replace("_", "/")
+
     if Student.is_valid_reg_no(reg_no):
         try:
             student = Student.objects.get(student_reg_no=reg_no)
@@ -132,16 +132,39 @@ def update_progress_history(request, reg_no):
                                                 )
                     )
         else:
-            ProgressHistoryFormSet = inlineformset_factory(
-                                Student,
-                                StudentProgressHistory,
-                                min_num=2,
-                                max_num=10,
-                                exclude=[])
-        if request.method == 'POST':
-            # formset = 
-            pass
-        else:
-            formset = ProgressHistoryFormSet(instance=student)
+            context.update(student=student)
 
-        return render(request, 'students/progress_history.html', {'formset': formset})
+        if request.method == 'POST':
+            form = ProgressHistoryForm(request.POST)
+            if form.is_valid():
+                form.save()
+                try:
+                    prog_hist = StudentProgressHistory.objects.get(
+                            student_reg_no=request.POST['student_reg_no'],
+                            session=int(request.POST['session']))
+                except:
+                    form = ProgressHistoryForm(request.POST)
+                else:
+                    form = ProgressHistoryForm(request.POST, instance=student)
+                finally:
+                    if form.is_valid():
+                        form.save()
+                        messages.add_message(request, messages.SUCCESS,
+                                                    "Progress history saved.",
+                                                    extra_tags="text-success")
+                    else:
+                        print("Form is not valid")
+                        messages.add_message(request, messages.SUCCESS,
+                                                    "Error. Please check form",
+                                                    extra_tags="text-danger")
+        existing_progress_history = StudentProgressHistory.objects.all(                
+                                        ).filter(student_reg_no=student
+                                        ).select_related('session',
+                                                        'level_of_study',
+                                                        'student_reg_no'
+                                        ).order_by('session')
+        context.update(existing_progress_history=existing_progress_history)
+        context.update(form=ProgressHistoryForm(instance=student))
+
+    return render(request, 'students/progress_history.html', context)
+
