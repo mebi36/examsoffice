@@ -7,15 +7,12 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import never_cache
 import csv
 import pandas as pd
-from openpyxl import Workbook
 from pandas.core.frame import DataFrame
-from openpyxl.utils.dataframe import dataframe_to_rows
-from openpyxl.utils import get_column_letter
-from openpyxl.styles import (Alignment, PatternFill, Font, Border, Side)
 from openpyxl.writer.excel import save_virtual_workbook
 from . import models as ex
-from results.utils import (failed_courses_breakdown, student_transcript, 
+from results.utils import (student_transcript, 
                             class_result_spreadsheet)
+
 #Generating querysets that will be used often in many views of this app
 _queryset = ex.Result.objects.all().select_related('course',                                           
                                 'semester').values(
@@ -40,7 +37,6 @@ _valid_grades = ['A', 'B', 'C', 'D', 'E', 'F']
 def results_menu(request):
     """A view to display all the actions a user can perform
         with regards to student results"""
-    
     return render(request, 'results/menu.html', {})
 
 @login_required
@@ -127,8 +123,8 @@ def add_result(request, reg_no):
     reg_no = reg_no.replace("_", "/")
     course_qs = ex.Course.objects.all()
     semester_qs = ex.SemesterSession.objects.all().order_by('-session')
-    context = {'reg_no': reg_no, 'courses': course_qs, 'semesters': semester_qs,
-                'valid_grades': _valid_grades}
+    context = {'reg_no':reg_no, 'courses':course_qs, 'semesters':semester_qs,
+                'valid_grades':_valid_grades}
     
     return render(request, 'results/add_result.html', context)
 
@@ -152,8 +148,8 @@ def result_add_processor(request):
     
             return HttpResponseRedirect(student.get_records_url())
         else:
-            messages.add_message(request, messages.ERROR, 'Course/Semester Mismatch!',
-                                    extra_tags='text-danger')
+            messages.add_message(request, messages.ERROR, 
+                        'Course/Semester Mismatch!',extra_tags='text-danger')
     else:
             messages.add_message(request, messages.ERROR, 
                                 'Uknown Error, Please Try again')
