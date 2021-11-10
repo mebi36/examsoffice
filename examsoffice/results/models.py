@@ -258,7 +258,8 @@ class Student(models.Model):
                                     for x in df.get(grade_col)]
         return df
 
-    def get_full_name(self):
+    @property
+    def full_name(self):
             full_name = ''
             if self.last_name:
                 full_name += (self.last_name + ", ")
