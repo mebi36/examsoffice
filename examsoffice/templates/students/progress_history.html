@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="card mx-auto w-75 ml-3">
+{% include 'message_display.html' %}
+<h3>Academic Progress History for {{ student.student_reg_no }} - {{ student.last_name }}, {{ student.first_name }}</h3>
+<h5>
+    Mode of admission:  {% if student.mode_of_admission %}
+                        {{ student.mode_of_admission.mode_of_admission }}
+                        {% else %}Unknown{% endif %}
+</h5>
+
+{% if existing_progress_history %}
+<ul>
+{% for entry in existing_progress_history %}
+<li>{{entry.session.session }}: {{ entry.level_of_study.level }}/5 </li>
+{% endfor %}
+</ul>
+{% else %}
+<h5>Student has no existing academic progress records</h5>
+{% endif %}
+</div>
+<div class="card mx-auto w-75"></div>
+<div class="card mx-auto w-75 ml-3">
+<form action="{{ student.get_progress_history_url }}" method="post">
+{% csrf_token %}
+{{ form.as_p }}
+<div class="form-group">
+    <button class="btn btn-success" type="submit">
+        <img src="{% static 'images/save.svg' %}" alt="save-icon" class="mr-2">
+        Save Changes
+    </button>
+</div>
+</form>
+</div>
+
+{% endblock %}

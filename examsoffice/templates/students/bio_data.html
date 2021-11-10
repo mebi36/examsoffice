@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load to_underscore %}
+{% block content %}
+<div class="card mx-auto w-75">
+    {% include 'message_display.html' %}
+    <form action="." method="post" class="ml-3">
+        {% csrf_token %}
+        {{ form.as_p }}
+        {% include 'next_url_form_field.html' %}
+        <div class="form-group">
+            <button class="btn btn-success" type="submit">
+                <img src="{% static 'images/save.svg' %}" alt="save-icon" class="mr-2">
+                Save Changes
+            </button>
+        </div>
+    </form>
+    <div class="mx-auto wx-25">
+        <a href="{% url 'students:menu' %}">
+            <img class="mr-1" src="{% static 'images/back-b.svg' %}" alt="forward-icon">
+            Return to main menu
+        </a>
+    </div>
+</div>
+{% endblock %}
