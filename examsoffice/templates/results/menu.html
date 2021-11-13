@@ -6,7 +6,23 @@
             <p class="card-text">
                 Print student transcripts and academic progress reports
             </p>
-            <a href="#" class="btn btn-success" id="go-button">
+            <a href="{% url 'results:transcripts' %}" class="btn btn-success" id="go-button">
+                <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">    Go</a>    
+        </div> 
+        <div class="card w-75 mx-auto">
+            <h5 class="card-title">Collated Results</h5>
+            <p class="card-text">
+                Download Spreadsheet of Collated results for a given session
+            </p>
+            <a href="{% url 'results:collation' %}" class="btn btn-success" id="go-button">
+                <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">    Go</a>    
+        </div> 
+        <div class="card w-75 mx-auto">
+            <h5 class="card-title">Class Spreadsheets</h5>
+            <p class="card-text">
+                Download Spreadsheet of academic records of entire class
+            </p>
+            <a href="{% url 'results:spreadsheets' %}" class="btn btn-success" id="go-button">
                 <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">    Go</a>    
         </div> 
         <div class="card w-75 mx-auto">
@@ -30,7 +46,7 @@
         <div class="card w-75 mx-auto">
             <h5 class="card-title">Delete Results by Session</h5>
             <p class="card-text">
-                Delete all results for a given session.
+                Delete all results for a course in a given session.
             </p>
             <a href="{% url 'results:delete_by_session' %}" class="btn btn-success" id="go-button">
                 <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">Go</a>    
