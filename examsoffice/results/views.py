@@ -1,17 +1,23 @@
+from os import replace
+from re import template
 from django.http import response, HttpResponse
 from django.urls import reverse
-from django.http.response import HttpResponseRedirect
+from django.http.response import HttpResponseBadRequest, HttpResponseRedirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import never_cache
+from django.db.models import (OuterRef, Subquery, Value)
+from django.db.models.functions import Concat
 import csv
+from datetime import date
 import pandas as pd
 from pandas.core.frame import DataFrame
 from openpyxl.writer.excel import save_virtual_workbook
 from . import models as ex
 from results.utils import (student_transcript, 
-                            class_result_spreadsheet)
+                            class_result_spreadsheet,
+                            collated_results_spreadsheet)
 
 #Generating querysets that will be used often in many views of this app
 _queryset = ex.Result.objects.all().select_related('course',                                           
@@ -173,7 +179,6 @@ def rogue_results(request):
                             'course_id__course_semester','semester_id__desc',
                             'semester_id__semester','letter_grade')[:20]
     context = {'object_list': queryset}
-    # print(queryset)
     if request.htmx:
         template = 'results/partials/rogue_results.html'
     else:
@@ -456,7 +461,18 @@ def student_transcript_generator(request, reg_no):
                 transcipt_body[session] = session_entry
             transcipt_data['transcript_body'] = transcipt_body
             wb = student_transcript(transcipt_data)
-            wb.save("checker.xlsx")
+
+            file_name = f'Academic Transcript of {student.full_name.replace(",","")}.xlsx'
+            response = HttpResponse(content=save_virtual_workbook(wb), 
+                                    content_type='application/ms-excel')
+            response['Content-Disposition']  = f'attachment; filename={file_name}'
+            return response
+        
+        else:
+            messages.add_message(request, messages.ERROR, 
+                                "No results were found for the student",
+                                extra_tags="text-danger")
+            return HttpResponseRedirect(reverse('results:transcripts'))
 
     return render(request, template_name, {})
 
@@ -468,9 +484,15 @@ def class_speadsheet_generator(request, expected_yr_of_grad):
                         'student_reg_no',
                         'mode_of_admission_id__mode_of_admission'
                         )
+    if len(class_query) == 0:
+        messages.add_message(request, messages.ERROR, 
+                    f'''No students are currently registered with 
+                    {expected_yr_of_grad} as their year of graduation''',
+                    extra_tags='text-danger')
+        return HttpResponseRedirect(reverse('results:spreadsheets'))
+
     class_reg_no = list(class_query.values_list('student_reg_no', flat=True))
     class_list = []
-    print(class_query)
     for el in class_query:
         name = ex.Student.objects.get(student_reg_no=el[0]).full_name
         class_list.append([el[0], name, el[1]])
@@ -492,5 +514,136 @@ def class_speadsheet_generator(request, expected_yr_of_grad):
                                 content_type='application/ms-excel')
         response['Content-Disposition']  = f'attachment; filename={file_name}'
         return response
+    else:
+        messages.add_message(request, messages.ERROR,
+                        "No results have been uploaded for students of this level",
+                        extra_tags='text-danger')
 
     return render(request, 'results/class_spreadsheet.html', {})
+
+
+def result_collation(request, session, level):
+    '''This view will take two args: level of study and session.
+        Using these, it will produce a file response (excel worksheet) of all 
+        available results for the given session and level of study '''
+    
+    session = session.replace("_", "/")
+    try:
+        level_of_study = int(level)
+    except ValueError:
+        return HttpResponseBadRequest("Invalid Arg(s) provided")
+    # session_obj = ex.Session
+    student_info = ex.Student.objects.filter(student_reg_no=OuterRef('student_reg_no'))
+    qs = ex.Result.objects.all().select_related('course', 'semester'
+                ).filter(semester__session=session,course__course_level=level_of_study).annotate(
+                    name=Concat(Subquery(student_info.values('last_name')), Value(' '),
+                            Subquery(student_info.values('first_name')),Value(' '),
+                            Subquery(student_info.values('other_names')))
+                ).order_by('course__course_semester')
+    result_dict = {}
+    if len(qs)>0:
+        for idx, el in enumerate(qs):
+            result_dict[(idx)] = {
+                        'reg_no': el.student_reg_no,
+                        'name': el.name,
+                        'course_title': el.course.course_title,
+                        'course_code': el.course.course_code,
+                        'semester': el.course.course_semester.semester,
+                        'grade': el.letter_grade
+                        }
+        result_df = DataFrame(result_dict)
+        result_df = result_df.transpose()
+        wb = collated_results_spreadsheet(result_df)
+        file_name = f'{session} Collated Results - {int(level) * 100}L.xlsx'
+        response = HttpResponse(content=save_virtual_workbook(wb), 
+                                content_type='application/ms-excel')
+        response['Content-Disposition']  = f'attachment; filename={file_name}'
+        return response
+    else:
+        messages.add_message(request, messages.ERROR, 
+        "No results found for the selected session/level of study")
+        return HttpResponseRedirect(reverse('results:collation'))
+
+def result_collation_form(request):
+    template = 'results/result_collation_form.html'
+    context = {}
+    if request.method == 'GET':
+        sessions = ex.Session.objects.all().order_by('-session')
+        levels_of_study = [x for x in range(1, 6)]
+        context = {'sessions':sessions, 'levels_of_study':levels_of_study}
+
+    else:
+        if request.POST['session'] and request.POST['level']:
+            session = request.POST['session'].replace('/','_')
+            level = request.POST['level']
+            next_url = reverse('results:result_collation', 
+                kwargs={'session':session,'level':level})
+
+            return HttpResponseRedirect(
+                        reverse('index:download_info')+'?next=%s' % next_url)
+        else:
+            messages.add_message(request, messages.ERROR,
+                                "Please verify information provided is valid",
+                                extra_tags="text-danger")
+    return render(request, template, context)
+
+def result_spreadsheet_form(request):
+    template = 'results/spreadsheet_form.html'
+    context = {}
+
+    if request.method == 'GET':
+        expected_yrs_of_grad = sorted(
+                [x for x in range(2017, (date.today().year+5))],reverse=True)
+        context = {'expected_yrs_of_grad': expected_yrs_of_grad}
+
+    else:
+        if request.POST['expected_yr_of_grad']:
+            try:
+                expected_yr_of_grad = int(request.POST['expected_yr_of_grad'])
+            except ValueError:
+                return HttpResponseBadRequest(
+                                    "Invalid Session. Select a valid year.")
+            else:
+                next_url = reverse('results:generate_class_spreadsheet', 
+                        kwargs={'expected_yr_of_grad': expected_yr_of_grad})
+                return HttpResponseRedirect(
+                        reverse('index:download_info')+'?next=%s' % next_url)
+    return render(request, template, context)
+
+def student_transcript_form(request):
+    template = 'results/reg_no_search.html'
+
+    if request.method == 'POST':
+        reg_no = request.POST['reg_no'] or None
+        if ex.Student.is_valid_reg_no(reg_no):
+            next_url = reverse('results:generate_transcript', 
+                        kwargs={'reg_no': reg_no.replace("/", "_")})
+            return HttpResponseRedirect(
+                        reverse('results:transcript_download_info',
+                        kwargs={'reg_no': reg_no.replace('/','_')}
+                        )+'?next=%s' % next_url)
+        else:
+            messages.add_message(request, messages.ERROR,
+                                'Invalid Student Registration Number',
+                                extra_tags='text-danger')
+    return render(request, template, {})
+
+def transcript_download_info(request, reg_no):
+    template = 'results/transcript_download_info.html'
+    context = {}
+    if request.method == 'GET':
+        try:
+            context.update(next=request.GET['next'])
+        except:
+            pass
+    reg_no = reg_no.replace("_", "/")
+    if ex.Student.is_valid_reg_no(reg_no):
+        student = get_object_or_404(ex.Student, student_reg_no=reg_no)
+        hod_info = get_object_or_404(ex.Lecturer, head_of_dept=True)
+        context.update(student=student, hod=hod_info)
+    else:
+        messages.add_message(request, messages.ERROR, 
+                            "Invalid Student Registration Number",
+                            extra_tags='text-danger')
+        HttpResponseRedirect(reverse('results:transcripts'))
+    return render(request, template, context)

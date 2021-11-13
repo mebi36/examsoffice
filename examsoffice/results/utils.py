@@ -1,5 +1,7 @@
+from datetime import time
 import os
 from results.models import Lecturer, Student
+from itertools import chain
 
 import pandas as pd
 from pandas.core.frame import DataFrame
@@ -8,6 +10,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import (Alignment, PatternFill, Font, Border, Side)
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.worksheet.pagebreak import Break
+from openpyxl.worksheet.worksheet import Worksheet
 from django.templatetags.static import static
 
 
@@ -15,7 +18,9 @@ normal_border = Border(left=Side(style='thin'),
                                 right=Side(style='thin'),
                                 top=Side(style='thin'),
                                 bottom=Side(style='thin'),)
+times_new_rom_style = Font('Times New Roman', 11)
 center_align = Alignment(horizontal='center')
+vertical_align_top = Alignment(vertical='top')
 top_bot_text_direction = Alignment(text_rotation=255, vertical='top')
 
 def _merge_row_wise(worksheet, row, col_start, col_end):
@@ -380,4 +385,71 @@ def class_result_spreadsheet(result_qs, class_list, expected_yr_of_grad):
             row += 5
             serial_number += 1        
     
+    return wb
+
+
+def collated_results_spreadsheet(res_df):
+    '''This function will process the result df into a spreadsheet which
+        will be returned to the caller'''
+    
+    courses = res_df['course_code'].unique().tolist()
+    students  = res_df.groupby(['name', 'reg_no']).size().reset_index()
+    students = students[['name', 'reg_no']].values.tolist()
+    collated_result = pd.DataFrame(students, columns=['Name', 'RegNo'])
+    print("This is before",collated_result)
+    for course in courses:
+        x = ['X'] * len(students)
+        j = course
+        for student in range(0,len(students)):
+            grade = res_df.query('(reg_no == @students[@student][1]) and (course_code == @course)')
+            if len(grade) == 1:
+                x[student] = grade['grade'].tolist()[0]
+        collated_result[j] = x
+    # print(collated_result)
+
+    # printing to a worksheet
+    wb = Workbook()
+    ws = wb.active
+
+    row = 1
+    col = 1
+    ws.freeze_panes = 'D2'
+    headings = ['SN', 'Name','REG NO'] + courses
+
+    for c_idx in chain(range(1,2),range(4,(len(headings)+1))):
+        ws.column_dimensions[get_column_letter(c_idx)].width = 4
+    ws.column_dimensions[get_column_letter(2)].width = 38
+    ws.column_dimensions[get_column_letter(3)].width = 12
+    for idx, heading in enumerate(headings, 1):
+        _ = ws.cell(row=1,column=idx, value=heading)
+        _.font = Font('Times new Roman', 13, bold=True)
+        _.border = normal_border
+        _.alignment = Alignment(vertical='top', horizontal='center')
+        if idx > 3:
+            _.alignment = Alignment(vertical='top', text_rotation=180, 
+                                    horizontal='center')
+    row += 1
+
+    result_rows = dataframe_to_rows(collated_result, index=False, header=False)
+    count = 1
+    for row_idx, df_row in enumerate(result_rows, row):
+        _ = ws.cell(row=row_idx, column=1, value = count)
+        _.border = normal_border
+        _.font = times_new_rom_style
+        _.alignment = Alignment(horizontal='center', vertical='top')
+        count += 1
+        for col_idx, df_value in enumerate(df_row, col+1):
+            _ = ws.cell(row=row_idx, column=col_idx, value=df_value.upper())
+            _.border = normal_border
+            _.alignment = Alignment(horizontal='center', vertical='top',
+                                    wrap_text=True)
+            _.font = times_new_rom_style    
+    
+    hod_name = Lecturer.objects.get(head_of_dept=True).get_full_name()
+    
+    ws.print_title_rows = '1:1'
+    ws.HeaderFooter.differentFirst = False
+    ws.oddFooter.left.text = '&BHead of Dept.: '+'&U'+hod_name + '  &U&B\nSign:__________________'
+    ws.oddFooter.right.text = '&BExams Officer:__________________&B\nSign:__________________'
+    Worksheet.set_printer_settings(ws, paper_size=9,orientation='landscape')
     return wb
