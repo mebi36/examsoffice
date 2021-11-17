@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="card mx-auto wx-75">
+    <div class="card-title"><h6>Download Collated Results</h6></div>
+    {% include "message_display.html" %}
+    <div class="card-body">
+        <form action="{% url 'results:collation' %}" method="post">
+        {% csrf_token %}
+            <div class="form-group">
+                <label for="session">Select Session:</label>
+                <select name="session" class="form-control wx-75" required>
+                    <option disabled selected value> -- select session -- </option>
+                    {% for session in sessions %}
+                    <option value="{{ session }}">{{ session }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="level">Select Level of Study:</label>
+                <select name="level" class="form-control wx-75" required>
+                    <option disabled selected value> -- select level of study -- </option>
+                    {% for level in levels_of_study %}
+                    <option value="{{ level }}">{{ level }}/5</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-success" type="submit">
+                    <img src="{% static 'images/save.svg' %}" alt="save-icon" class="mr-2">
+                    Download Collated Result</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card mx-auto w-75">
+    <p class="card-text mx-auto">
+        {% block extra_info %}
+        {% endblock %}
+        <br>
+        <a class="btn btn-success" href="{{ request.scheme }}://{{ request.get_host }}{{ next }}">
+        Click here to start download
+        </a>
+    </p>
+    <p class="text-danger">Please be patient after clicking link. The download may take a few moments to start.</p>
+</div>
+{% endblock %}

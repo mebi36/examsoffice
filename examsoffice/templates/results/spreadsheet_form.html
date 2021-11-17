@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="card mx-auto wx-75">
+    <div class="card-title"><h6>Download Spreadsheet of entire class results</h6></div>
+    {% include "message_display.html" %}
+    <div class="card-body">
+        <form action="{% url 'results:spreadsheets' %}" method="post">
+        {% csrf_token %}
+            <div class="form-group">
+                <label for="expected_yr_of_grad">Select Expected Year of Graduation:</label>
+                <select name="expected_yr_of_grad" class="form-control wx-75" required>
+                    <option disabled selected value> -- select session -- </option>
+                    {% for yr in expected_yrs_of_grad %}
+                    <option value="{{ yr }}">{{ yr }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-success" type="submit">
+                    <img src="{% static 'images/save.svg' %}" alt="save-icon" class="mr-2">
+                    Download Spreadsheet</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
