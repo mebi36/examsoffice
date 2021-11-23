@@ -17,6 +17,14 @@ class LoggedInTestCase(TestCase):
 
 
 # #models test
+
+# this project uses a pre-existing database, writing passing tests
+# for the models is yet to be addressed.
+# the issue is that the Meta class of the pre-existing models have their 
+# managed field field set to False. 
+# Actively looking for a solve for this.
+
+
 # class StudentModelTestCase(TestCase):
 #     def setUp(self):
 #         Student.objects.create(student_reg_no='2010/170254', 
