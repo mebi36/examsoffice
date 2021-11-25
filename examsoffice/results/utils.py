@@ -472,7 +472,7 @@ def class_failure_spreadsheet(result_qs, class_list, expected_yr_of_grad):
 
             row += 1
             serial_number += 1
-
+    ws.oddHeader.center.text = '''&BDEPARTMENT OF ELECTRONIC ENGINEERING\nSTUDENT ACADEMIC PERFORMANCE SUMMARY&B'''
     Worksheet.set_printer_settings(ws, paper_size=9,orientation='landscape')
     return wb
 
