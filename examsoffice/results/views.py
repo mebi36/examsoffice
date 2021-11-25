@@ -17,7 +17,8 @@ from openpyxl.writer.excel import save_virtual_workbook
 from . import models as ex
 from results.utils import (student_transcript, 
                             class_result_spreadsheet,
-                            collated_results_spreadsheet)
+                            collated_results_spreadsheet,
+                            class_failure_spreadsheet)
 
 #Generating querysets that will be used often in many views of this app
 _queryset = ex.Result.objects.all().select_related('course',                                           
@@ -522,6 +523,58 @@ def class_speadsheet_generator(request, expected_yr_of_grad):
     return render(request, 'results/class_spreadsheet.html', {})
 
 
+@login_required
+def generic_class_info_handler(request, expected_yr_of_grad, 
+                            spread_sheet_method=class_failure_spreadsheet):
+
+    class_query = ex.Student.objects.all().select_related('mode_of_admission'
+                        ).filter(expected_yr_of_grad=expected_yr_of_grad
+                        ).values_list(
+                        'student_reg_no',
+                        'mode_of_admission_id__mode_of_admission'
+                        )
+    if len(class_query) == 0:
+        messages.add_message(request, messages.ERROR, 
+                    f'''No students are currently registered with 
+                    {expected_yr_of_grad} as their year of graduation''',
+                    extra_tags='text-danger')
+        return HttpResponseRedirect(reverse('results:spreadsheets'))
+
+    class_reg_no = list(class_query.values_list('student_reg_no', flat=True))
+    class_list = []
+    for el in class_query:
+        name = ex.Student.objects.get(student_reg_no=el[0]).full_name
+        class_list.append([el[0], name, el[1]])
+
+    result_qs = ex.Result.objects.all().select_related(
+                    'semester', 'course').filter(
+                        student_reg_no__in=class_reg_no).values_list(
+                        'course_id__course_title', 
+                    'course_id__course_code', 'course_id__credit_load', 
+                    'course_id__course_level','semester_id__desc',
+                     'letter_grade',)
+    
+    if len(class_list) > 0:        
+        wb = spread_sheet_method(result_qs=result_qs, 
+                                    class_list=class_list,
+                                    expected_yr_of_grad=expected_yr_of_grad)
+        file_name = f'Class of {expected_yr_of_grad} Results.xlsx'
+        response = HttpResponse(content=save_virtual_workbook(wb), 
+                                content_type='application/ms-excel')
+        response['Content-Disposition']  = f'attachment; filename={file_name}'
+        return response
+    else:
+        messages.add_message(request, messages.ERROR,
+                        "No results have been uploaded for students of this level",
+                        extra_tags='text-danger')
+
+    return render(request, 'results/class_spreadsheet.html', {})
+
+
+@login_required
+def class_outstanding_courses(request, expected_yr_of_grad):
+    return generic_class_info_handler(request, expected_yr_of_grad)
+
 def result_collation(request, session, level):
     '''This view will take two args: level of study and session.
         Using these, it will produce a file response (excel worksheet) of all 
@@ -605,6 +658,29 @@ def result_spreadsheet_form(request):
                                     "Invalid Session. Select a valid year.")
             else:
                 next_url = reverse('results:generate_class_spreadsheet', 
+                        kwargs={'expected_yr_of_grad': expected_yr_of_grad})
+                return HttpResponseRedirect(
+                        reverse('index:download_info')+'?next=%s' % next_url)
+    return render(request, template, context)
+
+def class_outstanding_courses_form(request):
+    template = 'results/spreadsheet_form.html'
+    context = {}
+
+    if request.method == 'GET':
+        expected_yrs_of_grad = sorted(
+                [x for x in range(2017, (date.today().year+5))],reverse=True)
+        context = {'expected_yrs_of_grad': expected_yrs_of_grad}
+
+    elif request.method == 'POST':
+        if request.POST['expected_yr_of_grad']:
+            try:
+                expected_yr_of_grad = int(request.POST['expected_yr_of_grad'])
+            except ValueError:
+                return HttpResponseBadRequest(
+                                    "Invalid Session. Select a valid year.")
+            else:
+                next_url = reverse('results:class_outstanding_courses', 
                         kwargs={'expected_yr_of_grad': expected_yr_of_grad})
                 return HttpResponseRedirect(
                         reverse('index:download_info')+'?next=%s' % next_url)

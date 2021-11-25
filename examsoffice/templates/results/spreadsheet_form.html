@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="card mx-auto wx-75">
-    <div class="card-title"><h6>Download Spreadsheet of entire class results</h6></div>
+    <div class="card-title"><h6>Download spreadsheet of class information</h6></div>
     {% include "message_display.html" %}
     <div class="card-body">
         <form action="{% url 'results:spreadsheets' %}" method="post">

@@ -2,6 +2,7 @@ from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 from django.contrib import messages
 from django.urls import reverse
+from django.views.decorators.cache import never_cache
 
 from .forms import (ProgressHistoryForm, 
                     StudentBioForm, 
@@ -34,15 +35,15 @@ def search(request):
             context = {}
     return render(request, 'results/reg_no_search.html',context)
 
-
+@never_cache
 def edit_bio_data(request, reg_no):
     """
     This view is supposed to enable the editing of student
     bio data.
     """
     context = {}
+    reg_no = reg_no.replace("_", "/")
     if request.method == 'GET':
-        reg_no = reg_no.replace("_", "/")
         if Student.is_valid_reg_no(reg_no):
             try:
                 student = Student.objects.get(student_reg_no=reg_no)
@@ -53,8 +54,11 @@ def edit_bio_data(request, reg_no):
                                     ''',
                                     extra_tags='text-info')
                 form = StudentBioForm(initial={'student_reg_no':reg_no})
-            else:
+            else:           
                 form = StudentBioForm(instance=student)
+            finally:
+                context['reg_no'] = reg_no
+                context['form'] = form
         else:
             messages.add_message(request, messages.ERROR,
                             "Invalid student registration number",
@@ -67,21 +71,30 @@ def edit_bio_data(request, reg_no):
     
     # process form submission
     if request.method == 'POST':
-        if Student.is_valid_reg_no(request.POST['student_reg_no']):
-            reg_no = request.POST['student_reg_no']
+        if Student.is_valid_reg_no(reg_no):
+            print(request.FILES,len(request.FILES))
             try:
                 student = Student.objects.get(student_reg_no=reg_no)
             except:
-                form = StudentBioForm(request.POST, request.FILES)
+                form = StudentBioForm(request.POST, request.FILES) if len(request.FILES)==0 else StudentBioForm(request.POST)
             else:
                 form = StudentBioForm(request.POST, request.FILES, 
-                                        instance=student)
+                                        instance=student) if request.FILES is not None else StudentBioForm(request.POST, instance=student)
             finally:
                 if form.is_valid():
-                    form.save()
+                    try:
+                        form.save()
+                    except:
+                        messages.add_message(request, messages.ERROR,
+                                        "Fatal error",extra_tags='bg-danger')
+                        return HttpResponseRedirect(reverse('students:search'))
+                    else:    
+                        messages.add_message(request, messages.SUCCESS,
+                                        "Save successful",
+                                        extra_tags='text-success')
                     if 'next' in request.POST:
                         return HttpResponseRedirect(request.POST['next'])
-                    return HttpResponseRedirect(reverse('students:menu'))
+                    return HttpResponseRedirect(reverse('students:search'))
         else:
             form = StudentBioForm(request.POST, request.FILES)
             messages.add_message(request, messages.ERROR,
@@ -89,7 +102,7 @@ def edit_bio_data(request, reg_no):
                                     extra_tags='text-danger')
     context.update(form=form)
     # print(context)
-    return render(request, 'students/bio_data.html', {'form': form})
+    return render(request, 'students/bio_data.html',context)
 
 
 def update_progress_history(request, reg_no):

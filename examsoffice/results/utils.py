@@ -23,6 +23,17 @@ center_align = Alignment(horizontal='center')
 vertical_align_top = Alignment(vertical='top')
 top_bot_text_direction = Alignment(text_rotation=255, vertical='top')
 
+def _list_to_cell(list_var):
+    final_str = ''
+    if len(list_var)>0:
+        for index, content in enumerate(list_var, 1):
+            final_str += content
+            if index != len(list_var):
+                final_str += ', '
+    else:
+        final_str = 'No outstanding course for semester'    
+    return final_str
+
 def _merge_row_wise(worksheet, row, col_start, col_end):
     cell_start = get_column_letter(col_start)+str(row)
     cell_stop = get_column_letter(col_end)+str(row)
@@ -83,7 +94,8 @@ def student_transcript(transcript_data):
     col = 5
     # writing result block
     student_bio = transcript_data['student_bio']
-    result_columns = [1,5,14,37,47,55,62]
+    # result_columns = [1,5,14,37,47,55,62]
+    result_columns = [1,4,11,44,51,55,62]
     for idx, el in enumerate(bio_info):
         _ = ws.cell(row=row+idx, column=col, value=el)
         _.font = Font(bold=True)
@@ -152,9 +164,10 @@ def student_transcript(transcript_data):
                 count += 1
                 for c_idx, df_value in enumerate(df_row, 1):
                     _ = ws.cell(row=r_idx, column=result_columns[c_idx], 
-                                                            value=df_value)
+                                                            value=str(df_value).upper())
                     _.alignment = Alignment(horizontal='center', wrap_text=True)
                     _.border = normal_border
+
                     _merge_row_wise(ws, r_idx, col_start=result_columns[c_idx],
                                     col_end=(result_columns[(c_idx+1)]-1))
             
@@ -308,7 +321,6 @@ def class_result_spreadsheet(result_qs, class_list, expected_yr_of_grad):
             for el in ['A', 'C', 'D']:
                 ws.column_dimensions[el].width = 3
             
-
             # writing results to worksheet
             cred_sum = 0
             weight_sum = 0
@@ -387,6 +399,82 @@ def class_result_spreadsheet(result_qs, class_list, expected_yr_of_grad):
     
     return wb
 
+def class_failure_spreadsheet(result_qs, class_list, expected_yr_of_grad):
+    wb = Workbook()
+    ws = wb.active
+
+    ws.title = f'Class of {expected_yr_of_grad} CO Summary List'
+    headers = ['SN', 'Reg Number', 'Name', 'Outstanding Courses (1st)', 
+                'Credit Load(1st)','Outstanding Courses (2nd)',
+                'Total Credit Load', 'CGPA']
+    ws.append(headers)
+    ws.freeze_panes = 'A2'
+    serial_number = 1
+    column_dimensions = {1:4,2:12,3:20,4:28,5:10,6:28,7:11,8:9}
+    
+    for key, value in column_dimensions.items():
+        ws.column_dimensions[get_column_letter(key)].width = value
+        cell = ws.cell(row=1, column=key)
+        cell.border = normal_border
+        cell.alignment = Alignment(horizontal='center',vertical='top',
+                                                        wrap_text=True)
+        cell.font = Font(bold=True)
+
+
+    row = 2
+    for student in class_list:
+        student_qs = result_qs.filter(student_reg_no=student[0]).order_by(
+                                                                'semester')
+        # confirm that the student's results are available
+        if len(student_qs) == 0:
+            continue
+        
+        else:
+            #convert student's result qs to dataframe
+            df = pd.DataFrame.from_records(student_qs)
+            df = df.rename(columns = {0: 'course_title', 1: 'course_code', 
+                                    2: 'credit_load', 3: 'course_level', 
+                                    4: 'semester', 5: 'grade'})
+            df = Student.get_weight_col(df)
+            reg_no = student[0]
+            name = student[1]
+            
+            #calculate the cgpa of the student
+            weight_sum = df['weight'].sum()
+            credit_sum = df['credit_load'].sum()
+            cgpa = round(weight_sum/credit_sum,3)
+
+            #get dictionary containing breakdown of failed courses
+            course_brk_dwn = failed_courses_breakdown(df)
+            failed_courses_first = course_brk_dwn['failed_courses_first']
+            outstanding_cred_1st = course_brk_dwn['outstanding_cred_1st'] 
+            outstanding_cred = course_brk_dwn['outstanding_credit_load'] 
+            failed_courses_second = course_brk_dwn['failed_courses_second']
+
+            entry_alignment = Alignment(vertical='top',horizontal='center',
+                                                            wrap_text=True)
+            
+            ws.row_dimensions[row].height = 90
+            ws.cell(row=row, column=1, value=serial_number)
+            ws.cell(row=row, column=2, value=reg_no)
+            ws.cell(row=row, column=3, value=name)
+            ws.cell(row=row, column=4, value=_list_to_cell(failed_courses_first))
+            ws.cell(row=row, column=5, value=outstanding_cred_1st)
+            ws.cell(row=row, column=6, value=_list_to_cell(failed_courses_second))
+            ws.cell(row=row, column=7, value=outstanding_cred)
+            ws.cell(row=row, column=8, value=cgpa)
+
+            for col_idx in range(1,9):
+                cell = ws.cell(row=row, column=col_idx)
+                cell.alignment = entry_alignment
+                cell.border = normal_border
+
+
+            row += 1
+            serial_number += 1
+
+    Worksheet.set_printer_settings(ws, paper_size=9,orientation='landscape')
+    return wb
 
 def collated_results_spreadsheet(res_df):
     '''This function will process the result df into a spreadsheet which
@@ -453,3 +541,5 @@ def collated_results_spreadsheet(res_df):
     ws.oddFooter.right.text = '&BExams Officer:__________________&B\nSign:__________________'
     Worksheet.set_printer_settings(ws, paper_size=9,orientation='landscape')
     return wb
+
+

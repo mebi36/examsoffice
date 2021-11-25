@@ -6,7 +6,7 @@ from .views import (
     rogue_results, delete_result, result_upload_options, upload_result_file,
     delete_by_session, student_transcript_generator, class_speadsheet_generator,
     result_collation_form, result_spreadsheet_form, student_transcript_form,
-    transcript_download_info,
+    transcript_download_info, class_outstanding_courses, class_outstanding_courses_form,
 
     delete_student_result
 )
@@ -30,6 +30,8 @@ urlpatterns = [
     path('transcript/<str:reg_no>/',student_transcript_generator, name='generate_transcript'),
     path('spreadsheets', result_spreadsheet_form, name='spreadsheets'),
     path('spreadsheet/<str:expected_yr_of_grad>/',class_speadsheet_generator, name='generate_class_spreadsheet'),
+    path('outstanding courses/class/', class_outstanding_courses_form, name='class_outstanding_courses'),
+    path('outstanding courses/class/<str:expected_yr_of_grad>/', class_outstanding_courses, name='class_outstanding_courses'),
     path('collation', result_collation_form, name='collation'),
     path('result_collation/session=<str:session>/level=<str:level>', result_collation,name='result_collation'),
     path('hx/delete/<int:pk>',delete_student_result,name='delete_student_result'),

@@ -10,7 +10,7 @@ def add_bootstrap_formatting(self):
 
 
 class StudentBioForm(forms.ModelForm):
-    student_reg_no = forms.CharField(max_length=12,required=True)
+    student_reg_no = forms.CharField(max_length=12,required=True,disabled=True)
     
     def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)    
