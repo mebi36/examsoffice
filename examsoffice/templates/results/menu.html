@@ -26,6 +26,15 @@
                 <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">    Go</a>    
         </div> 
         <div class="card w-75 mx-auto">
+            <h5 class="card-title">Outstanding Courses Summary</h5>
+            <p class="card-text">
+                Download Spreadsheet that summarizes the current outstanding courses 
+                of all students in a given level of study
+            </p>
+            <a href="{% url 'results:class_outstanding_courses' %}" class="btn btn-success" id="go-button">
+                <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">    Go</a>    
+        </div> 
+        <div class="card w-75 mx-auto">
             <h5 class="card-title">Modify Student Records</h5>
             <p class="card-text">
                 Edit Student Records here

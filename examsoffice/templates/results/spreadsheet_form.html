@@ -6,7 +6,7 @@
     <div class="card-title"><h6>Download spreadsheet of class information</h6></div>
     {% include "message_display.html" %}
     <div class="card-body">
-        <form action="{% url 'results:spreadsheets' %}" method="post">
+        <form action="." method="post">
         {% csrf_token %}
             <div class="form-group">
                 <label for="expected_yr_of_grad">Select Expected Year of Graduation:</label>

@@ -25,7 +25,7 @@ top_bot_text_direction = Alignment(text_rotation=255, vertical='top')
 
 def _list_to_cell(list_var):
     final_str = ''
-    if len(list_var)>0:
+    if isinstance(list_var, list) and len(list_var)>0:
         for index, content in enumerate(list_var, 1):
             final_str += content
             if index != len(list_var):
@@ -73,6 +73,10 @@ def failed_courses_breakdown(df):
                             'course_code == @course')['credit_load'].iloc[0]
         else:
             failed_courses.remove(course)
+    
+    failed_courses_first.sort(key=lambda x:x[-3:])
+    failed_courses_second.sort(key=lambda x:x[-3:])
+    failed_courses.sort(key=lambda x:x[-3:])
     
     return {'failed_courses_first': failed_courses_first, 
             'failed_courses_second': failed_courses_second, 
@@ -438,7 +442,7 @@ def class_failure_spreadsheet(result_qs, class_list, expected_yr_of_grad):
             df = Student.get_weight_col(df)
             reg_no = student[0]
             name = student[1]
-            
+            # df.sort_values('course_level', ascending=False, in_place=True)
             #calculate the cgpa of the student
             weight_sum = df['weight'].sum()
             credit_sum = df['credit_load'].sum()

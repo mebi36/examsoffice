@@ -477,54 +477,54 @@ def student_transcript_generator(request, reg_no):
 
     return render(request, template_name, {})
 
-@login_required
-def class_speadsheet_generator(request, expected_yr_of_grad):
-    class_query = ex.Student.objects.all().select_related('mode_of_admission'
-                        ).filter(expected_yr_of_grad=expected_yr_of_grad
-                        ).values_list(
-                        'student_reg_no',
-                        'mode_of_admission_id__mode_of_admission'
-                        )
-    if len(class_query) == 0:
-        messages.add_message(request, messages.ERROR, 
-                    f'''No students are currently registered with 
-                    {expected_yr_of_grad} as their year of graduation''',
-                    extra_tags='text-danger')
-        return HttpResponseRedirect(reverse('results:spreadsheets'))
+# @login_required
+# def class_speadsheet_generator(request, expected_yr_of_grad):
+#     class_query = ex.Student.objects.all().select_related('mode_of_admission'
+#                         ).filter(expected_yr_of_grad=expected_yr_of_grad
+#                         ).values_list(
+#                         'student_reg_no',
+#                         'mode_of_admission_id__mode_of_admission'
+#                         )
+#     if len(class_query) == 0:
+#         messages.add_message(request, messages.ERROR, 
+#                     f'''No students are currently registered with 
+#                     {expected_yr_of_grad} as their year of graduation''',
+#                     extra_tags='text-danger')
+#         return HttpResponseRedirect(reverse('results:spreadsheets'))
 
-    class_reg_no = list(class_query.values_list('student_reg_no', flat=True))
-    class_list = []
-    for el in class_query:
-        name = ex.Student.objects.get(student_reg_no=el[0]).full_name
-        class_list.append([el[0], name, el[1]])
+#     class_reg_no = list(class_query.values_list('student_reg_no', flat=True))
+#     class_list = []
+#     for el in class_query:
+#         name = ex.Student.objects.get(student_reg_no=el[0]).full_name
+#         class_list.append([el[0], name, el[1]])
 
-    result_qs = ex.Result.objects.all().select_related(
-                    'semester', 'course').filter(
-                        student_reg_no__in=class_reg_no).values_list(
-                        'course_id__course_title', 
-                    'course_id__course_code', 'course_id__credit_load', 
-                    'course_id__course_level','semester_id__desc',
-                     'letter_grade',)
+#     result_qs = ex.Result.objects.all().select_related(
+#                     'semester', 'course').filter(
+#                         student_reg_no__in=class_reg_no).values_list(
+#                         'course_id__course_title', 
+#                     'course_id__course_code', 'course_id__credit_load', 
+#                     'course_id__course_level','semester_id__desc',
+#                      'letter_grade',)
     
-    if len(class_list) > 0:        
-        wb = class_result_spreadsheet(result_qs=result_qs, 
-                                    class_list=class_list,
-                                    expected_yr_of_grad=expected_yr_of_grad)
-        file_name = f'Class of {expected_yr_of_grad} Results.xlsx'
-        response = HttpResponse(content=save_virtual_workbook(wb), 
-                                content_type='application/ms-excel')
-        response['Content-Disposition']  = f'attachment; filename={file_name}'
-        return response
-    else:
-        messages.add_message(request, messages.ERROR,
-                        "No results have been uploaded for students of this level",
-                        extra_tags='text-danger')
+#     if len(class_list) > 0:        
+#         wb = class_result_spreadsheet(result_qs=result_qs, 
+#                                     class_list=class_list,
+#                                     expected_yr_of_grad=expected_yr_of_grad)
+#         file_name = f'Class of {expected_yr_of_grad} Results.xlsx'
+#         response = HttpResponse(content=save_virtual_workbook(wb), 
+#                                 content_type='application/ms-excel')
+#         response['Content-Disposition']  = f'attachment; filename={file_name}'
+#         return response
+#     else:
+#         messages.add_message(request, messages.ERROR,
+#                         "No results have been uploaded for students of this level",
+#                         extra_tags='text-danger')
 
-    return render(request, 'results/class_spreadsheet.html', {})
+#     return render(request, 'results/class_spreadsheet.html', {})
 
 
 @login_required
-def generic_class_info_handler(request, expected_yr_of_grad, 
+def generic_class_info_handler(request, expected_yr_of_grad, file_name, 
                             spread_sheet_method=class_failure_spreadsheet):
 
     class_query = ex.Student.objects.all().select_related('mode_of_admission'
@@ -558,7 +558,6 @@ def generic_class_info_handler(request, expected_yr_of_grad,
         wb = spread_sheet_method(result_qs=result_qs, 
                                     class_list=class_list,
                                     expected_yr_of_grad=expected_yr_of_grad)
-        file_name = f'Class of {expected_yr_of_grad} Results.xlsx'
         response = HttpResponse(content=save_virtual_workbook(wb), 
                                 content_type='application/ms-excel')
         response['Content-Disposition']  = f'attachment; filename={file_name}'
@@ -573,7 +572,14 @@ def generic_class_info_handler(request, expected_yr_of_grad,
 
 @login_required
 def class_outstanding_courses(request, expected_yr_of_grad):
-    return generic_class_info_handler(request, expected_yr_of_grad)
+    file_name = f'Class of {expected_yr_of_grad} Extra Load Summary.xlsx'
+    return generic_class_info_handler(request, expected_yr_of_grad, file_name)
+
+@login_required
+def class_speadsheet_generator(request, expected_yr_of_grad):
+    file_name = f'Class of {expected_yr_of_grad} Results.xlsx'
+    return generic_class_info_handler(request, expected_yr_of_grad, file_name,
+                                spread_sheet_method=class_result_spreadsheet)
 
 def result_collation(request, session, level):
     '''This view will take two args: level of study and session.
@@ -648,9 +654,10 @@ def result_spreadsheet_form(request):
         expected_yrs_of_grad = sorted(
                 [x for x in range(2017, (date.today().year+5))],reverse=True)
         context = {'expected_yrs_of_grad': expected_yrs_of_grad}
-
+        return render(request, template, context)
     else:
         if request.POST['expected_yr_of_grad']:
+            print('got here')
             try:
                 expected_yr_of_grad = int(request.POST['expected_yr_of_grad'])
             except ValueError:
@@ -661,7 +668,6 @@ def result_spreadsheet_form(request):
                         kwargs={'expected_yr_of_grad': expected_yr_of_grad})
                 return HttpResponseRedirect(
                         reverse('index:download_info')+'?next=%s' % next_url)
-    return render(request, template, context)
 
 def class_outstanding_courses_form(request):
     template = 'results/spreadsheet_form.html'
