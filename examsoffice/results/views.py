@@ -623,6 +623,7 @@ def result_collation(request, session, level):
         "No results found for the selected session/level of study")
         return HttpResponseRedirect(reverse('results:collation'))
 
+@login_required
 def result_collation_form(request):
     template = 'results/result_collation_form.html'
     context = {}
@@ -646,6 +647,7 @@ def result_collation_form(request):
                                 extra_tags="text-danger")
     return render(request, template, context)
 
+@login_required
 def result_spreadsheet_form(request):
     template = 'results/spreadsheet_form.html'
     context = {}
@@ -669,6 +671,7 @@ def result_spreadsheet_form(request):
                 return HttpResponseRedirect(
                         reverse('index:download_info')+'?next=%s' % next_url)
 
+@login_required
 def class_outstanding_courses_form(request):
     template = 'results/spreadsheet_form.html'
     context = {}
@@ -692,6 +695,7 @@ def class_outstanding_courses_form(request):
                         reverse('index:download_info')+'?next=%s' % next_url)
     return render(request, template, context)
 
+@login_required
 def student_transcript_form(request):
     template = 'results/reg_no_search.html'
 
@@ -710,6 +714,7 @@ def student_transcript_form(request):
                                 extra_tags='text-danger')
     return render(request, template, {})
 
+@login_required
 def transcript_download_info(request, reg_no):
     template = 'results/transcript_download_info.html'
     context = {}
