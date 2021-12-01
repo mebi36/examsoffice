@@ -1,0 +1,6 @@
+{% extends 'bio_data.html' %}
+{% load static %}
+{% load to_underscore %}
+{% block action_url %}
+{% url 'students:edit_bio' reg_no|to_underscore %}
+{% endblock %}

@@ -217,7 +217,8 @@ class Student(models.Model):
         return self.student_reg_no.replace("/", "_")
 
     def get_absolute_url(self):
-        return reverse('students:edit_bio',kwargs={'pk': self.pk})
+        return reverse('students:edit_bio',
+                        kwargs={'reg_no': self.get_reg_no_for_url()})
 
     def get_records_url(self):
         return reverse('results:student_records',

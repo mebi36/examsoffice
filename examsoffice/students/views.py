@@ -22,11 +22,14 @@ def search(request):
         if Student.is_valid_reg_no(request.POST['reg_no']):
             reg_no = request.POST['reg_no']
             try:
-                student = Student.objects.get(
-                                            student_reg_no=reg_no)
+                student = Student.objects.get(student_reg_no=reg_no)
             except:
-                return HttpResponseRedirect(reverse('students:create', 
-                                            args=[reg_no.replace('/','_')]))
+                messages.add_message(request, messages.INFO,
+                                    '''No student bio data found. 
+                                    Please provide student details.''',
+                                    extra_tags='text-primary')
+                return HttpResponseRedirect(reverse('students:create_bio', 
+                                    kwargs={'reg_no':reg_no.replace('/','_')}))
             else:
                 return HttpResponseRedirect(student.get_absolute_url())
     else:
@@ -54,10 +57,10 @@ def edit_bio_data(request, reg_no):
                                     Provide student info for registration
                                     ''',
                                     extra_tags='text-info')
-                form = StudentBioForm(initial={'student_reg_no':reg_no})
+                return HttpResponseRedirect(reverse('students:create_bio',
+                                    kwargs={'reg_no':reg_no.replace("/","_")}))
             else:           
                 form = StudentBioForm(instance=student)
-            finally:
                 context['reg_no'] = reg_no
                 context['form'] = form
         else:
@@ -173,13 +176,51 @@ def update_progress_history(request, reg_no):
 
     return render(request, 'students/progress_history.html', context)
 
-class StudentUpdateView(UpdateView):
-    model = Student
-    fields = ['student_reg_no', 'last_name', 'first_name', 'other_names', 'email',
-                'phone_number', 'sex', 'marital_status', 'date_of_birth', 
-                'town_of_origin', 'lga_of_origin', 'state_of_origin', 'nationality',
-                'mode_of_admission', 'level_admitted_to', 'mode_of_study',
-                'year_of_admission', 'expected_yr_of_grad', 'graduated', 'address_line1',
-                'address_line2', 'city', 'state', 'country', 'class_rep', 'current_level_of_study', 'cgpa']
-    template_name = 'students/student_update_form.html'
-    form = StudentBioForm
+def create_bio_data(request, reg_no):
+
+    '''This view updates a student's academic progress history.'''
+    context = {}
+    reg_no = reg_no.replace("_", "/")
+    template = 'students/bio_data.html'
+    form = StudentBioForm(initial={'student_reg_no':reg_no})
+    if request.method == 'GET':
+        try:
+            Student.objects.get(student_reg_no=reg_no)
+        except:
+            context = {'form': form}
+            return render(request, template, context)
+        else:
+            messages.add_message(request, messages.INFO, 
+                                "Student Bio Records Already Exists",
+                                extra_tags='text-primary')
+            return HttpResponseRedirect(reverse('students:edit_bio',
+                                        kwargs={'reg_no':reg_no.replace('/','_')}))
+    elif request.method == 'POST':
+        if Student.is_valid_reg_no(reg_no):
+            student = Student(student_reg_no=reg_no)
+            student.save()
+
+            for field in form.fields:
+                if form[field].value() not in [None, '', 'student_reg_no']:
+                    Student.objects.get(student_reg_no=reg_no).field = form[field].value()
+                    student.save()
+            messages.add_message(request, messages.SUCCESS, 
+                                "Student bio data saved",
+                                extra_tags='text-success')
+        else:
+            messages.add_message(request, messages.ERROR, 
+                                "Registration Number is invalid",
+                                extra_tags='text-danger')
+        return HttpResponseRedirect(reverse('students:search'))
+        
+# class StudentUpdateView(UpdateView):
+#     model = Student
+#     fields = ['student_reg_no', 'last_name', 'first_name', 'other_names', 'email',
+#                 'phone_number', 'sex', 'marital_status', 'date_of_birth', 
+#                 'town_of_origin', 'lga_of_origin', 'state_of_origin', 'nationality',
+#                 'mode_of_admission', 'level_admitted_to', 'mode_of_study',
+#                 'year_of_admission', 'expected_yr_of_grad', 'graduated', 'address_line1',
+#                 'address_line2', 'city', 'state', 'country', 'class_rep', 'current_level_of_study', 'cgpa']
+#     template_name = 'students/student_update_form.html'
+#     form = StudentBioForm
+

@@ -4,7 +4,7 @@
 {% block content %}
 <div class="card mx-auto w-75">
     {% include 'message_display.html' %}
-    <form action="{% url 'students:edit_bio' reg_no|to_underscore %}" method="post" class="ml-3" enctype="multipart/form-data">
+    <form action="{% block action_url %}{% endblock %}" method="post" class="ml-3" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
         {% include 'next_url_form_field.html' %}
