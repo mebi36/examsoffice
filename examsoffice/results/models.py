@@ -5,15 +5,18 @@ import re
 
 from django.urls.base import reverse
 
-# Create your models here.
+# the managed attribute of the model's meta classes needs
+# to be set to False after initial migrations are run as this 
+# will adversely impact the use of forms in the project if left
+# as false
 
+# Create your models here.
 
 class LecturerRole(models.Model):
     id = models.BigAutoField(db_column='RoleID', primary_key=True)
     role = models.CharField(db_column='Role', max_length=255, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'tbl2LecturerRoles'
 
 
@@ -29,7 +32,6 @@ class Lecturer(models.Model):
     faculty = models.CharField(db_column='Faculty', max_length=255, blank=True, null=True)
     head_of_dept = models.BooleanField(db_column='HeadOfDepartment', null=True, blank=True)
     class Meta:
-        managed = False
         db_table = 'tbl2Lecturers'
 
     def get_full_name(self):
@@ -41,7 +43,6 @@ class LevelOfStudy(models.Model):
     level_description = models.CharField(db_column='LevelDescription', max_length=255, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'tbl2Levels'
     
     def __str__(self):
@@ -53,7 +54,6 @@ class MaritalStatus(models.Model):
     marital_status = models.CharField(db_column='MaritalStatus', max_length=255, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'tbl2MaritalStatuses'
 
     def __str__(self):
@@ -66,7 +66,6 @@ class ModeOfAdmission(models.Model):
     description = models.CharField(db_column='Description', max_length=255, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'tbl2ModesOfAdmission'
     
     def __str__(self) -> str:
@@ -78,7 +77,6 @@ class ModeOfStudy(models.Model):
     mode_of_study = models.CharField(db_column='ModeOfStudy', max_length=255, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'tbl2ModesOfStudy'
 
     def __str__(self):
@@ -89,7 +87,6 @@ class Relationship(models.Model):
     relationship = models.CharField(db_column='Relationship', max_length=255, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'tbl2Relationships'
 
     def __str__(self):
@@ -101,7 +98,6 @@ class Semester(models.Model):
     semester = models.CharField(db_column='Semester', max_length=255, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'tbl2Semesters'
 
     def __str__(self):
@@ -113,7 +109,6 @@ class Session(models.Model):
                              null=False, unique=True)
 
     class Meta:
-        managed = False
         db_table = 'tbl2Sessions'
 
 
@@ -126,7 +121,6 @@ class Sex(models.Model):
     sex = models.CharField(db_column='Sex', max_length=255, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'tbl2Sexes'
 
     def __str__(self):
@@ -141,7 +135,6 @@ class SemesterSession(models.Model):
     desc = models.CharField(db_column='Desc', max_length=243, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'tbl2SemesterCount'
         unique_together = (('session', 'semester'),)
 
@@ -161,7 +154,6 @@ class Course(models.Model):
     elective = models.BooleanField(db_column='Elective', default=False)
 
     class Meta:
-        managed = False
         db_table = 'tbl2Courses'
         unique_together = (('course_title', 'course_code', 'course_level'),)
 
@@ -179,7 +171,6 @@ class ProgramRequirement(models.Model):
                                     on_delete=PROTECT)
 
     class Meta:
-        managed = False
         db_table = 'tbl1ProgramRequirements'
         unique_together = (('course', 'mode_of_admission', 'session'),)
 
@@ -219,7 +210,6 @@ class Student(models.Model):
     student_photo = models.ImageField(db_column='studentPhoto', blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'tbl1StudentBios'
 
 
@@ -227,8 +217,7 @@ class Student(models.Model):
         return self.student_reg_no.replace("/", "_")
 
     def get_absolute_url(self):
-        return reverse('students:edit_bio', 
-                        kwargs={'reg_no': self.get_reg_no_for_url()})
+        return reverse('students:edit_bio',kwargs={'pk': self.pk})
 
     def get_records_url(self):
         return reverse('results:student_records',
@@ -297,7 +286,6 @@ class Result(models.Model):
                                                     null=True, auto_now=True)
 
     class Meta:
-        managed = False
         db_table = 'tbl1StudentResults'
         unique_together = (('semester', 'student_reg_no', 'course'),)
 
@@ -323,7 +311,6 @@ class StudentSponsor(models.Model):
     country = models.CharField(db_column='Country', max_length=255, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'tbl1StudentSponsorInfo'
 
 
@@ -338,7 +325,6 @@ class StudentProgressHistory(models.Model):
                                         on_delete=PROTECT)
 
     class Meta:
-        managed = False
         db_table = 'tbl2StudentProgressHistory'
         unique_together = (('student_reg_no', 'session_id'),)
 

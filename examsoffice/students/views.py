@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.contrib import messages
 from django.urls import reverse
 from django.views.decorators.cache import never_cache
+from django.views.generic.edit import UpdateView
 
 from .forms import (ProgressHistoryForm, 
                     StudentBioForm, 
@@ -72,26 +73,35 @@ def edit_bio_data(request, reg_no):
     # process form submission
     if request.method == 'POST':
         if Student.is_valid_reg_no(reg_no):
-            print(request.FILES,len(request.FILES))
             try:
                 student = Student.objects.get(student_reg_no=reg_no)
             except:
-                form = StudentBioForm(request.POST, request.FILES) if len(request.FILES)==0 else StudentBioForm(request.POST)
+                # form = StudentBioForm(request.POST, request.FILES) if len(request.FILES)==0 else StudentBioForm(request.POST)
+                print("an exception occured")
             else:
-                form = StudentBioForm(request.POST, request.FILES, 
-                                        instance=student) if request.FILES is not None else StudentBioForm(request.POST, instance=student)
+                # form = StudentBioForm(request.POST, request.FILES, 
+                #                         instance=student) if request.FILES is not None else StudentBioForm(request.POST, instance=student)
+                form = StudentBioForm(request.POST, instance=student)
+                initial_obj_state = StudentBioForm(instance=student)
             finally:
                 if form.is_valid():
-                    try:
-                        form.save()
-                    except:
-                        messages.add_message(request, messages.ERROR,
-                                        "Fatal error",extra_tags='bg-danger')
-                        return HttpResponseRedirect(reverse('students:search'))
-                    else:    
-                        messages.add_message(request, messages.SUCCESS,
-                                        "Save successful",
-                                        extra_tags='text-success')
+                    # try:
+                    #     form.save()
+                    # except:
+                    #     messages.add_message(request, messages.ERROR,
+                    #                     "Fatal error",extra_tags='bg-danger')
+                    #     return HttpResponseRedirect(reverse('students:search'))
+                    # else:    
+                    #     messages.add_message(request, messages.SUCCESS,
+                    #                     "Save successful",
+                    #                     extra_tags='text-success')
+                    # form.save()
+                    for field in form.fields:
+                        print(student.pk, field, 'then ', form[field].value())
+                        if form[field].value() not in [None, ''] and form[field].value() != initial_obj_state[field].value():
+                            Student.objects.get(student_reg_no=reg_no).field = form[field].value()
+                            print(f"after {field}\n\n\n\n\n\n\n")
+                            student.save()
                     if 'next' in request.POST:
                         return HttpResponseRedirect(request.POST['next'])
                     return HttpResponseRedirect(reverse('students:search'))
@@ -163,3 +173,13 @@ def update_progress_history(request, reg_no):
 
     return render(request, 'students/progress_history.html', context)
 
+class StudentUpdateView(UpdateView):
+    model = Student
+    fields = ['student_reg_no', 'last_name', 'first_name', 'other_names', 'email',
+                'phone_number', 'sex', 'marital_status', 'date_of_birth', 
+                'town_of_origin', 'lga_of_origin', 'state_of_origin', 'nationality',
+                'mode_of_admission', 'level_admitted_to', 'mode_of_study',
+                'year_of_admission', 'expected_yr_of_grad', 'graduated', 'address_line1',
+                'address_line2', 'city', 'state', 'country', 'class_rep', 'current_level_of_study', 'cgpa']
+    template_name = 'students/student_update_form.html'
+    form = StudentBioForm
