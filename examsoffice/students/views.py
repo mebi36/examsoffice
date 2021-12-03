@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.views.generic.edit import UpdateView
+from django.contrib.auth.decorators import login_required
 
 from .forms import (ProgressHistoryForm, 
                     StudentBioForm, 
@@ -13,11 +14,12 @@ from results.models import (LevelOfStudy, Student,
 
 # Create your views here.
 def students_menu(request):
-    transcript_name = 'students/menu.html'
+    return render(request,'students/menu.html', {})
 
-    return render(request, transcript_name, {})
-
+@login_required
 def search(request):
+    context = {}
+
     if request.method == 'POST':
         if Student.is_valid_reg_no(request.POST['reg_no']):
             reg_no = request.POST['reg_no']
@@ -32,14 +34,18 @@ def search(request):
                                     kwargs={'reg_no':reg_no.replace('/','_')}))
             else:
                 return HttpResponseRedirect(student.get_absolute_url())
+        else:
+            messages.add_message(request, messages.ERROR,
+                                "Invalid Student Registration Number",
+                                extra_tags='text-danger')
+            return HttpResponseRedirect(reverse('students:search'))
     else:
         if 'next' in request.GET.keys():
             context = {'next': request.GET['next']}
-        else:
-            context = {}
     return render(request, 'results/reg_no_search.html',context)
 
 @never_cache
+@login_required
 def edit_bio_data(request, reg_no):
     """
     This view is supposed to enable the editing of student
@@ -63,6 +69,8 @@ def edit_bio_data(request, reg_no):
                 form = StudentBioForm(instance=student)
                 context['reg_no'] = reg_no
                 context['form'] = form
+                context['action_url'] = reverse('students:edit_bio', 
+                                    kwargs={'reg_no': reg_no.replace("/","_")})
         else:
             messages.add_message(request, messages.ERROR,
                             "Invalid student registration number",
@@ -99,12 +107,14 @@ def edit_bio_data(request, reg_no):
                     #                     "Save successful",
                     #                     extra_tags='text-success')
                     # form.save()
-                    for field in form.fields:
-                        print(student.pk, field, 'then ', form[field].value())
-                        if form[field].value() not in [None, ''] and form[field].value() != initial_obj_state[field].value():
-                            Student.objects.get(student_reg_no=reg_no).field = form[field].value()
-                            print(f"after {field}\n\n\n\n\n\n\n")
+                    print("the cleaned data: ", form.cleaned_data.keys())
+                    for field in form.cleaned_data.keys():
+                        if form.cleaned_data[field] not in [None, ''] and form.cleaned_data[field] != initial_obj_state[field].value():
+                            # student = Student.objects.get(student_reg_no=reg_no)
+                            Student.objects.get(student_reg_no=reg_no).field = form.cleaned_data[field]
                             student.save()
+                    messages.add_message(request, messages.SUCCESS, 
+                        "Student bio data update successful", extra_tags='text-success')
                     if 'next' in request.POST:
                         return HttpResponseRedirect(request.POST['next'])
                     return HttpResponseRedirect(reverse('students:search'))
@@ -113,11 +123,9 @@ def edit_bio_data(request, reg_no):
             messages.add_message(request, messages.ERROR,
                                     "Invalid student registration number",
                                     extra_tags='text-danger')
-    context.update(form=form)
-    # print(context)
-    return render(request, 'students/bio_data.html',context)
+    return render(request, 'bio_data.html',context)
 
-
+@login_required
 def update_progress_history(request, reg_no):
     '''This view updates a student's academic progress history.
     '''
@@ -176,18 +184,22 @@ def update_progress_history(request, reg_no):
 
     return render(request, 'students/progress_history.html', context)
 
+@login_required
 def create_bio_data(request, reg_no):
 
     '''This view updates a student's academic progress history.'''
     context = {}
     reg_no = reg_no.replace("_", "/")
-    template = 'students/bio_data.html'
-    form = StudentBioForm(initial={'student_reg_no':reg_no})
+    template = 'bio_data.html'
+
     if request.method == 'GET':
+        form = StudentBioForm(initial={'student_reg_no':reg_no})
         try:
             Student.objects.get(student_reg_no=reg_no)
         except:
-            context = {'form': form}
+            context = {'form': form, 
+                        'action_url': reverse('students:create_bio', 
+                        kwargs={'reg_no': reg_no.replace('/', '_')})}
             return render(request, template, context)
         else:
             messages.add_message(request, messages.INFO, 
@@ -199,14 +211,22 @@ def create_bio_data(request, reg_no):
         if Student.is_valid_reg_no(reg_no):
             student = Student(student_reg_no=reg_no)
             student.save()
-
-            for field in form.fields:
-                if form[field].value() not in [None, '', 'student_reg_no']:
-                    Student.objects.get(student_reg_no=reg_no).field = form[field].value()
-                    student.save()
-            messages.add_message(request, messages.SUCCESS, 
-                                "Student bio data saved",
-                                extra_tags='text-success')
+            student = Student.objects.get(student_reg_no=reg_no)
+            form = StudentBioForm(request.POST, instance=student)
+            initial_form = StudentBioForm(initial={'student_reg_no':reg_no})
+            if form.is_valid():
+                for field in form.cleaned_data.keys():
+                    if form.cleaned_data[field] != initial_form[field].value():
+                        Student.objects.get(student_reg_no=reg_no).field = form.cleaned_data[field]
+                        # student.field = form[field].value()
+                        student.save()
+                messages.add_message(request, messages.SUCCESS, 
+                                    "Student bio data saved",
+                                    extra_tags='text-success')
+            else:
+                messages.add_message(request, messages.SUCCESS, 
+                                    "Error processing form entries",
+                                    extra_tags='text-danger')
         else:
             messages.add_message(request, messages.ERROR, 
                                 "Registration Number is invalid",

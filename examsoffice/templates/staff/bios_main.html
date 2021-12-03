@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+{% include 'message_display.html' %}
+<div class="row">
+    <div class="col-sm-2"></div>
+    <div class="col-sm-8">
+        <h3>Staff Bio Update</h3>
+        {% if staff %}
+        <label for="staff">Select Staff:</label>
+            <div name="staff" class="overflow-auto" cols="70" rows="15">
+            {% for staff_obj in staff %}
+            <p><a href="{% url 'staff:edit' staff_obj.id %}">{{ staff_obj|upper}}</a></p>
+            {% endfor %}
+            </div>
+        {% endif %}
+        <br><br><br>
+        <a href="{% url 'staff:create' %}">Create Bio for New Staff </a>
+    </div>
+    <div class="col-sm-2"></div>
+</div>
+{% endblock %}

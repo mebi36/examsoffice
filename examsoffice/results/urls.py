@@ -1,5 +1,6 @@
 from django.urls.conf import path
 from django.urls.resolvers import URLPattern
+
 from .views import (
     result_collation, results_menu, edit_result, student_search_processor,
     find_student, student_records, add_result, result_add_processor,

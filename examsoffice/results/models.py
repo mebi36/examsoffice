@@ -34,8 +34,19 @@ class Lecturer(models.Model):
     class Meta:
         db_table = 'tbl2Lecturers'
 
-    def get_full_name(self):
-        return f"{self.title or ''} {self.first_name[0] or ''} {self.other_names[0] or ''} {self.last_name}"
+    @property
+    def full_name(self):
+        return f"{self.title or ''} {self.first_name[0] if self.first_name != None else ''} {self.other_names[0] if self.other_names != None else ''} {self.last_name}"
+    
+    def __str__(self) -> str:
+        return self.full_name
+    
+    @staticmethod
+    def is_valid_staff_no(staff_no):
+        if re.search(r"^[S]{2}.", staff_no) != None:
+            return True
+        else:
+            return False
 
 class LevelOfStudy(models.Model):
     level = models.BigIntegerField(db_column='Level', primary_key=True)

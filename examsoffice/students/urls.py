@@ -14,7 +14,7 @@ urlpatterns = [
     path('',students_menu, name='menu'),
     path('bio/<str:reg_no>', edit_bio_data, name='edit_bio'),
     # path('bio2/<int:pk>', StudentUpdateView.as_view(), name='edit_bio'),
-    path('create bio/<str:reg_no>', create_bio_data, name='create_bio'),
+    path('create bio/<str:reg_no>/', create_bio_data, name='create_bio'),
     path('search/', search, name='search'),
     path('progress history/<str:reg_no>', update_progress_history, 
                                         name='progress_history'),

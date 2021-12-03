@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+{% include 'message_display.html' %}
+<div class="card w-75 mx-auto">
+    <h5 class="card-title">Staff Bios</h5>
+    <p class="card-text">
+        Create/Update Staff Bios.
+    </p>
+    <a href="{% url 'staff:bios_main' %}" class="btn btn-success" id="go-button">
+        <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">    Go</a>    
+</div> 
+{% endblock %}

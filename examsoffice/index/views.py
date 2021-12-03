@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 
 def index_view(request):
     template_name = 'index.html'
-    message = "This is the Home Page!"
+    message = "Welcome to ECE Exams Office"
     context = {'message': message}
     return render(request, template_name, context)
 

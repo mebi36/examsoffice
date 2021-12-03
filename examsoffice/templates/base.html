@@ -32,19 +32,37 @@
                             <a class="nav-link" href="{% url 'results:menu' %}">Results & Transcripts</a>
                         </li>
                         <li class="navbar-item">
-                            <a class="nav-link" href="{% url 'students:menu' %}">Students Info</a>
+                            <a class="nav-link" href="{% url 'students:menu' %}">Students Bio Data</a>
                         </li>
                         <li class="navbar-item">
-                            <a class="nav-link" href="#">Staff Info</a>
+                            <a class="nav-link" href="{% url 'staff:menu' %}">Staff Info</a>
                         </li>
                     </ul>
                 </div>
             </nav>
         </div>
         <div class="container-fluid bg-white mt-5">
-            <div class="mt-2">        
-            {% block content%}
-            {% endblock%}
+            <div class="col-sm">        
+            {% block jumbo_heading %}
+            {% endblock%}       
+            </div>
+            <div class="row">
+                <div class="col-sm-9">
+                    <div class="mt-2">        
+                    {% block content%}
+                    {% endblock%}       
+                    </div>
+                </div>
+                <div class="col-sm-3 border-left">
+                    <h4>Important Links</h4>
+                    <ul>
+                        <li><a href="{% url 'results:transcripts' %}">Student Transcripts</a></li>
+                        <li><a href="{% url 'results:collation' %}">Collate Results by Session/Level</a></li>
+                    </ul>
+                    <br><br><br><br><br><br><br><br><br><br><br><br>
+                    <br><br><br><br><br><br><br><br><br><br><br>
+                </div>
+                </div>
             </div>
         </div>
         <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
