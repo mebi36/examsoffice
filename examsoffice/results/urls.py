@@ -4,7 +4,7 @@ from django.urls.resolvers import URLPattern
 from .views import (
     result_collation, results_menu, edit_result, student_search_processor,
     find_student, student_records, add_result, result_add_processor,
-    rogue_results, delete_result, result_upload_options, upload_result_file,
+    recent_results, recent_results_bulk, delete_result, result_upload_options, upload_result_file,
     delete_by_session, student_transcript_generator, class_speadsheet_generator,
     result_collation_form, result_spreadsheet_form, student_transcript_form,
     transcript_download_info, class_outstanding_courses, class_outstanding_courses_form,
@@ -21,7 +21,8 @@ urlpatterns = [
     path('records/<str:reg_no>/',student_records, name='student_records'),
     path('add/<str:reg_no>/', add_result, name='add'),
     path('result_add/', result_add_processor, name='add_processor'),
-    path('recent/',rogue_results,name='recent_results'),
+    path('recent uploads', recent_results_bulk, name='recent_uploads'),
+    path('recent/',recent_results,name='recent'),
     path('delete/<int:pk>',delete_result,name='delete'),
     path('upload/', result_upload_options, name='upload'),
     path('upload file/', upload_result_file, name='upload_result_file'),

@@ -65,7 +65,7 @@
             <p class="card-text">
                 View results that were added recently.
             </p>
-            <a href="#" class="btn btn-success" id="go-button">
+            <a href="{% url 'results:recent_uploads' %}" class="btn btn-success" id="go-button">
                 <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">Go</a>    
         </div>
 {% endblock %}

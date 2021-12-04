@@ -4,7 +4,8 @@
 #2.     make view for updating individual student progress history
 # new   make view for deleting existing students?
 # new   make view to view recently added students with option of editing or removing them from the system.
-#new    make view to view recently added results(with courses aggregated together)
+#new    make view to view recently added results(with courses aggregated together) -done
+        #new could it be possible to then find the bulk results and make it available for bulk deletion?
 # 3.    make view for updating entire class bio data
 # 4.    make view for updating entire class academic progress history
 # 5.    make view for updating the 'current_level_of_study' field for a list of
@@ -17,7 +18,7 @@
 #       courses database)
 # 2.Make it clear that courses should never be edited due to change in curriculum
     # that rather, new courses have to be created to fit new academic requirements
-#should courses have field to see years where it has results/have been offered by the deparment
+#should courses have field to see years where it has results/have been offered by the department
 #this will make sure the user understands the effect deleting a course will have
 
 #IN lecturers app

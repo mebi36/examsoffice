@@ -1,17 +1,16 @@
-from os import replace
-from re import template
-from django.http import response, HttpResponse
+from django.http import HttpResponse
 from django.urls import reverse
 from django.http.response import HttpResponseBadRequest, HttpResponseRedirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import never_cache
-from django.db.models import (OuterRef, Subquery, Value)
+from django.db.models import (OuterRef, Subquery, Value, Count)
 from django.db.models.functions import Concat
 import csv
 from datetime import date
 import pandas as pd
+import numpy as np
 from pandas.core.frame import DataFrame
 from openpyxl.writer.excel import save_virtual_workbook
 from . import models as ex
@@ -34,12 +33,6 @@ _queryset = ex.Result.objects.all().select_related('course',
 
 _valid_grades = ['A', 'B', 'C', 'D', 'E', 'F']
 
-
-# # @login_required
-# class EditResultsView(generic.ListView):
-#     template_name = "results/edit_results_view.html"
-#     context_object_name = 'result'
-#     queryset = _queryset
 
 def results_menu(request):
     """A view to display all the actions a user can perform
@@ -164,15 +157,6 @@ def result_add_processor(request):
 
 @login_required
 def recent_results(request):
-    queryset = _queryset.order_by('-id')[:100]
-    
-    context = {'object_list': queryset}
-    template = 'results/recent_results.html'
-
-    return render(request, template, context)
-
-@login_required
-def rogue_results(request):
     queryset = ex.Result.objects.all().select_related('semester', 'course'
                         ).order_by('-id').values(
                             'id','student_reg_no','course_id__course_title',
@@ -203,9 +187,30 @@ def delete_student_result(request, pk):
                             student_reg_no=result_details.student_reg_no)
         ex.Result.objects.get(id=pk).delete()
         
-
     return HttpResponseRedirect(student.get_records_url())
 
+@login_required
+def recent_results_bulk(request):
+    '''This view will find results for the  last N unique courses
+        uploaded to the db.'''
+    qs = ex.Result.objects.all().order_by('-id').select_related('course', 
+                        'semester')
+    course_count = 0
+    for idx, entry in enumerate(qs):
+        if idx != 0 and qs[idx].course != qs[idx-1].course:
+            course_count += 1
+        if course_count == 26:
+            break
+    min_id = qs[idx].id
+    final_qs = ex.Result.objects.all().filter(id__gt=min_id).order_by('-id'
+                        ).values('course__course_title', 'course__course_code',
+                        'semester__desc')
+    df = pd.DataFrame(final_qs)
+    grouped = df.groupby(['course__course_code', 'semester__desc'], sort=False)
+    new_df = grouped.agg(np.size)
+    grouped_dict = new_df.to_dict('dict')['course__course_title']
+    template = 'results/recent_results_bulk.html'
+    return render(request, template, {'qs': grouped_dict})
 
 """For bulk result operations like:
     class result uploads
@@ -476,52 +481,6 @@ def student_transcript_generator(request, reg_no):
             return HttpResponseRedirect(reverse('results:transcripts'))
 
     return render(request, template_name, {})
-
-# @login_required
-# def class_speadsheet_generator(request, expected_yr_of_grad):
-#     class_query = ex.Student.objects.all().select_related('mode_of_admission'
-#                         ).filter(expected_yr_of_grad=expected_yr_of_grad
-#                         ).values_list(
-#                         'student_reg_no',
-#                         'mode_of_admission_id__mode_of_admission'
-#                         )
-#     if len(class_query) == 0:
-#         messages.add_message(request, messages.ERROR, 
-#                     f'''No students are currently registered with 
-#                     {expected_yr_of_grad} as their year of graduation''',
-#                     extra_tags='text-danger')
-#         return HttpResponseRedirect(reverse('results:spreadsheets'))
-
-#     class_reg_no = list(class_query.values_list('student_reg_no', flat=True))
-#     class_list = []
-#     for el in class_query:
-#         name = ex.Student.objects.get(student_reg_no=el[0]).full_name
-#         class_list.append([el[0], name, el[1]])
-
-#     result_qs = ex.Result.objects.all().select_related(
-#                     'semester', 'course').filter(
-#                         student_reg_no__in=class_reg_no).values_list(
-#                         'course_id__course_title', 
-#                     'course_id__course_code', 'course_id__credit_load', 
-#                     'course_id__course_level','semester_id__desc',
-#                      'letter_grade',)
-    
-#     if len(class_list) > 0:        
-#         wb = class_result_spreadsheet(result_qs=result_qs, 
-#                                     class_list=class_list,
-#                                     expected_yr_of_grad=expected_yr_of_grad)
-#         file_name = f'Class of {expected_yr_of_grad} Results.xlsx'
-#         response = HttpResponse(content=save_virtual_workbook(wb), 
-#                                 content_type='application/ms-excel')
-#         response['Content-Disposition']  = f'attachment; filename={file_name}'
-#         return response
-#     else:
-#         messages.add_message(request, messages.ERROR,
-#                         "No results have been uploaded for students of this level",
-#                         extra_tags='text-danger')
-
-#     return render(request, 'results/class_spreadsheet.html', {})
-
 
 @login_required
 def generic_class_info_handler(request, expected_yr_of_grad, file_name, 

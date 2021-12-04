@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Course Code</th>
+            <th>Session</th>
+            <th>Number of Records</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        {% if qs %}
+        {% for key, count in qs.items %}
+        
+        <tr>
+        <td><a href="{% url 'results:recent' %}">{{ key.0 }}</a></td>
+        <td>{{ key.1 }}</td>
+        <td>{{ count }}</td>
+        </tr>
+        {% endfor %}
+        {% endif%}
+        
+    </tbody>
+</table>
+{% endblock %}
