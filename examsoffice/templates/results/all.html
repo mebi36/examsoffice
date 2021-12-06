@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Course Code</th>
+            <th>Session</th>
+            <th>Number of Records</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        {% if qs %}
+        {% for key in qs %}
+        
+        <tr>
+        <td><a href="{% url 'results:recent' %}">{{ key.0.0 }}</a></td>
+        <td>{{ key.0.1 }}</td>
+        <td>{{ key.1 }}</td>
+        </tr>
+        {% endfor %}
+        {% endif%}
+        
+    </tbody>
+    <tfoot>
+        <tr>
+            <td class="text-center">
+        <div class="pagination">
+            <span class="step-links">
+                {% if qs.has_previous %}
+                    <a href="?page=1">&laquo; first</a>
+                    <a href="?page= {{ qs.previous_page_number.num_pages }}">previous</a>
+                {% endif %}
+
+                <span class="current">
+                    Page {{ qs.number }} of {{ qs.paginator.num_pages }}.
+                </span>
+
+                {% if qs.has_next %}
+                    <a href="?page={{ qs.next_page_number }}">next</a>
+                    <a href="?page={{ qs.paginator.num_pages }}">last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+    </td>
+    </tr>
+    </tfoot>
+</table>
+{% endblock %}

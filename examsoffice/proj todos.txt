@@ -24,3 +24,16 @@
 #IN lecturers app
 1. a view for editing lecturer bio data - done
 2. a view for easily changing the current head of dept. -  done
+
+#in programs app
+# there could be a view for adding a single program requirement
+# and another viw for adding the entire program requirement of 
+# for an entire level of study
+# there could be a view for reviewing the program requirement of 
+# the last session and agreeing that nothing has changed/adopting
+# it for the new session.
+
+once the tasks for the programs app is done, attention will shift to the progresshistory functionality
+of the system
+after which these features can be tied together with the results app for determining the eligibility of
+a student to graduate

@@ -207,7 +207,7 @@ def student_transcript(transcript_data):
         _merge_row_wise(ws, row=(r_idx+2), col_start=result_columns[6], col_end=(result_columns[6]+4))    
         ws.row_breaks.append(Break(id=r_idx+2))
 
-    hod_name = Lecturer.objects.get(head_of_dept=True).get_full_name()
+    hod_name = Lecturer.objects.get(head_of_dept=True).full_name
     ws.HeaderFooter.differentFirst = False
     ws.oddFooter.left.text = '&BHead of Dept.: '+'&U'+hod_name + '  &U&B\n'
     ws.oddFooter.center.text = '&BSign:__________________&B\n'
@@ -488,7 +488,6 @@ def collated_results_spreadsheet(res_df):
     students  = res_df.groupby(['name', 'reg_no']).size().reset_index()
     students = students[['name', 'reg_no']].values.tolist()
     collated_result = pd.DataFrame(students, columns=['Name', 'RegNo'])
-    print("This is before",collated_result)
     for course in courses:
         x = ['X'] * len(students)
         j = course
@@ -497,7 +496,6 @@ def collated_results_spreadsheet(res_df):
             if len(grade) == 1:
                 x[student] = grade['grade'].tolist()[0]
         collated_result[j] = x
-    # print(collated_result)
 
     # printing to a worksheet
     wb = Workbook()
@@ -537,7 +535,7 @@ def collated_results_spreadsheet(res_df):
                                     wrap_text=True)
             _.font = times_new_rom_style    
     
-    hod_name = Lecturer.objects.get(head_of_dept=True).get_full_name()
+    hod_name = Lecturer.objects.get(head_of_dept=True).full_name
     
     ws.print_title_rows = '1:1'
     ws.HeaderFooter.differentFirst = False

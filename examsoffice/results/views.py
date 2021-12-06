@@ -7,6 +7,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import never_cache
 from django.db.models import (OuterRef, Subquery, Value, Count)
 from django.db.models.functions import Concat
+from django.core.paginator import Paginator
 import csv
 from datetime import date
 import pandas as pd
@@ -211,6 +212,27 @@ def recent_results_bulk(request):
     grouped_dict = new_df.to_dict('dict')['course__course_title']
     template = 'results/recent_results_bulk.html'
     return render(request, template, {'qs': grouped_dict})
+
+
+@login_required
+def all_results_agg(request):
+    '''This view will aggregate all results currently
+        uploaded to the db.'''
+    qs = ex.Result.objects.all().values('course__course_title', 
+                    'course__course_code','semester__desc')
+    df = pd.DataFrame(qs)
+    grouped = df.groupby(['course__course_code', 'semester__desc'])
+    new_df = grouped.agg(np.size)
+    grouped_dict = new_df.to_dict('dict')['course__course_title']
+    grouped_list = [[k, v] for (k, v) in grouped_dict.items()]
+    paginator = Paginator(grouped_list, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    template = 'results/all.html'
+
+    return render(request, template, {'qs': page_obj})
+
 
 """For bulk result operations like:
     class result uploads

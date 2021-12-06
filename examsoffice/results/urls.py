@@ -7,7 +7,7 @@ from .views import (
     recent_results, recent_results_bulk, delete_result, result_upload_options, upload_result_file,
     delete_by_session, student_transcript_generator, class_speadsheet_generator,
     result_collation_form, result_spreadsheet_form, student_transcript_form,
-    transcript_download_info, class_outstanding_courses, class_outstanding_courses_form,
+    transcript_download_info, class_outstanding_courses, class_outstanding_courses_form,all_results_agg,
 
     delete_student_result
 )
@@ -21,6 +21,7 @@ urlpatterns = [
     path('records/<str:reg_no>/',student_records, name='student_records'),
     path('add/<str:reg_no>/', add_result, name='add'),
     path('result_add/', result_add_processor, name='add_processor'),
+    path('all/', all_results_agg, name='all'),
     path('recent uploads', recent_results_bulk, name='recent_uploads'),
     path('recent/',recent_results,name='recent'),
     path('delete/<int:pk>',delete_result,name='delete'),

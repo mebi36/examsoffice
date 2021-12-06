@@ -19,12 +19,14 @@ class StudentBioForm(forms.ModelForm):
     class Meta:
         model = Student 
         # exclude = ['student_photo']
-        fields = ['student_reg_no', 'last_name', 'first_name', 'other_names', 'email',
-                'phone_number', 'sex', 'marital_status', 'date_of_birth', 
+        fields = ['student_reg_no', 'last_name', 'first_name', 'other_names',
+                 'expected_yr_of_grad',
+                 'email','phone_number', 'sex', 'marital_status', 'date_of_birth', 
                 'town_of_origin', 'lga_of_origin', 'state_of_origin', 'nationality',
                 'mode_of_admission', 'level_admitted_to', 'mode_of_study',
-                'year_of_admission', 'expected_yr_of_grad', 'graduated', 'address_line1',
-                'address_line2', 'city', 'state', 'country', 'class_rep', 'current_level_of_study', 'cgpa']
+                'year_of_admission', 'graduated', 'address_line1',
+                'address_line2', 'city', 'state', 'country', 'class_rep', 
+                'current_level_of_study', 'cgpa']
 
 
 ProgressHistoryFormSet = inlineformset_factory(

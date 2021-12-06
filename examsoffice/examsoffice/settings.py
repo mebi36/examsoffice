@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'results',
     'courses',
     'staff',
+    'programs',
     'django_htmx',
 ]
 
