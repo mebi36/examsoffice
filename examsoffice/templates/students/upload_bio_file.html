@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="card wx-75 mx-auto">
+    {% include 'message_display.html' %}
+    <h6 class="text-warning">
+        **Please ensure the headers and file format of the result 
+        format provided is not modified in the file to be uploaded.</h6>
+    <form action="{% url 'students:upload_bio_file' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="result_file">Select Bio File:</label>
+            <input class="form-control wx-75" type="file" name="result_file" 
+            required="required" accept=".csv">
+        </div>
+        <button type="submit" class="btn btn-success">
+            <img src="{% static 'images/save.svg' %}" alt="save-icon" class="mr-2">
+            Upload File
+        </button>
+    </form>
+</div>
+{% endblock %}

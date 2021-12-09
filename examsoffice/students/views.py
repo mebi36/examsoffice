@@ -1,3 +1,8 @@
+import csv
+import pandas as pd
+from datetime import datetime
+import pytz
+from django.http import HttpResponse
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 from django.contrib import messages
@@ -9,9 +14,19 @@ from django.contrib.auth.decorators import login_required
 from .forms import (ProgressHistoryForm, 
                     StudentBioForm, 
                     )
-from results.models import (LevelOfStudy, Student,
+from results.models import (LevelOfStudy, ModeOfAdmission, ModeOfStudy, Student, Sex,
                             StudentProgressHistory, Session,)
 
+STUDENT_BIO_FIELDS = [
+                    'student_reg_no', 'last_name', 'first_name', 
+                    'other_names', 'email','phone_number', 'sex', 
+                    'marital_status', 'date_of_birth', 'town_of_origin',
+                    'lga_of_origin', 'state_of_origin', 'nationality',
+                    'mode_of_admission', 'level_admitted_to', 
+                    'mode_of_study', 'year_of_admission', 
+                    'expected_yr_of_grad', 'graduated', 'address_line1',
+                    'address_line2', 'city', 'state', 'country', 
+                    'class_rep', 'current_level_of_study', 'jamb_number']
 # Create your views here.
 def students_menu(request):
     return render(request,'students/menu.html', {})
@@ -87,32 +102,12 @@ def edit_bio_data(request, reg_no):
             try:
                 student = Student.objects.get(student_reg_no=reg_no)
             except:
-                # form = StudentBioForm(request.POST, request.FILES) if len(request.FILES)==0 else StudentBioForm(request.POST)
                 print("an exception occured")
             else:
-                # form = StudentBioForm(request.POST, request.FILES, 
-                #                         instance=student) if request.FILES is not None else StudentBioForm(request.POST, instance=student)
                 form = StudentBioForm(request.POST, instance=student)
-                initial_obj_state = StudentBioForm(instance=student)
             finally:
                 if form.is_valid():
-                    # try:
-                    #     form.save()
-                    # except:
-                    #     messages.add_message(request, messages.ERROR,
-                    #                     "Fatal error",extra_tags='bg-danger')
-                    #     return HttpResponseRedirect(reverse('students:search'))
-                    # else:    
-                    #     messages.add_message(request, messages.SUCCESS,
-                    #                     "Save successful",
-                    #                     extra_tags='text-success')
-                    # form.save()
-                    print("the cleaned data: ", form.cleaned_data.keys())
-                    for field in form.cleaned_data.keys():
-                        if form.cleaned_data[field] not in [None, ''] and form.cleaned_data[field] != initial_obj_state[field].value():
-                            # student = Student.objects.get(student_reg_no=reg_no)
-                            Student.objects.get(student_reg_no=reg_no).field = form.cleaned_data[field]
-                            student.save()
+                    form.save()
                     messages.add_message(request, messages.SUCCESS, 
                         "Student bio data update successful", extra_tags='text-success')
                     if 'next' in request.POST:
@@ -213,13 +208,8 @@ def create_bio_data(request, reg_no):
             student.save()
             student = Student.objects.get(student_reg_no=reg_no)
             form = StudentBioForm(request.POST, instance=student)
-            initial_form = StudentBioForm(initial={'student_reg_no':reg_no})
             if form.is_valid():
-                for field in form.cleaned_data.keys():
-                    if form.cleaned_data[field] != initial_form[field].value():
-                        Student.objects.get(student_reg_no=reg_no).field = form.cleaned_data[field]
-                        # student.field = form[field].value()
-                        student.save()
+                form.save()
                 messages.add_message(request, messages.SUCCESS, 
                                     "Student bio data saved",
                                     extra_tags='text-success')
@@ -233,14 +223,109 @@ def create_bio_data(request, reg_no):
                                 extra_tags='text-danger')
         return HttpResponseRedirect(reverse('students:search'))
         
-# class StudentUpdateView(UpdateView):
-#     model = Student
-#     fields = ['student_reg_no', 'last_name', 'first_name', 'other_names', 'email',
-#                 'phone_number', 'sex', 'marital_status', 'date_of_birth', 
-#                 'town_of_origin', 'lga_of_origin', 'state_of_origin', 'nationality',
-#                 'mode_of_admission', 'level_admitted_to', 'mode_of_study',
-#                 'year_of_admission', 'expected_yr_of_grad', 'graduated', 'address_line1',
-#                 'address_line2', 'city', 'state', 'country', 'class_rep', 'current_level_of_study', 'cgpa']
-#     template_name = 'students/student_update_form.html'
-#     form = StudentBioForm
 
+def bio_update_format(request):
+    
+    if request.method == 'GET':
+        template = 'students/bio_update_bulk.html'
+        return render(request, template, {})
+    if request.method == 'POST':
+        response = HttpResponse(
+                content_type='text/csv',
+                headers={'Content-Disposition': 'attachment; filename="bio_update_form.csv"'},
+            )
+        writer = csv.writer(response)
+        writer.writerow(STUDENT_BIO_FIELDS)
+        return response
+
+def upload_bio_file(request):
+    template = 'students/upload_bio_file.html'
+    if request.method == 'GET':
+        return render(request, template, {})
+
+    elif request.method == 'POST' and request.FILES:
+    # begin by checking if uploaded file is a csv file
+        try:
+            df = pd.read_csv(request.FILES['result_file'], skipinitialspace=True)
+            #you can define a chunksize parameter in the read_csv method
+            # to handle large file sizes [chunksize=1000]
+        except:
+            messages.add_message(request, messages.ERROR, 
+                                "Invalid File. File must be a non-empty CSV file.",
+                                extra_tags="text-danger")
+            return HttpResponseRedirect(reverse('students:bio_update_format'))
+        else:
+            invalid_result_index_list = []
+            # strip whitespaces from dataframe
+            df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
+            df = df.astype(str)
+            updated_fields = {}
+            if len(df)>0:
+                #ensure all column headings are valid
+                if not set(df.columns.to_list()).issubset(set(STUDENT_BIO_FIELDS)):
+                    messages.add_message(request, messages.ERROR, 
+                                        '''Invalid column heading(s). 
+                                        Please use the bio format without 
+                                        modifying the column headings''')
+                    return HttpResponseRedirect(reverse('students:bio_update_format'))
+    
+                original_df = df.copy() #make a copy of dataframe before modification
+                for index, row in df.iterrows():
+                    if Student.is_valid_reg_no(row['student_reg_no']):
+                        for field in STUDENT_BIO_FIELDS:
+                            #skip NaN
+                            if (pd.isna(row[field]) or field == 'student_reg_no' 
+                                                        or row[field] == 'nan'):
+                                continue
+                            else:
+                                col_entry = row[field]
+                                if field == 'sex':
+                                    try:
+                                        col_entry = Sex.objects.get(
+                                                    sex__istartswith=row[field])
+                                    except:
+                                        continue
+                                if field == 'date_of_birth':
+                                    try:
+                                        col_entry = datetime.strptime(
+                                                        row[field], '%d/%m/%Y')
+                                    except:
+                                        continue
+                                    else:
+                                        col_entry = col_entry.replace(tzinfo=pytz.UTC)
+                                if field == 'level_admitted_to':
+                                    try:
+                                        col_entry = int(row[field])
+                                    except:
+                                        continue
+
+                                if field == 'mode_of_admission':
+                                    try:
+                                        col_entry = ModeOfAdmission.objects.get(
+                                            mode_of_admission__icontains=row[field])
+                                    except:
+                                        try:
+                                            col_entry = ModeOfAdmission.objects.get(
+                                                description__icontains=row[field])
+                                        except:
+                                            continue
+                                if field == 'mode_of_study':
+                                    try:
+                                        col_entry = ModeOfStudy.objects.get(
+                                                mode_of_study__icontains=row[field])
+                                    except:
+                                        continue
+                                updated_fields[field] = col_entry
+                                Student.objects.update_or_create(
+                                        student_reg_no=row['student_reg_no'], 
+                                                    defaults={field:col_entry})
+                                
+                messages.add_message(request, messages.SUCCESS, 
+                                    "Update Complete",
+                                    extra_tags='text-success')
+            else:
+                messages.add_message(request, messages.ERROR, 
+                                    "No Bio entries found in uploaded file",
+                                    extra_tags='text-danger')
+                        
+            return render(request, template, {})

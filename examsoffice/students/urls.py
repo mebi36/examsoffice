@@ -6,6 +6,8 @@ from .views import (
     students_menu,
     search,
     update_progress_history,
+    bio_update_format,
+    upload_bio_file,
     # StudentUpdateView,
 )
 app_name = 'students'
@@ -18,4 +20,6 @@ urlpatterns = [
     path('search/', search, name='search'),
     path('progress history/<str:reg_no>', update_progress_history, 
                                         name='progress_history'),
+    path('bio update format/', bio_update_format, name='bio_update_format'),
+    path('bio update format/upload', upload_bio_file, name='upload_bio_file'),
 ]

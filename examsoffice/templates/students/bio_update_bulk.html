@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+{% include 'message_display.html' %}
+<div class="row">
+    <div class="col-sm-4"></div>
+    <div class="col-sm-8">
+        <p>Download Bio Update Format</p>
+        <form action="." method="post">
+            {% csrf_token %}
+            <button class="button btn-success" type="submit">Download Format</button>
+        </form>
+        
+    </div>
+    <div class="col-sm-4"></div>
+</div>
+{% endblock %}

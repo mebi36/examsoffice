@@ -1,3 +1,10 @@
+import csv
+from datetime import date
+import pandas as pd
+import numpy as np
+from pandas.core.frame import DataFrame
+from openpyxl.writer.excel import save_virtual_workbook
+
 from django.http import HttpResponse
 from django.urls import reverse
 from django.http.response import HttpResponseBadRequest, HttpResponseRedirect
@@ -8,12 +15,7 @@ from django.views.decorators.cache import never_cache
 from django.db.models import (OuterRef, Subquery, Value, Count)
 from django.db.models.functions import Concat
 from django.core.paginator import Paginator
-import csv
-from datetime import date
-import pandas as pd
-import numpy as np
-from pandas.core.frame import DataFrame
-from openpyxl.writer.excel import save_virtual_workbook
+
 from . import models as ex
 from results.utils import (student_transcript, 
                             class_result_spreadsheet,
@@ -213,6 +215,8 @@ def recent_results_bulk(request):
     template = 'results/recent_results_bulk.html'
     return render(request, template, {'qs': grouped_dict})
 
+# @login_required
+# def results_view_filtered(request, )
 
 @login_required
 def all_results_agg(request):
@@ -238,7 +242,6 @@ def all_results_agg(request):
     class result uploads
     deletion of entire results for a particular session
 """
-
 @login_required
 def result_upload_options(request):
     RESULT_UPLOAD_OPTIONS = ('Upload results without scores', 
@@ -307,7 +310,7 @@ def upload_result_file(request):
                                             id=int(request.POST['course']))
                                 semester = ex.SemesterSession.objects.get(
                                                     id=int(request.POST['semester']))
-                                result_details = ex.Result.objects.update_or_create(
+                                ex.Result.objects.update_or_create(
                                                 student_reg_no=row['reg_no'],
                                                 course=course,
                                                 semester=semester,
@@ -340,7 +343,7 @@ def upload_result_file(request):
                                                     id=int(request.POST['course']))
                                         semester = ex.SemesterSession.objects.get(
                                                             semester_number=int(request.POST['semester']))
-                                        result_details = ex.Result.objects.update_or_create(
+                                        ex.Result.objects.update_or_create(
                                                             student_reg_no=row['reg_no'],
                                                             course=course,
                                                             semester=semester,
