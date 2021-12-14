@@ -1,7 +1,6 @@
 import csv
 import pandas as pd
-from datetime import datetime
-import pytz
+from datetime import datetime, timezone
 from django.http import HttpResponse
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
@@ -255,7 +254,7 @@ def upload_bio_file(request):
                                 extra_tags="text-danger")
             return HttpResponseRedirect(reverse('students:bio_update_format'))
         else:
-            invalid_result_index_list = []
+            invalid_student_index_list = []
             # strip whitespaces from dataframe
             df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
             df = df.astype(str)
@@ -269,11 +268,10 @@ def upload_bio_file(request):
                                         modifying the column headings''')
                     return HttpResponseRedirect(reverse('students:bio_update_format'))
     
-                original_df = df.copy() #make a copy of dataframe before modification
                 for index, row in df.iterrows():
                     if Student.is_valid_reg_no(row['student_reg_no']):
                         for field in STUDENT_BIO_FIELDS:
-                            #skip NaN
+                            #skip student_reg_no and cells with NaN
                             if (pd.isna(row[field]) or field == 'student_reg_no' 
                                                         or row[field] == 'nan'):
                                 continue
@@ -285,6 +283,8 @@ def upload_bio_file(request):
                                                     sex__istartswith=row[field])
                                     except:
                                         continue
+                                if field == 'phone_number':
+                                    col_entry = col_entry.split(".", 1)[0]
                                 if field == 'date_of_birth':
                                     try:
                                         col_entry = datetime.strptime(
@@ -292,7 +292,7 @@ def upload_bio_file(request):
                                     except:
                                         continue
                                     else:
-                                        col_entry = col_entry.replace(tzinfo=pytz.UTC)
+                                        col_entry = col_entry.replace(tzinfo=timezone.utc)
                                 if field == 'level_admitted_to':
                                     try:
                                         col_entry = int(row[field])
@@ -319,10 +319,17 @@ def upload_bio_file(request):
                                 Student.objects.update_or_create(
                                         student_reg_no=row['student_reg_no'], 
                                                     defaults={field:col_entry})
+                    else:
+                        invalid_student_index_list.append(index+1)
                                 
-                messages.add_message(request, messages.SUCCESS, 
-                                    "Update Complete",
-                                    extra_tags='text-success')
+                if len(invalid_student_index_list) == 0:
+                    messages.add_message(request, messages.SUCCESS, 
+                                        "Update Complete",
+                                        extra_tags='text-success')
+                else:
+                    messages.add_message(request, messages.ERROR, 
+                        f"Rows: {invalid_student_index_list} were not uploaded",
+                                                    extra_tags="text-danger")
             else:
                 messages.add_message(request, messages.ERROR, 
                                     "No Bio entries found in uploaded file",

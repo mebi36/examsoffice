@@ -1,6 +1,30 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
+<div class="row">
+    {% if sessions %}
+    <form action="?session= {{ session_div }}" method="get">
+    <div class="form-group">
+        <select name="session" >
+            <option disabled selected value> -- select semester -- </option>
+            {% for session in sessions %}
+            <option value="{{ session.session}}">{{ session.session }}</option>
+            {% endfor %}
+        </select>
+        <select name="level" >
+            <option disabled selected value> -- select level of study -- </option>
+            {% for level in levels %}
+            <option value="{{ level.level }}">{{ level.level_name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-success">
+            <img src="{% static 'images/save.svg' %}" alt="save-icon" class="mr-2">
+            Filter
+        </button>
+    </div>
+    </form>
+    {% endif%}
+</div>
 <table class="table table-hover">
     <thead>
         <tr>
@@ -15,7 +39,7 @@
         {% for key in qs %}
         
         <tr>
-        <td><a href="{% url 'results:recent' %}">{{ key.0.0 }}</a></td>
+        <td><a href="{% url 'results:recent' %}?course={{key.0.0}}&semester={{key.0.1}}">{{ key.0.0 }}</a></td>
         <td>{{ key.0.1 }}</td>
         <td>{{ key.1 }}</td>
         </tr>
@@ -38,8 +62,8 @@
                 </span>
 
                 {% if qs.has_next %}
-                    <a href="?page={{ qs.next_page_number }}">next</a>
-                    <a href="?page={{ qs.paginator.num_pages }}">last &raquo;</a>
+                <a href="?page={{ qs.next_page_number }}">next</a>
+                <a href="?page={{ qs.paginator.num_pages }}">last &raquo;</a>
                 {% endif %}
             </span>
         </div>

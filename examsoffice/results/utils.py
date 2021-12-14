@@ -1,17 +1,16 @@
-from datetime import time
 import os
-from results.models import Lecturer, Student
+
+from results.models import Lecturer, Student, Result
 from itertools import chain
 
 import pandas as pd
-from pandas.core.frame import DataFrame
+# from pandas.core.frame import DataFrame
 from openpyxl import Workbook, load_workbook
-from openpyxl.utils import get_column_letter
+from openpyxl.utils import cell, get_column_letter
 from openpyxl.styles import (Alignment, PatternFill, Font, Border, Side)
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.worksheet.pagebreak import Break
 from openpyxl.worksheet.worksheet import Worksheet
-from django.templatetags.static import static
 
 
 normal_border = Border(left=Side(style='thin'),
@@ -545,3 +544,128 @@ def collated_results_spreadsheet(res_df):
     return wb
 
 
+def possible_graduands_wb(expected_yr_of_grad):
+    student_qs = Student.objects.all().filter(
+                                    expected_yr_of_grad=expected_yr_of_grad
+                                    ).values('student_reg_no', 'jamb_number',
+                                    'phone_number','last_name', 
+                                    'first_name', 'other_names',
+                                    'sex__sex', 'marital_status__marital_status', 
+                                    'lga_of_origin', 'state_of_origin','email', 
+                                    'current_level_of_study', 'level_admitted_to','date_of_birth')
+    if len(student_qs) == 0:
+        raise ValueError(
+            f"No student with expected year of graduation {expected_yr_of_grad}")
+    bio_df = pd.DataFrame(student_qs)
+    class_list = bio_df['student_reg_no'].to_list()
+    # print(class_list)
+    result_qs = Result.objects.all().select_related(
+                    'semester', 'course').filter(
+                        student_reg_no__in=class_list).values_list(
+                        'course_id__course_title', 
+                    'course_id__course_code', 'course_id__credit_load', 
+                    'course_id__course_level','semester_id__desc',
+                     'letter_grade',)
+
+
+    eligible_students = []
+
+    # checking eligibility of every student in the class list
+    for student in class_list:
+        student_qs = result_qs.filter(student_reg_no=student).order_by(
+                                                                'semester')
+
+
+        if len(student_qs) == 0:
+            continue
+        
+        else:
+            df = pd.DataFrame.from_records(student_qs)
+            df = df.rename(columns = {0: 'course_title', 1: 'course_code', 
+                                    2: 'credit_load', 3: 'course_level', 
+                                    4: 'semester', 5: 'grade'})
+
+            df = Student.get_weight_col(df)
+            course_brk_dwn = failed_courses_breakdown(df)
+            outstanding_cred_1st = course_brk_dwn['outstanding_cred_1st']
+            outstanding_cred_2nd = course_brk_dwn['outstanding_cred_2nd']
+            reg_courses_load_1st = 19
+            reg_course_load_2nd = 16
+
+            if ((reg_courses_load_1st + outstanding_cred_1st) <= 24 and
+                (reg_course_load_2nd + outstanding_cred_2nd) <= 24):
+                eligible_students.append(student)
+    
+    print(eligible_students)
+    grad_df = bio_df[bio_df['student_reg_no'].isin(eligible_students)]
+    
+    # cleaning up some columns of the df
+    grad_df['date_of_birth'] = grad_df['date_of_birth'].dt.strftime('%d/%m/%Y')
+    grad_df['jamb_no_phone_no'] = (
+                                grad_df['jamb_number'].fillna('')
+                                + '/+234' + 
+                                grad_df['phone_number'].fillna('--'))
+    grad_df['full_name'] = (grad_df['last_name'].fillna('') + ' ' + 
+                            grad_df['first_name'].fillna('') + ' ' 
+                            + grad_df['other_names'].fillna(''))
+    grad_df['department'] = 'Electronic Engineering'
+    grad_df['duration'] = ((
+                            grad_df['current_level_of_study'].fillna(5) - 
+                            grad_df['level_admitted_to'].fillna(1)
+                            ).astype(int) + 1)
+    grad_df['signature'] = ' '
+    grad_df['sex_abbr'] = grad_df.sex__sex.str[:1]
+    req_cols = ['student_reg_no', 'jamb_no_phone_no', 'department', 'full_name',
+                'sex_abbr', 'marital_status__marital_status', 'lga_of_origin',
+                'state_of_origin', 'email', 'duration',
+                'date_of_birth', 'signature']
+    grad_df = grad_df[req_cols]
+    grad_df.sort_values('full_name', inplace=True)
+    for field in grad_df.columns.to_list():
+        print(grad_df[field])
+
+    # writing to excel workbook
+    wb = Workbook()
+    ws = wb.active
+    df_rows = dataframe_to_rows(grad_df, index=False, header=False)
+
+    ws_headings = ['S/N', 'Reg. No.', 'Jamb No./Phone No.', 'Department',
+                        'Full Name', 'Sex', 'Marital Status', 'L.G.A', 
+                        'State of Origin', 'Email', 'Duration', 'Date of Birth', 
+                        'Signature']
+    ws_title = f"LIST OF {int(expected_yr_of_grad)-1}/{expected_yr_of_grad} POSSIBLE GRADUANDS"
+    count = 1
+    row = 5
+    
+    _ = ws.cell(row=row, column=1, value=ws_title)
+    _.alignment = center_align
+    _.font = Font(bold=True)
+    _merge_row_wise(ws, row, 1, 13)
+    row += 2
+    ws.freeze_panes = 'E1'
+    for c_idx, header in enumerate(ws_headings, 1):
+        _ = ws.cell(row=row, column=c_idx, value=header)
+        _.font = Font(bold=True)
+        _.border = normal_border
+        _.alignment = Alignment(horizontal='center', wrap_text=True, 
+                                                    vertical='top')
+    row += 1
+
+    for r_idx, df_row in enumerate(df_rows, row):
+        _ = ws.cell(row=r_idx, column=1, value=count)
+        _.border = normal_border
+        _.alignment = Alignment(vertical='top')
+        count += 1
+        for c_idx, df_value in enumerate(df_row, 2):
+            cell_val = str(df_value).upper() if (
+                    str(df_value).upper() not in ['NONE', 'NAT', 'NAN']) else ''
+            _ = ws.cell(row=r_idx, column=c_idx, value=cell_val)
+            _.alignment = Alignment(horizontal='center', wrap_text=True, 
+                                                        vertical='top')
+            _.border = normal_border
+    
+    ws.HeaderFooter.differentFirst = True
+    ws.firstHeader.center.text = '''&BUNIVERSITY OF NIGERIA, NSUKKA\nOFFICE OF THE REGISTRAR\n(EXAMINATIONS)\n\nFACULTY/SCHOOL: ____&UENGINEERING&U____  DEPARTMENT/COURSE COMBINATION: ____&UELECTRONIC&U____&B'''
+    ws.firstHeader.size = 16
+    Worksheet.set_printer_settings(ws, paper_size=9,orientation='landscape')
+    wb.save('possible_grad.xlsx')

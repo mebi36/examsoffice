@@ -8,6 +8,7 @@ from .views import (
     delete_by_session, student_transcript_generator, class_speadsheet_generator,
     result_collation_form, result_spreadsheet_form, student_transcript_form,
     transcript_download_info, class_outstanding_courses, class_outstanding_courses_form,all_results_agg,
+    possible_graduands,
 
     delete_student_result
 )
@@ -38,4 +39,5 @@ urlpatterns = [
     path('collation/', result_collation_form, name='collation'),
     path('result_collation/session=<str:session>/level=<str:level>', result_collation,name='result_collation'),
     path('hx/delete/<int:pk>',delete_student_result,name='delete_student_result'),
+    path('possible graduands/<str:expected_yr_of_grad>', possible_graduands, name='possible_graduands'),
 ]

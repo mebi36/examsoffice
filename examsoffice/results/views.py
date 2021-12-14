@@ -17,7 +17,7 @@ from django.db.models.functions import Concat
 from django.core.paginator import Paginator
 
 from . import models as ex
-from results.utils import (student_transcript, 
+from results.utils import (possible_graduands_wb, student_transcript, 
                             class_result_spreadsheet,
                             collated_results_spreadsheet,
                             class_failure_spreadsheet)
@@ -160,7 +160,18 @@ def result_add_processor(request):
 
 @login_required
 def recent_results(request):
-    queryset = ex.Result.objects.all().select_related('semester', 'course'
+    if request.GET.get('course') and request.GET.get('semester'):
+        queryset = ex.Result.objects.all().select_related('semester', 'course'
+                        ).order_by('-id').values(
+                            'id','student_reg_no','course_id__course_title',
+                             'course_id__course_code',
+                            'course_id__course_semester','semester_id__desc',
+                            'semester_id__semester','letter_grade').filter(
+                                course__course_code=request.GET.get('course'),
+                                semester__desc=request.GET.get('semester')
+                            )
+    else:
+        queryset = ex.Result.objects.all().select_related('semester', 'course'
                         ).order_by('-id').values(
                             'id','student_reg_no','course_id__course_title',
                              'course_id__course_code',
@@ -222,20 +233,46 @@ def recent_results_bulk(request):
 def all_results_agg(request):
     '''This view will aggregate all results currently
         uploaded to the db.'''
-    qs = ex.Result.objects.all().values('course__course_title', 
+    context = {}
+    sessions = ex.Session.objects.all().order_by('-session')
+    levels = ex.LevelOfStudy.objects.all().filter(level__lte=5).order_by('level')
+    session = request.GET.get('session')
+    level = request.GET.get('level')
+    context['levels'] = levels
+    context['sessions'] = sessions
+    if session and level:
+        print('getting it')
+        qs = ex.Result.objects.all().values('course__course_title', 
+                    'course__course_code','semester__desc').filter(
+                                                semester__session=session,
+                                                course__course_level=level)
+    elif session and not level:
+        qs = ex.Result.objects.all().values('course__course_title', 
+                    'course__course_code','semester__desc').filter(
+                                                semester__session=session)
+    elif level and not session:
+        qs = ex.Result.objects.all().values('course__course_title', 
+                    'course__course_code','semester__desc').filter(
+                                                course__course_level=level)
+    else:
+        qs = ex.Result.objects.all().values('course__course_title', 
                     'course__course_code','semester__desc')
     df = pd.DataFrame(qs)
     grouped = df.groupby(['course__course_code', 'semester__desc'])
     new_df = grouped.agg(np.size)
     grouped_dict = new_df.to_dict('dict')['course__course_title']
     grouped_list = [[k, v] for (k, v) in grouped_dict.items()]
-    paginator = Paginator(grouped_list, 20)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
 
+    if not session and not level:
+        paginator = Paginator(grouped_list, 20)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context['qs'] = page_obj
+    else:
+        context['qs'] = grouped_list
     template = 'results/all.html'
 
-    return render(request, template, {'qs': page_obj})
+    return render(request, template, context)
 
 
 """For bulk result operations like:
@@ -468,7 +505,8 @@ def student_transcript_generator(request, reg_no):
                                         ).order_by('course_id__course_level')
                 if len(first_sem_res) > 0:
                     first_sem_df = DataFrame(list(first_sem_res))
-                    first_sem_df.rename(columns={k:v for (k,v) in enumerate(required_fields)}, inplace=True)
+                    first_sem_df.rename(columns={k:v for (k,v) in enumerate(
+                                                required_fields)}, inplace=True)
                     first_sem_df['weight'] = (first_sem_df['course_id__credit_load']
                                                 * [5 if x == 'A' else 4 
                                                 if x == 'B' else 3 if 
@@ -480,7 +518,8 @@ def student_transcript_generator(request, reg_no):
                 
                 if len(second_sem_res) > 0:
                     second_sem_df = DataFrame(list(second_sem_res))
-                    second_sem_df.rename(columns={k:v for (k,v) in enumerate(required_fields)}, inplace=True)
+                    second_sem_df.rename(columns={k:v for (k,v) in enumerate(
+                                                required_fields)}, inplace=True)
                     second_sem_df['weight'] = (second_sem_df['course_id__credit_load']
                                                 * [5 if x == 'A' else 4 
                                                 if x == 'B' else 3 if 
@@ -718,3 +757,8 @@ def transcript_download_info(request, reg_no):
                             extra_tags='text-danger')
         HttpResponseRedirect(reverse('results:transcripts'))
     return render(request, template, context)
+
+@login_required
+def possible_graduands(request, expected_yr_of_grad):
+    possible_graduands_wb(expected_yr_of_grad)
+    return HttpResponse("Hello again")

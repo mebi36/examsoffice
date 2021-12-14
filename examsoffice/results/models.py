@@ -160,7 +160,7 @@ class Course(models.Model):
     course_code = models.CharField(db_column='CourseCode', max_length=255, blank=True, null=True)
     course_semester = models.ForeignKey(db_column='CourseSemester', to='Semester',
                                         on_delete=CASCADE)
-    course_level = models.IntegerField(db_column='CourseLevel')
+    course_level = models.ForeignKey(db_column='CourseLevel', to='LevelOfStudy', on_delete=PROTECT)
     credit_load = models.IntegerField(db_column='CreditLoad', blank=True, null=True)
     elective = models.BooleanField(db_column='Elective', default=False)
 
@@ -345,3 +345,18 @@ class StudentProgressHistory(models.Model):
 
     def get_update_url(self):
         return reverse('students:progress_history_edit',args=[self.id])
+
+# from django.db.models.signals import post_save
+# # from django.dispatch import receiver
+
+# # @receiver(post_save, sender=Result)
+# def bio_update(sender, instance, created, **kwargs):
+#     if created:
+#         print(f"{sender.first_name} is being updated")
+# post_save.connect(bio_update, sender=Result)
+
+# def bio_create(sender, instance, created, **kwargs):
+#     if created == False:
+#         print("New student created")
+    
+# post_save.connect(bio_create, sender=Result)

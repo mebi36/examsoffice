@@ -8,14 +8,13 @@
             {% if result.semester_number.semester_id.semester == result.course_id.course_semester.semester %}
 
             <tr>
-                <td>{{ result.id }}</td>
                 <td>{{ result.student_reg_no }}</td>
                 <td>{{ result.course_id__course_title }}</td>
                 <td>{{ result.course_id__course_semester.semester }}</td>
-                <td>{{ result.course_id__course_code}}</td>
+                <td>{{ result.course_id__course_code }}</td>
                 <td>{{ result.semester_id__desc }}</td>
                 <td>{{ result.semester_id__semester }}</td>
-                <td>{{ result.letter_grade }}</td>
+                <td>{{ result.letter_grade|upper }}</td>
                 <td>
                     <input type="button" 
                         value="Delete This Record" 
