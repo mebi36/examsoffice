@@ -2,7 +2,7 @@ from django.urls.conf import path
 from django.urls.resolvers import URLPattern
 
 from .views import (
-    result_collation, results_menu, edit_result, student_search_processor,
+    possible_graduands_form, result_collation, results_menu, edit_result, student_search_processor,
     find_student, student_records, add_result, result_add_processor,
     recent_results, recent_results_bulk, delete_result, result_upload_options, upload_result_file,
     delete_by_session, student_transcript_generator, class_speadsheet_generator,
@@ -39,5 +39,6 @@ urlpatterns = [
     path('collation/', result_collation_form, name='collation'),
     path('result_collation/session=<str:session>/level=<str:level>', result_collation,name='result_collation'),
     path('hx/delete/<int:pk>',delete_student_result,name='delete_student_result'),
+    path('possible graduands/', possible_graduands_form, name='possible_graduands_form'),
     path('possible graduands/<str:expected_yr_of_grad>', possible_graduands, name='possible_graduands'),
 ]

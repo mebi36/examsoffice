@@ -1,3 +1,4 @@
+import re
 import csv
 from datetime import date
 import pandas as pd
@@ -760,5 +761,31 @@ def transcript_download_info(request, reg_no):
 
 @login_required
 def possible_graduands(request, expected_yr_of_grad):
-    possible_graduands_wb(expected_yr_of_grad)
-    return HttpResponse("Hello again")
+    wb = possible_graduands_wb(expected_yr_of_grad)
+    # return HttpResponse("Hello again")
+    file_name = f'{expected_yr_of_grad} List of Possible graduands.xlsx'
+    response = HttpResponse(content=save_virtual_workbook(wb), 
+                            content_type='application/ms-excel')
+    response['Content-Disposition']  = f'attachment; filename={file_name}'
+    return response
+
+@login_required
+def possible_graduands_form(request):
+    if request.method == 'GET':
+        return render(request, 'results/possible_graduands_form.html', {})
+    else:
+        try:
+            expected_yr_of_grad = request.POST['expected_yr_of_grad']
+        except:
+            messages.add_message(request, messages.ERROR,
+                                "No expected year of graduation found",
+                                extra_tags='text-danger')
+            return HttpResponseRedirect(reverse('results:possible_graduands_form'))
+        else:
+            if re.search("^[0-9]{4}$", expected_yr_of_grad) != None:
+                return HttpResponseRedirect(reverse('results:possible_graduands', 
+                                        kwargs={'expected_yr_of_grad': expected_yr_of_grad}))
+            else:
+                messages.add_message(request, messages.ERROR, 
+                                "Invalid year entered. Must be of the format 'XXXX'")
+                return HttpResponseRedirect(reverse('results:possible_graduands_form'))

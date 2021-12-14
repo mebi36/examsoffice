@@ -68,4 +68,12 @@
             <a href="{% url 'results:recent_uploads' %}" class="btn btn-success" id="go-button">
                 <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">Go</a>    
         </div>
+        <div class="card w-75 mx-auto">
+            <h5 class="card-title">List of Possible Graduands</h5>
+            <p class="card-text">
+                Download list of possible graduands for a given session
+            </p>
+            <a href="{% url 'results:possible_graduands_form' %}" class="btn btn-success" id="go-button">
+                <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">Go</a>    
+        </div>
 {% endblock %}

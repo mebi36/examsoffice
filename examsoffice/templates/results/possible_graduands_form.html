@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+{% include 'message_display.html' %}
+<div class="row">
+    <div class="col-sm-8">
+        <form action="." method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="expected_yr_of_grad">Expected Year of Graduation:</label>
+                <input type="text" class="form-control w-75" name="expected_yr_of_grad" 
+                    placeholder="Expected Year of Graduation" required="required">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-success">
+                    <img class="img-fluid mr-2" src="{% static 'images/search.svg' %}" alt="search-button">Search
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

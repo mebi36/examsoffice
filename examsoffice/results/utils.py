@@ -663,9 +663,10 @@ def possible_graduands_wb(expected_yr_of_grad):
             _.alignment = Alignment(horizontal='center', wrap_text=True, 
                                                         vertical='top')
             _.border = normal_border
-    
+    ws.print_title_rows = '7:7'
     ws.HeaderFooter.differentFirst = True
     ws.firstHeader.center.text = '''&BUNIVERSITY OF NIGERIA, NSUKKA\nOFFICE OF THE REGISTRAR\n(EXAMINATIONS)\n\nFACULTY/SCHOOL: ____&UENGINEERING&U____  DEPARTMENT/COURSE COMBINATION: ____&UELECTRONIC&U____&B'''
     ws.firstHeader.size = 16
     Worksheet.set_printer_settings(ws, paper_size=9,orientation='landscape')
-    wb.save('possible_grad.xlsx')
+    # wb.save('possible_grad.xlsx')
+    return wb
