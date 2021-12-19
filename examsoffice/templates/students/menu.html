@@ -12,11 +12,11 @@
     </a>    
 </div>
 <div class="card w-75 mx-auto">
-    <h5 class="card-title">Edit Entire Class Info</h5>
+    <h5 class="card-title">Edit Entire Class Bio</h5>
     <p class="card-text">
         View and edit class information
     </p>
-    <a href="#" class="btn btn-success" id="go-button">
+    <a href="{% url 'students:bio_update_format' %}" class="btn btn-success" id="go-button">
         <img class="img-fluid mr-2" src="{% static 'images/forward-w.svg' %}" alt="go-button">
         {{ entry_link_title|default:"Go" }}
     </a>    

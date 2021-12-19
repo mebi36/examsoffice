@@ -6,10 +6,10 @@ from datetime import datetime
 MODEL_WATCHLIST = (Result, Student)
 
 for model in MODEL_WATCHLIST:
-    @receiver(pre_save, sender=model)
-    def result_pre_save(sender, instance, **kwargs):
-        print("Before saving: ", instance.id)
-        print("Before Result is updated: ", sender.objects.get(id=instance.id).__dict__, "by ", datetime.now())
+    # @receiver(pre_save, sender=model)
+    # def result_pre_save(sender, instance, **kwargs):
+    #     print("Before saving: ", instance.id)
+    #     print("Before Result is updated: ", instance.__dict__, "by ", datetime.now())
         
 
     @receiver(post_save, sender=model)

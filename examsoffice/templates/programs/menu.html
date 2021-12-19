@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="card w-75 mx-auto">
+    <h5 class="card-title">Program Requirements</h5>
+    <p class="card-text">
+        Create and/or modify program requirements for a particular session
+    </p>
+    <a href="{% url 'programs:add_prog_requirement_form' %}" class="btn btn-success" id="go-button">
+        <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">    Go</a>    
+</div> 
+{% endblock %}

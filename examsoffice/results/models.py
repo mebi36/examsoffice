@@ -168,8 +168,12 @@ class Course(models.Model):
         db_table = 'tbl2Courses'
         unique_together = (('course_title', 'course_code', 'course_level'),)
 
+    def __str__(self):
+        return f"{self.course_code} - {self.course_title}"
+
 
 class ProgramRequirement(models.Model):
+    # DEFAULT_MODE_OF_ADMISSION = 1
     id = models.BigAutoField(db_column='ID', primary_key=True)
     mode_of_admission = models.ForeignKey(db_column='ModeOfAdmission',
                                             to='ModeOfAdmission',
@@ -183,7 +187,7 @@ class ProgramRequirement(models.Model):
 
     class Meta:
         db_table = 'tbl1ProgramRequirements'
-        unique_together = (('course', 'mode_of_admission', 'session'),)
+        unique_together = (('course', 'level_of_study', 'session'),)
 
 
 class Student(models.Model):

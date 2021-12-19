@@ -1,0 +1,5 @@
+#to restore a db dump from a sql file
+psql -U username -d db_name -f filepath.sql
+
+#to backup a db
+ps_dump -U username -d db_name > filename.format

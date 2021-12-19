@@ -39,3 +39,12 @@ once the tasks for the programs app is done, attention will shift to the progres
 of the system
 after which these features can be tied together with the results app for determining the eligibility of
 a student to graduate
+
+
+#the progresshistory functionality
+build out the functionality for adding new sessions and semesters
+
+could be designed in such a way that it would be entered the first time and then
+the user can simply say that this session's program requirement is the same as last year,
+they could also be allowed to modify last session's requirements and save it as the 
+program requirements for the new session

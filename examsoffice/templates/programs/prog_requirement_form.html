@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="card mx-auto">
+    <form action="{% url 'programs:add_prog_requirement_form' %}" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="Session">Session:</label>
+            <select name="session" class="form-control wx-75" required>
+                <option disabled selected value> -- select session -- </option>
+                {% for session in sessions %}
+                <option value="{{ session.id }}">{{ session.session }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="level_of_study">Level of Study:</label>
+            <select name="level_of_study" class="form-control wx-75" required>
+                <option disabled selected value> -- select level -- </option>
+                {% for level in levels_of_study %}
+                <option value="{{ level.level }}">{{ level.level_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button class="btn btn-success" type="submit">
+            <img src="{% static 'images/save.svg' %}" alt="save-icon" class="mr-2">
+            Save Changes
+        </button>
+    </form>
+</div>
+{% endblock %}

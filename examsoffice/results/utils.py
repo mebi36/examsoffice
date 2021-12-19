@@ -596,7 +596,7 @@ def possible_graduands_wb(expected_yr_of_grad):
                 (reg_course_load_2nd + outstanding_cred_2nd) <= 24):
                 eligible_students.append(student)
     
-    print(eligible_students)
+    # print(eligible_students)
     grad_df = bio_df[bio_df['student_reg_no'].isin(eligible_students)]
     
     # cleaning up some columns of the df
@@ -621,8 +621,8 @@ def possible_graduands_wb(expected_yr_of_grad):
                 'date_of_birth', 'signature']
     grad_df = grad_df[req_cols]
     grad_df.sort_values('full_name', inplace=True)
-    for field in grad_df.columns.to_list():
-        print(grad_df[field])
+    # for field in grad_df.columns.to_list():
+        # print(grad_df[field])
 
     # writing to excel workbook
     wb = Workbook()
