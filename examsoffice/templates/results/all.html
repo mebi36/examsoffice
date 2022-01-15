@@ -4,6 +4,7 @@
 <div class="row">
     {% if sessions %}
     <form action="?session= {{ session_div }}" method="get">
+    {% csrf_token %}
     <div class="form-group">
         <select name="session" >
             <option disabled selected value> -- select semester -- </option>

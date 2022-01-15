@@ -1,5 +1,5 @@
 from django import forms
-from django.forms.models import inlineformset_factory
+from django.forms.models import modelformset_factory
 
 from results.models import Student, StudentProgressHistory
 
@@ -29,22 +29,22 @@ class StudentBioForm(forms.ModelForm):
                 'current_level_of_study', 'cgpa']
 
 
-ProgressHistoryFormSet = inlineformset_factory(
-                                Student,
+ProgressHistoryFormSet = modelformset_factory(
                                 StudentProgressHistory,
-                                min_num=1,
                                 extra=1,
-                                exclude=[])    
+                                can_delete=True,
+                                exclude=[],
+                                widgets={'student_reg_no': forms.HiddenInput}
+                                )    
+
+# class ProgressHistoryForm(forms.ModelForm):
 
 
-class ProgressHistoryForm(forms.ModelForm):
+#         def __init__(self, *args, **kwargs):
+#             super().__init__(*args, **kwargs)    
+#             add_bootstrap_formatting(self)
+#             self.fields['student_reg_no'].widget = forms.HiddenInput()
 
-
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)    
-            add_bootstrap_formatting(self)
-            self.fields['student_reg_no'].widget = forms.HiddenInput()
-
-        class Meta:
-                model = StudentProgressHistory
-                exclude = []
+#         class Meta:
+#                 model = StudentProgressHistory
+#                 exclude = []

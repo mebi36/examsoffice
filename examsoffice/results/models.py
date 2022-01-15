@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.constraints import UniqueConstraint
 from django.db.models.deletion import CASCADE, PROTECT
 
 import re
@@ -156,8 +157,8 @@ class SemesterSession(models.Model):
 
 class Course(models.Model):
     id = models.BigAutoField(db_column='CourseID', primary_key=True)
-    course_title = models.CharField(db_column='CourseTitle', max_length=255, blank=True, null=True)
-    course_code = models.CharField(db_column='CourseCode', max_length=255, blank=True, null=True)
+    course_title = models.CharField(db_column='CourseTitle', max_length=255)
+    course_code = models.CharField(db_column='CourseCode', max_length=255)
     course_semester = models.ForeignKey(db_column='CourseSemester', to='Semester',
                                         on_delete=CASCADE)
     course_level = models.ForeignKey(db_column='CourseLevel', to='LevelOfStudy', on_delete=PROTECT)
@@ -188,6 +189,9 @@ class ProgramRequirement(models.Model):
     class Meta:
         db_table = 'tbl1ProgramRequirements'
         unique_together = (('course', 'level_of_study', 'session'),)
+        # constraints = [
+        #         UniqueConstraint(fields=['course', 'level_of_study', 'session'], name="course_entry_limit")
+        # ]
 
 
 class Student(models.Model):
@@ -349,18 +353,3 @@ class StudentProgressHistory(models.Model):
 
     def get_update_url(self):
         return reverse('students:progress_history_edit',args=[self.id])
-
-# from django.db.models.signals import post_save
-# # from django.dispatch import receiver
-
-# # @receiver(post_save, sender=Result)
-# def bio_update(sender, instance, created, **kwargs):
-#     if created:
-#         print(f"{sender.first_name} is being updated")
-# post_save.connect(bio_update, sender=Result)
-
-# def bio_create(sender, instance, created, **kwargs):
-#     if created == False:
-#         print("New student created")
-    
-# post_save.connect(bio_create, sender=Result)

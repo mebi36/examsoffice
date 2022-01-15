@@ -1,5 +1,6 @@
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
+from django.core.signals import request_started
 from results.models import Result, Student
 from datetime import datetime
 
@@ -19,7 +20,10 @@ for model in MODEL_WATCHLIST:
         else:
             print("Result updated: ", instance.id, instance.__dict__, "by ", datetime.now(), instance.__str__)
     
-
+# @receiver(request_started)
+# def request_logger(sender, environ, **kwargs):
+#     print("The app user is: ", environ)
+#     print("Also sender information: ", sender)
 # @receiver(pre_save, sender=Student)
 # def student_pre_save(sender, instance, **kwargs):
 #     print("Before saving: ", instance.id)

@@ -34,16 +34,6 @@ def add_prog_requirement_form(request):
         context = {'sessions': session, 'levels_of_study': level_of_study}
         return render(request, template, context)
     elif request.method == 'POST':
-        # prog_req_qs = ProgramRequirement.objects.all().filter(
-        #                         session=request.POST['session'],
-        #                         level_of_study=request.POST['level_of_study'])
-        # #start by checking if there are any existing prog req for the given 
-        # #session/level_of_study. If there are, list them with links to edit them
-        # #else just provide form for adding new prog req
-
-        
-        # #add prog_req_qs to the context
-        # context['existing_prog_req'] = prog_req_qs if len(prog_req_qs)>0 else None
         return HttpResponseRedirect(reverse('programs:edit_prog_req', 
                                     kwargs={'session': request.POST['session'],
                                     'level_of_study': request.POST['level_of_study']}))
@@ -57,6 +47,8 @@ def add_prog_requirement_form(request):
 def edit_prog_req(request, session, level_of_study):
     template = 'programs/edit_prog_req.html'
     context = {}
+
+    #get session and level_of_study objs for titles in template
     session_title = Session.objects.get(id=session)
     level_title = LevelOfStudy.objects.get(level=level_of_study) 
     context['session_title'] = session_title
@@ -70,41 +62,50 @@ def edit_prog_req(request, session, level_of_study):
     if request.method == 'GET':
         context['formset'] = formset
         return render(request, template, context)
+
     elif request.method == 'POST':
         formset = prog_req_formset(request.POST)
         for form in formset:
-            if form.is_valid():
-                if form.cleaned_data != {}:
-                    if form.cleaned_data.get('DELETE'):
-                        print(form.cleaned_data.get('id').id)
-                        try:
-                            obj = ProgramRequirement.objects.get(
-                                            pk=form.cleaned_data.get('id').id)
-                        except:
-                            print("problem fetching model instance")
-                        else:
-                            obj.delete()
-                    else:
-                        obj = form.save(commit=False)
-                        obj.level_of_study = LevelOfStudy(level=level_of_study)
-                        obj.session = Session(id=session)
-                        try:
-                            obj.save()
-                        except IntegrityError:
-                            messages.add_message(request, messages.ERROR,
-                                        f"Course already exists as a program requirement",
-                                        extra_tags='text-danger')
-                            return HttpResponseRedirect(reverse('programs:edit_prog_req', 
-                                    kwargs={'session': session,
-                                    'level_of_study': level_of_study}))
+            if not form.is_valid():
+                print("invalid form found!!")
+                continue
+            
+            if form.cleaned_data == {}:
+                print("empty form found")
+                continue
 
-                        
-            else:
-                print("invalid form found!!!")
+            if form.cleaned_data.get('DELETE'):
+                print(form.cleaned_data.get('id').id)
+                try:
+                    obj = ProgramRequirement.objects.get(
+                                    pk=form.cleaned_data.get('id').id)
+                except:
+                    print("problem fetching model instance")
+                else:
+                    obj.delete()
+                continue
+
+            obj = form.save(commit=False)
+            obj.level_of_study = LevelOfStudy(level=level_of_study)
+            obj.session = Session(id=session)
+            try:
+                obj.save()
+            except IntegrityError:
+                messages.add_message(request, messages.ERROR,
+                            f'''Course already exists as a program requirement.\n
+                            Courses that are a requirement for students of all modes of entry
+                            should be created with program requirement of "UTME".\n
+                            Courses that are a requirement for only transfer and Direct Entry students
+                            should be created with program requirement of "DE".''',
+                            extra_tags='text-danger')
+                return HttpResponseRedirect(reverse('programs:edit_prog_req', 
+                        kwargs={'session': session,
+                        'level_of_study': level_of_study}))
+
         if request.POST['submit'] == 'Finish':
             return HttpResponse("Formset has been validated!")
         elif request.POST['submit'] == 'Save and Continue':
             return HttpResponseRedirect(reverse('programs:edit_prog_req', 
                                     kwargs={'session': session,
-                                    'level_of_study': level_of_study}))
+                                            'level_of_study': level_of_study}))
 

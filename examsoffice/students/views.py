@@ -1,4 +1,5 @@
 import csv
+from django.db import IntegrityError
 import pandas as pd
 from datetime import datetime, timezone
 from django.http import HttpResponse
@@ -10,7 +11,7 @@ from django.views.decorators.cache import never_cache
 from django.views.generic.edit import UpdateView
 from django.contrib.auth.decorators import login_required
 
-from .forms import (ProgressHistoryForm, 
+from .forms import (ProgressHistoryFormSet,
                     StudentBioForm, 
                     )
 from results.models import (LevelOfStudy, ModeOfAdmission, ModeOfStudy, Student, Sex,
@@ -126,57 +127,85 @@ def update_progress_history(request, reg_no):
     context = {}
     reg_no = reg_no.replace("_", "/")
 
-    if Student.is_valid_reg_no(reg_no):
-        try:
-            student = Student.objects.get(student_reg_no=reg_no)
-        except:
-            messages.add_message(request,messages.ERROR,
-                                '''No existing record found for student.
-                                Provide student info for registration
-                                ''',
-                                extra_tags="text-danger")
-            return HttpResponseRedirect(reverse('students:edit_bio', 
-                    args=[reg_no.replace("/","_")])+'?next=%s' %
-                    (reverse('students:progress_history',
-                                args=[reg_no.replace("/","_")])
-                                                )
-                    )
-        else:
-            context.update(student=student)
+    #begin by checking validity of student reg number
+    if not Student.is_valid_reg_no(reg_no):
+        messages.add_message(request, messages.ERROR, 
+                            "Invalid Student Registration Number",
+                            extra_tags='text-danger')
+        return HttpResponseRedirect(reverse('index:general_messages'))
 
-        if request.method == 'POST':
-            form = ProgressHistoryForm(request.POST)
-            if form.is_valid():
-                form.save()
+    #also check to ensure that student has been duly registered in Student model
+    try:
+        student = Student.objects.get(student_reg_no=reg_no)
+    except:
+        messages.add_message(request,messages.ERROR,
+                            '''No existing record found for student.
+                            Provide student info for registration
+                            ''',
+                            extra_tags="text-danger")
+        return HttpResponseRedirect(reverse('students:edit_bio', 
+                args=[reg_no.replace("/","_")])+'?next=%s' %
+                (reverse('students:progress_history',
+                            args=[reg_no.replace("/","_")])
+                                            )
+                )
+    else:
+        context.update(student=student)
+
+    if request.method =='GET':
+        prog_hist_qs = StudentProgressHistory.objects.all().filter(
+                                    student_reg_no=student)
+        formset = ProgressHistoryFormSet(queryset=prog_hist_qs)
+
+        # #some on-the-fly modifications to the form
+        for form in formset:
+            form.fields['student_reg_no'].initial = student
+
+        context['formset'] = formset
+        return render(request, 'students/progress_history.html', context)
+    elif request.method == 'POST':
+        formset = ProgressHistoryFormSet(request.POST)
+        for form in formset:
+            #don't save invalid forms
+            if not form.is_valid():
+                print("invalid form found!!")
+                continue
+
+            #skip empty forms
+            if form.cleaned_data == {}:
+                continue
+            
+            if form.cleaned_data.get('DELETE'):
+                # print(form.cleaned_data.get('id').id)
                 try:
-                    prog_hist = StudentProgressHistory.objects.get(
-                            student_reg_no=request.POST['student_reg_no'],
-                            session=int(request.POST['session']))
+                    obj = StudentProgressHistory.objects.get(
+                                    pk=form.cleaned_data.get('id').id)
                 except:
-                    form = ProgressHistoryForm(request.POST)
+                    print("problem fetching model instance")
                 else:
-                    form = ProgressHistoryForm(request.POST, instance=student)
-                finally:
-                    if form.is_valid():
-                        form.save()
-                        messages.add_message(request, messages.SUCCESS,
-                                                    "Progress history saved.",
-                                                    extra_tags="text-success")
-                    else:
-                        print("Form is not valid")
-                        messages.add_message(request, messages.SUCCESS,
-                                                    "Error. Please check form",
-                                                    extra_tags="text-danger")
-        existing_progress_history = StudentProgressHistory.objects.all(                
-                                        ).filter(student_reg_no=student
-                                        ).select_related('session',
-                                                        'level_of_study',
-                                                        'student_reg_no'
-                                        ).order_by('session')
-        context.update(existing_progress_history=existing_progress_history)
-        context.update(form=ProgressHistoryForm(instance=student))
+                    obj.delete()
+                continue
+            
+            try:
+                form.save()
+            except IntegrityError:
+                messages.add_message(request, messages.ERROR,
+                                "Student already has an entry for selected session",
+                                extra_tags='text-danger')
+                return HttpResponseRedirect(reverse(student.get_progress_history_url()))
+            except:
+                messages.add_message(request, messages.ERROR,
+                                "Unknown error. Try again",
+                                extra_tags='text-danger')
+                return HttpResponseRedirect(reverse(student.get_progress_history_url()))
+            else:
+                print("save successful")
+            
+        if request.POST['submit'] == 'Finish':
+            return HttpResponse("Formset has been validated!")
+        elif request.POST['submit'] == 'Save and Continue':
+            return HttpResponseRedirect(student.get_progress_history_url())
 
-    return render(request, 'students/progress_history.html', context)
 
 @login_required
 def create_bio_data(request, reg_no):

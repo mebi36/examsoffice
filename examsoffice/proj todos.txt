@@ -10,7 +10,7 @@
 # 4.    make view for updating entire class academic progress history
 # 5.    make view for updating the 'current_level_of_study' field for a list of
         # students
-# 6.    make app/view for updating the department's current program requirements
+# 6.    make app/view for updating the department's current program requirements - done
 7. downloading the class list should also be possible
 #8.     student repetition workflow should be considered.
 
@@ -29,7 +29,7 @@
 
 #in programs app
 # there could be a view for adding a single program requirement
-# and another viw for adding the entire program requirement of 
+# and another view for adding the entire program requirement of 
 # for an entire level of study
 # there could be a view for reviewing the program requirement of 
 # the last session and agreeing that nothing has changed/adopting
@@ -48,3 +48,10 @@ could be designed in such a way that it would be entered the first time and then
 the user can simply say that this session's program requirement is the same as last year,
 they could also be allowed to modify last session's requirements and save it as the 
 program requirements for the new session
+
+#when checking for graduation eligibility, the functionality will breakdown with
+#the current pattern of course electives.
+#there may be need to have another model/many-to-many relationship for storing 
+#course electives that are mutually exclusive to one another
+#this is to ensure the system does not clear a student for graduation without attempting
+#an elective from all the required specialization groups
