@@ -275,7 +275,7 @@ def class_result_spreadsheet(result_qs, class_list, expected_yr_of_grad):
 
     for student in class_list:
         student_qs = result_qs.filter(student_reg_no=student[0]).order_by(
-                                                                'semester')
+                                                                'semester__semester')
         # confirm that the student's results are available
         if len(student_qs) == 0:
             continue
