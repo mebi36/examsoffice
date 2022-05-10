@@ -11,15 +11,22 @@ for model in MODEL_WATCHLIST:
     # def result_pre_save(sender, instance, **kwargs):
     #     print("Before saving: ", instance.id)
     #     print("Before Result is updated: ", instance.__dict__, "by ", datetime.now())
-        
 
     @receiver(post_save, sender=model)
     def results_save(sender, instance, created, **kwargs):
         if created:
             print("New result added: ", instance.id)
         else:
-            print("Result updated: ", instance.id, instance.__dict__, "by ", datetime.now(), instance.__str__)
-    
+            print(
+                "Result updated: ",
+                instance.id,
+                instance.__dict__,
+                "by ",
+                datetime.now(),
+                instance.__str__,
+            )
+
+
 # @receiver(request_started)
 # def request_logger(sender, environ, **kwargs):
 #     print("The app user is: ", environ)
@@ -28,7 +35,7 @@ for model in MODEL_WATCHLIST:
 # def student_pre_save(sender, instance, **kwargs):
 #     print("Before saving: ", instance.id)
 #     print("Before Result is updated: ", sender.objects.get(id=instance.id).__dict__, "by ", datetime.now())
-    
+
 
 # @receiver(post_save, sender=Result)
 # def student_save(sender, instance, created, **kwargs):
@@ -36,4 +43,3 @@ for model in MODEL_WATCHLIST:
 #         print("New result added: ", instance.id)
 #     else:
 #         print("Result updated: ", instance.id, instance.__dict__, "by ", datetime.now(), instance.__str__)
-    

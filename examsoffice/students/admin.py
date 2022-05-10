@@ -6,4 +6,5 @@ from results.models import Student
 class StudentAdmin(admin.ModelAdmin):
     exclude = []
 
+
 admin.site.register(Student, StudentAdmin)
