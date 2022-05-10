@@ -15,7 +15,7 @@
     {% endif %}
 {% endif%}
 
-<form action="{% url 'auth:login' %}" method="POST">
+<form action="{% url 'login' %}" method="POST">
     {% csrf_token %}
     <table>
         <tr>
@@ -33,6 +33,6 @@
 </form>
 
 {# Assume you setup the password reset view in your URLconf #}
-<p><a href="{% url 'auth:password_reset' %}">Lost Password?</a></p>
+<p><a href="{% url 'password_reset' %}">Lost Password?</a></p>
 
 {% endblock %}
