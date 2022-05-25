@@ -1,0 +1,5320 @@
+[
+    {
+        "model": "results.lecturerrole",
+        "pk": 1,
+        "fields": {
+            "role": "Coordinator"
+        }
+    },
+    {
+        "model": "results.lecturerrole",
+        "pk": 2,
+        "fields": {
+            "role": "Lecturer"
+        }
+    },
+    {
+        "model": "results.lecturerrole",
+        "pk": 3,
+        "fields": {
+            "role": "Graduate Assistant/Tutor"
+        }
+    },
+    {
+        "model": "results.lecturer",
+        "pk": 1,
+        "fields": {
+            "staff_number": "SS.123456",
+            "title": "Engr",
+            "first_name": "John",
+            "last_name": "Doe",
+            "other_names": "Anon",
+            "email": "john.doe@unn.edu.ng",
+            "department": null,
+            "faculty": null,
+            "head_of_dept": null
+        }
+    },
+    {
+        "model": "results.lecturer",
+        "pk": 2,
+        "fields": {
+            "staff_number": "SS.123457",
+            "title": "Mr",
+            "first_name": "Michael",
+            "last_name": "Powers",
+            "other_names": "Figo",
+            "email": "michael.powers@unn.edu.ng",
+            "department": null,
+            "faculty": null,
+            "head_of_dept": false
+        }
+    },
+    {
+        "model": "results.lecturer",
+        "pk": 3,
+        "fields": {
+            "staff_number": "SS.123458",
+            "title": "Mrs",
+            "first_name": "Janet",
+            "last_name": "Sounness",
+            "other_names": null,
+            "email": null,
+            "department": null,
+            "faculty": null,
+            "head_of_dept": null
+        }
+    },
+    {
+        "model": "results.levelofstudy",
+        "pk": 1,
+        "fields": {
+            "level_name": "1/5",
+            "level_description": "First Year"
+        }
+    },
+    {
+        "model": "results.levelofstudy",
+        "pk": 2,
+        "fields": {
+            "level_name": "2/5",
+            "level_description": "Second Year"
+        }
+    },
+    {
+        "model": "results.levelofstudy",
+        "pk": 3,
+        "fields": {
+            "level_name": "3/5",
+            "level_description": "Third Year"
+        }
+    },
+    {
+        "model": "results.levelofstudy",
+        "pk": 4,
+        "fields": {
+            "level_name": "4/5",
+            "level_description": "Fourth Year"
+        }
+    },
+    {
+        "model": "results.levelofstudy",
+        "pk": 5,
+        "fields": {
+            "level_name": "5/5",
+            "level_description": "Final Year"
+        }
+    },
+    {
+        "model": "results.levelofstudy",
+        "pk": 6,
+        "fields": {
+            "level_name": "6/5",
+            "level_description": "External"
+        }
+    },
+    {
+        "model": "results.levelofstudy",
+        "pk": 7,
+        "fields": {
+            "level_name": "7/5",
+            "level_description": "External"
+        }
+    },
+    {
+        "model": "results.levelofstudy",
+        "pk": 8,
+        "fields": {
+            "level_name": "8/5",
+            "level_description": "External"
+        }
+    },
+    {
+        "model": "results.levelofstudy",
+        "pk": 9,
+        "fields": {
+            "level_name": "9/5",
+            "level_description": "Overstay"
+        }
+    },
+    {
+        "model": "results.levelofstudy",
+        "pk": 10,
+        "fields": {
+            "level_name": "10/5",
+            "level_description": "Overstay"
+        }
+    },
+    {
+        "model": "results.levelofstudy",
+        "pk": 11,
+        "fields": {
+            "level_name": "11/5",
+            "level_description": "Overstay"
+        }
+    },
+    {
+        "model": "results.levelofstudy",
+        "pk": 100,
+        "fields": {
+            "level_name": "Graduate",
+            "level_description": "Graduate"
+        }
+    },
+    {
+        "model": "results.levelofstudy",
+        "pk": 101,
+        "fields": {
+            "level_name": "CO",
+            "level_description": "Carry-Over"
+        }
+    },
+    {
+        "model": "results.levelofstudy",
+        "pk": 102,
+        "fields": {
+            "level_name": "EXT",
+            "level_description": "External"
+        }
+    },
+    {
+        "model": "results.maritalstatus",
+        "pk": 1,
+        "fields": {
+            "marital_status": "Single"
+        }
+    },
+    {
+        "model": "results.maritalstatus",
+        "pk": 2,
+        "fields": {
+            "marital_status": "Married"
+        }
+    },
+    {
+        "model": "results.modeofadmission",
+        "pk": 1,
+        "fields": {
+            "mode_of_admission": "UTME",
+            "description": "Unified Tertiary Matriculation Examination"
+        }
+    },
+    {
+        "model": "results.modeofadmission",
+        "pk": 2,
+        "fields": {
+            "mode_of_admission": "DE",
+            "description": "Direct Entry"
+        }
+    },
+    {
+        "model": "results.modeofadmission",
+        "pk": 3,
+        "fields": {
+            "mode_of_admission": "Transfer",
+            "description": "Transfer"
+        }
+    },
+    {
+        "model": "results.modeofadmission",
+        "pk": 100,
+        "fields": {
+            "mode_of_admission": "N/A",
+            "description": "Unregistered"
+        }
+    },
+    {
+        "model": "results.modeofstudy",
+        "pk": 1,
+        "fields": {
+            "mode_of_study": "Full Time"
+        }
+    },
+    {
+        "model": "results.modeofstudy",
+        "pk": 2,
+        "fields": {
+            "mode_of_study": "Part Time"
+        }
+    },
+    {
+        "model": "results.relationship",
+        "pk": 1,
+        "fields": {
+            "relationship": "Father"
+        }
+    },
+    {
+        "model": "results.relationship",
+        "pk": 2,
+        "fields": {
+            "relationship": "Mother"
+        }
+    },
+    {
+        "model": "results.relationship",
+        "pk": 3,
+        "fields": {
+            "relationship": "Brother"
+        }
+    },
+    {
+        "model": "results.relationship",
+        "pk": 4,
+        "fields": {
+            "relationship": "Sister"
+        }
+    },
+    {
+        "model": "results.relationship",
+        "pk": 5,
+        "fields": {
+            "relationship": "Uncle"
+        }
+    },
+    {
+        "model": "results.relationship",
+        "pk": 6,
+        "fields": {
+            "relationship": "Aunt"
+        }
+    },
+    {
+        "model": "results.relationship",
+        "pk": 7,
+        "fields": {
+            "relationship": "Relative"
+        }
+    },
+    {
+        "model": "results.relationship",
+        "pk": 8,
+        "fields": {
+            "relationship": "Guardian"
+        }
+    },
+    {
+        "model": "results.semester",
+        "pk": 1,
+        "fields": {
+            "semester": "First"
+        }
+    },
+    {
+        "model": "results.semester",
+        "pk": 2,
+        "fields": {
+            "semester": "Second"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 1,
+        "fields": {
+            "session": "1981/1982"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 2,
+        "fields": {
+            "session": "1982/1983"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 3,
+        "fields": {
+            "session": "1983/1984"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 4,
+        "fields": {
+            "session": "1984/1985"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 5,
+        "fields": {
+            "session": "1985/1986"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 6,
+        "fields": {
+            "session": "1986/1987"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 7,
+        "fields": {
+            "session": "1987/1988"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 8,
+        "fields": {
+            "session": "1988/1989"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 9,
+        "fields": {
+            "session": "1989/1990"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 10,
+        "fields": {
+            "session": "1990/1991"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 11,
+        "fields": {
+            "session": "1991/1992"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 12,
+        "fields": {
+            "session": "1992/1993"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 13,
+        "fields": {
+            "session": "1993/1994"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 14,
+        "fields": {
+            "session": "1994/1995"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 15,
+        "fields": {
+            "session": "1995/1996"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 16,
+        "fields": {
+            "session": "1996/1997"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 17,
+        "fields": {
+            "session": "1997/1998"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 18,
+        "fields": {
+            "session": "1998/1999"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 19,
+        "fields": {
+            "session": "1999/2000"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 20,
+        "fields": {
+            "session": "2000/2001"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 21,
+        "fields": {
+            "session": "2001/2002"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 22,
+        "fields": {
+            "session": "2002/2003"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 23,
+        "fields": {
+            "session": "2003/2004"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 24,
+        "fields": {
+            "session": "2004/2005"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 25,
+        "fields": {
+            "session": "2005/2006"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 26,
+        "fields": {
+            "session": "2006/2007"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 27,
+        "fields": {
+            "session": "2007/2008"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 28,
+        "fields": {
+            "session": "2008/2009"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 29,
+        "fields": {
+            "session": "2009/2010"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 30,
+        "fields": {
+            "session": "2010/2011"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 31,
+        "fields": {
+            "session": "2011/2012"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 32,
+        "fields": {
+            "session": "2012/2013"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 33,
+        "fields": {
+            "session": "2013/2014"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 34,
+        "fields": {
+            "session": "2014/2015"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 35,
+        "fields": {
+            "session": "2015/2016"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 36,
+        "fields": {
+            "session": "2016/2017"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 37,
+        "fields": {
+            "session": "2017/2018"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 38,
+        "fields": {
+            "session": "2018/2019"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 39,
+        "fields": {
+            "session": "2019/2020"
+        }
+    },
+    {
+        "model": "results.session",
+        "pk": 40,
+        "fields": {
+            "session": "2020/2021"
+        }
+    },
+    {
+        "model": "results.sex",
+        "pk": 1,
+        "fields": {
+            "sex": "Male"
+        }
+    },
+    {
+        "model": "results.sex",
+        "pk": 2,
+        "fields": {
+            "sex": "Female"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 164,
+        "fields": {
+            "session": "1981/1982",
+            "semester": 1,
+            "desc": "1981/1982 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 165,
+        "fields": {
+            "session": "1981/1982",
+            "semester": 2,
+            "desc": "1981/1982 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 166,
+        "fields": {
+            "session": "1982/1983",
+            "semester": 1,
+            "desc": "1982/1983 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 173,
+        "fields": {
+            "session": "1982/1983",
+            "semester": 2,
+            "desc": "1982/1983 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 174,
+        "fields": {
+            "session": "1983/1984",
+            "semester": 1,
+            "desc": "1983/1984 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 175,
+        "fields": {
+            "session": "1983/1984",
+            "semester": 2,
+            "desc": "1983/1984 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 176,
+        "fields": {
+            "session": "1984/1985",
+            "semester": 1,
+            "desc": "1984/1985 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 177,
+        "fields": {
+            "session": "1984/1985",
+            "semester": 2,
+            "desc": "1984/1985 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 178,
+        "fields": {
+            "session": "1985/1986",
+            "semester": 1,
+            "desc": "1985/1986 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 179,
+        "fields": {
+            "session": "1985/1986",
+            "semester": 2,
+            "desc": "1985/1986 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 180,
+        "fields": {
+            "session": "1986/1987",
+            "semester": 1,
+            "desc": "1986/1987 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 181,
+        "fields": {
+            "session": "1986/1987",
+            "semester": 2,
+            "desc": "1986/1987 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 182,
+        "fields": {
+            "session": "1987/1988",
+            "semester": 1,
+            "desc": "1987/1988 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 183,
+        "fields": {
+            "session": "1987/1988",
+            "semester": 2,
+            "desc": "1987/1988 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 184,
+        "fields": {
+            "session": "1988/1989",
+            "semester": 1,
+            "desc": "1988/1989 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 185,
+        "fields": {
+            "session": "1988/1989",
+            "semester": 2,
+            "desc": "1988/1989 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 186,
+        "fields": {
+            "session": "1989/1990",
+            "semester": 1,
+            "desc": "1989/1990 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 187,
+        "fields": {
+            "session": "1989/1990",
+            "semester": 2,
+            "desc": "1989/1990 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 188,
+        "fields": {
+            "session": "1990/1991",
+            "semester": 1,
+            "desc": "1990/1991 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 189,
+        "fields": {
+            "session": "1990/1991",
+            "semester": 2,
+            "desc": "1990/1991 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 190,
+        "fields": {
+            "session": "1991/1992",
+            "semester": 1,
+            "desc": "1991/1992 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 191,
+        "fields": {
+            "session": "1991/1992",
+            "semester": 2,
+            "desc": "1991/1992 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 192,
+        "fields": {
+            "session": "1992/1993",
+            "semester": 1,
+            "desc": "1992/1993 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 193,
+        "fields": {
+            "session": "1992/1993",
+            "semester": 2,
+            "desc": "1992/1993 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 194,
+        "fields": {
+            "session": "1993/1994",
+            "semester": 1,
+            "desc": "1993/1994 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 195,
+        "fields": {
+            "session": "1993/1994",
+            "semester": 2,
+            "desc": "1993/1994 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 196,
+        "fields": {
+            "session": "1994/1995",
+            "semester": 1,
+            "desc": "1994/1995 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 197,
+        "fields": {
+            "session": "1994/1995",
+            "semester": 2,
+            "desc": "1994/1995 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 198,
+        "fields": {
+            "session": "1995/1996",
+            "semester": 1,
+            "desc": "1995/1996 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 199,
+        "fields": {
+            "session": "1995/1996",
+            "semester": 2,
+            "desc": "1995/1996 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 200,
+        "fields": {
+            "session": "1996/1997",
+            "semester": 1,
+            "desc": "1996/1997 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 201,
+        "fields": {
+            "session": "1996/1997",
+            "semester": 2,
+            "desc": "1996/1997 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 202,
+        "fields": {
+            "session": "1997/1998",
+            "semester": 1,
+            "desc": "1997/1998 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 203,
+        "fields": {
+            "session": "1997/1998",
+            "semester": 2,
+            "desc": "1997/1998 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 204,
+        "fields": {
+            "session": "1998/1999",
+            "semester": 1,
+            "desc": "1998/1999 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 205,
+        "fields": {
+            "session": "1998/1999",
+            "semester": 2,
+            "desc": "1998/1999 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 206,
+        "fields": {
+            "session": "1999/2000",
+            "semester": 1,
+            "desc": "1999/2000 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 207,
+        "fields": {
+            "session": "1999/2000",
+            "semester": 2,
+            "desc": "1999/2000 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 208,
+        "fields": {
+            "session": "2000/2001",
+            "semester": 1,
+            "desc": "2000/2001 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 209,
+        "fields": {
+            "session": "2000/2001",
+            "semester": 2,
+            "desc": "2000/2001 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 210,
+        "fields": {
+            "session": "2001/2002",
+            "semester": 1,
+            "desc": "2001/2002 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 211,
+        "fields": {
+            "session": "2001/2002",
+            "semester": 2,
+            "desc": "2001/2002 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 212,
+        "fields": {
+            "session": "2002/2003",
+            "semester": 1,
+            "desc": "2002/2003 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 213,
+        "fields": {
+            "session": "2002/2003",
+            "semester": 2,
+            "desc": "2002/2003 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 214,
+        "fields": {
+            "session": "2003/2004",
+            "semester": 1,
+            "desc": "2003/2004 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 215,
+        "fields": {
+            "session": "2003/2004",
+            "semester": 2,
+            "desc": "2003/2004 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 216,
+        "fields": {
+            "session": "2004/2005",
+            "semester": 1,
+            "desc": "2004/2005 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 217,
+        "fields": {
+            "session": "2004/2005",
+            "semester": 2,
+            "desc": "2004/2005 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 218,
+        "fields": {
+            "session": "2005/2006",
+            "semester": 1,
+            "desc": "2005/2006 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 219,
+        "fields": {
+            "session": "2005/2006",
+            "semester": 2,
+            "desc": "2005/2006 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 220,
+        "fields": {
+            "session": "2006/2007",
+            "semester": 1,
+            "desc": "2006/2007 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 221,
+        "fields": {
+            "session": "2006/2007",
+            "semester": 2,
+            "desc": "2006/2007 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 222,
+        "fields": {
+            "session": "2007/2008",
+            "semester": 1,
+            "desc": "2007/2008 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 223,
+        "fields": {
+            "session": "2007/2008",
+            "semester": 2,
+            "desc": "2007/2008 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 224,
+        "fields": {
+            "session": "2008/2009",
+            "semester": 1,
+            "desc": "2008/2009 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 225,
+        "fields": {
+            "session": "2008/2009",
+            "semester": 2,
+            "desc": "2008/2009 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 226,
+        "fields": {
+            "session": "2009/2010",
+            "semester": 1,
+            "desc": "2009/2010 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 227,
+        "fields": {
+            "session": "2009/2010",
+            "semester": 2,
+            "desc": "2009/2010 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 228,
+        "fields": {
+            "session": "2010/2011",
+            "semester": 1,
+            "desc": "2010/2011 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 229,
+        "fields": {
+            "session": "2010/2011",
+            "semester": 2,
+            "desc": "2010/2011 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 230,
+        "fields": {
+            "session": "2011/2012",
+            "semester": 1,
+            "desc": "2011/2012 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 231,
+        "fields": {
+            "session": "2011/2012",
+            "semester": 2,
+            "desc": "2011/2012 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 232,
+        "fields": {
+            "session": "2012/2013",
+            "semester": 1,
+            "desc": "2012/2013 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 233,
+        "fields": {
+            "session": "2012/2013",
+            "semester": 2,
+            "desc": "2012/2013 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 234,
+        "fields": {
+            "session": "2013/2014",
+            "semester": 1,
+            "desc": "2013/2014 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 235,
+        "fields": {
+            "session": "2013/2014",
+            "semester": 2,
+            "desc": "2013/2014 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 236,
+        "fields": {
+            "session": "2014/2015",
+            "semester": 1,
+            "desc": "2014/2015 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 237,
+        "fields": {
+            "session": "2014/2015",
+            "semester": 2,
+            "desc": "2014/2015 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 238,
+        "fields": {
+            "session": "2015/2016",
+            "semester": 1,
+            "desc": "2015/2016 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 239,
+        "fields": {
+            "session": "2015/2016",
+            "semester": 2,
+            "desc": "2015/2016 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 240,
+        "fields": {
+            "session": "2016/2017",
+            "semester": 1,
+            "desc": "2016/2017 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 241,
+        "fields": {
+            "session": "2016/2017",
+            "semester": 2,
+            "desc": "2016/2017 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 242,
+        "fields": {
+            "session": "2017/2018",
+            "semester": 1,
+            "desc": "2017/2018 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 243,
+        "fields": {
+            "session": "2017/2018",
+            "semester": 2,
+            "desc": "2017/2018 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 244,
+        "fields": {
+            "session": "2018/2019",
+            "semester": 1,
+            "desc": "2018/2019 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 245,
+        "fields": {
+            "session": "2018/2019",
+            "semester": 2,
+            "desc": "2018/2019 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 246,
+        "fields": {
+            "session": "2019/2020",
+            "semester": 1,
+            "desc": "2019/2020 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 248,
+        "fields": {
+            "session": "2020/2021",
+            "semester": 1,
+            "desc": "2020/2021 First Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 249,
+        "fields": {
+            "session": "2020/2021",
+            "semester": 2,
+            "desc": "2020/2021 Second Semester"
+        }
+    },
+    {
+        "model": "results.semestersession",
+        "pk": 250,
+        "fields": {
+            "session": "2019/2020",
+            "semester": 2,
+            "desc": "2019/2020 Second Semester"
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 1,
+        "fields": {
+            "course_title": "Introduction to Engineering",
+            "course_code": "ENG 101",
+            "course_semester": 1,
+            "course_level": 1,
+            "credit_load": 2,
+            "elective": true
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 2,
+        "fields": {
+            "course_title": "Elementary Mathematics I",
+            "course_code": "MTH 111",
+            "course_semester": 1,
+            "course_level": 1,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 3,
+        "fields": {
+            "course_title": "Elementary Mathematics II",
+            "course_code": "MTH 121",
+            "course_semester": 1,
+            "course_level": 1,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 4,
+        "fields": {
+            "course_title": "Basic Physical Chemistry I",
+            "course_code": "CHM 101",
+            "course_semester": 1,
+            "course_level": 1,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 5,
+        "fields": {
+            "course_title": "Basic Practical Chemistry",
+            "course_code": "CHM 171",
+            "course_semester": 1,
+            "course_level": 1,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 6,
+        "fields": {
+            "course_title": "Fundamentals of Physics I",
+            "course_code": "PHY 121",
+            "course_semester": 1,
+            "course_level": 1,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 7,
+        "fields": {
+            "course_title": "Practical Physics II",
+            "course_code": "PHY 195",
+            "course_semester": 1,
+            "course_level": 1,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 8,
+        "fields": {
+            "course_title": "Use of English I",
+            "course_code": "GSP 101",
+            "course_semester": 1,
+            "course_level": 1,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 9,
+        "fields": {
+            "course_title": "Use of Library",
+            "course_code": "GSP 111",
+            "course_semester": 1,
+            "course_level": 1,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 10,
+        "fields": {
+            "course_title": "Applied Mechanics",
+            "course_code": "ENG 102",
+            "course_semester": 2,
+            "course_level": 1,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 11,
+        "fields": {
+            "course_title": "Elementary Mathematics",
+            "course_code": "MTH 122",
+            "course_semester": 2,
+            "course_level": 1,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 12,
+        "fields": {
+            "course_title": "Basic Principles of Organic Chemistry II",
+            "course_code": "CHM 122",
+            "course_semester": 2,
+            "course_level": 1,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 13,
+        "fields": {
+            "course_title": "Basic Principles of Inorganic Chemistry III",
+            "course_code": "CHM 112",
+            "course_semester": 2,
+            "course_level": 1,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 14,
+        "fields": {
+            "course_title": "Fundamentals of Physics III",
+            "course_code": "PHY 124",
+            "course_semester": 2,
+            "course_level": 1,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 15,
+        "fields": {
+            "course_title": "Use of English II",
+            "course_code": "GSP 102",
+            "course_semester": 2,
+            "course_level": 1,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 16,
+        "fields": {
+            "course_title": "Material Science",
+            "course_code": "ENG 201",
+            "course_semester": 1,
+            "course_level": 2,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 17,
+        "fields": {
+            "course_title": "Material Science Laboratory",
+            "course_code": "ENG 202",
+            "course_semester": 1,
+            "course_level": 2,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 18,
+        "fields": {
+            "course_title": "Strength of Materials I",
+            "course_code": "CVE 211",
+            "course_semester": 1,
+            "course_level": 2,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 19,
+        "fields": {
+            "course_title": "Strength of Materials Laboratory",
+            "course_code": "CVE 212",
+            "course_semester": 1,
+            "course_level": 2,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 20,
+        "fields": {
+            "course_title": "Electrical Engineering I",
+            "course_code": "EEE 211",
+            "course_semester": 1,
+            "course_level": 2,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 21,
+        "fields": {
+            "course_title": "Thermodynamics I",
+            "course_code": "MEC 261",
+            "course_semester": 1,
+            "course_level": 2,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 22,
+        "fields": {
+            "course_title": "Advanced Mathematics VI",
+            "course_code": "MTH 206",
+            "course_semester": 2,
+            "course_level": 2,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 23,
+        "fields": {
+            "course_title": "Humanities I",
+            "course_code": "GSP 207",
+            "course_semester": 1,
+            "course_level": 2,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 24,
+        "fields": {
+            "course_title": "Social Sciences",
+            "course_code": "GSP 103",
+            "course_semester": 1,
+            "course_level": 2,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 26,
+        "fields": {
+            "course_title": "Engineering Computer Programming",
+            "course_code": "ECE 271",
+            "course_semester": 2,
+            "course_level": 2,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 27,
+        "fields": {
+            "course_title": "Engineering Computer Programming Lab",
+            "course_code": "ECE 281",
+            "course_semester": 2,
+            "course_level": 2,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 28,
+        "fields": {
+            "course_title": "Fluid Mechanics I",
+            "course_code": "CVE 221",
+            "course_semester": 2,
+            "course_level": 2,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 29,
+        "fields": {
+            "course_title": "Fluid Mechanics Laboratory",
+            "course_code": "CVE 222",
+            "course_semester": 2,
+            "course_level": 2,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 30,
+        "fields": {
+            "course_title": "Workshop Technology I",
+            "course_code": "MEC 212",
+            "course_semester": 2,
+            "course_level": 2,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 31,
+        "fields": {
+            "course_title": "Electrical Engineering Laboratory",
+            "course_code": "EEE 251",
+            "course_semester": 2,
+            "course_level": 2,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 32,
+        "fields": {
+            "course_title": "Advanced Mathematics VIII",
+            "course_code": "MTH 208",
+            "course_semester": 2,
+            "course_level": 2,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 33,
+        "fields": {
+            "course_title": "Social Sciences II",
+            "course_code": "GSP 104",
+            "course_semester": 2,
+            "course_level": 2,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 34,
+        "fields": {
+            "course_title": "Humanities II",
+            "course_code": "GSP 208",
+            "course_semester": 2,
+            "course_level": 2,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 36,
+        "fields": {
+            "course_title": "Circuit Theory I",
+            "course_code": "ECE 311",
+            "course_semester": 1,
+            "course_level": 3,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 37,
+        "fields": {
+            "course_title": "Physical Electronics",
+            "course_code": "ECE 321",
+            "course_semester": 1,
+            "course_level": 3,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 38,
+        "fields": {
+            "course_title": "Electromagnetic Fields and Waves I",
+            "course_code": "ECE 331",
+            "course_semester": 1,
+            "course_level": 3,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 39,
+        "fields": {
+            "course_title": "Electronic Measurements",
+            "course_code": "ECE 361",
+            "course_semester": 1,
+            "course_level": 3,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 40,
+        "fields": {
+            "course_title": "Physical Electronics Laboratory",
+            "course_code": "ECE 381",
+            "course_semester": 1,
+            "course_level": 3,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 41,
+        "fields": {
+            "course_title": "Electrical Machines I",
+            "course_code": "EEE 361",
+            "course_semester": 1,
+            "course_level": 3,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 42,
+        "fields": {
+            "course_title": "Electrical Machines Laboratory I",
+            "course_code": "EEE 351",
+            "course_semester": 1,
+            "course_level": 3,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 43,
+        "fields": {
+            "course_title": "Statistics for Physical Sciences and Engineering",
+            "course_code": "STA 205",
+            "course_semester": 1,
+            "course_level": 3,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 44,
+        "fields": {
+            "course_title": "Introduction to Entrepreneurship",
+            "course_code": "CED 341",
+            "course_semester": 1,
+            "course_level": 3,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 45,
+        "fields": {
+            "course_title": "Circuit Theory II",
+            "course_code": "ECE 312",
+            "course_semester": 2,
+            "course_level": 3,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 46,
+        "fields": {
+            "course_title": "Applied Electronics I",
+            "course_code": "ECE 322",
+            "course_semester": 2,
+            "course_level": 3,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 47,
+        "fields": {
+            "course_title": "Electromagnetic Fields and Waves II",
+            "course_code": "ECE 332",
+            "course_semester": 2,
+            "course_level": 3,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 48,
+        "fields": {
+            "course_title": "Applied Electronics Laboratory",
+            "course_code": "ECE 382",
+            "course_semester": 2,
+            "course_level": 3,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 49,
+        "fields": {
+            "course_title": "Measurements and Instrumentation Laboratory",
+            "course_code": "ECE 383",
+            "course_semester": 2,
+            "course_level": 3,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 51,
+        "fields": {
+            "course_title": "Electrical Power Systems Laboratory",
+            "course_code": "ECE 352",
+            "course_semester": 2,
+            "course_level": 3,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 52,
+        "fields": {
+            "course_title": "Engineering Analysis",
+            "course_code": "ENG 301",
+            "course_semester": 2,
+            "course_level": 3,
+            "credit_load": 4,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 53,
+        "fields": {
+            "course_title": "Entrepreneurship",
+            "course_code": "CED 342",
+            "course_semester": 2,
+            "course_level": 3,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 54,
+        "fields": {
+            "course_title": "Applied Electronics II",
+            "course_code": "ECE 421",
+            "course_semester": 1,
+            "course_level": 4,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 55,
+        "fields": {
+            "course_title": "Communications Principles",
+            "course_code": "ECE 441",
+            "course_semester": 1,
+            "course_level": 4,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 56,
+        "fields": {
+            "course_title": "Control Theory",
+            "course_code": "ECE 451",
+            "course_semester": 1,
+            "course_level": 4,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 57,
+        "fields": {
+            "course_title": "Digital Electronics",
+            "course_code": "ECE 471",
+            "course_semester": 1,
+            "course_level": 4,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 58,
+        "fields": {
+            "course_title": "Digital Logic Theory I",
+            "course_code": "ECE 472",
+            "course_semester": 1,
+            "course_level": 4,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 59,
+        "fields": {
+            "course_title": "Communications and Fields Laboratory",
+            "course_code": "ECE 482",
+            "course_semester": 1,
+            "course_level": 4,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 60,
+        "fields": {
+            "course_title": "Applied Electronics and Digital Logic Laboratory",
+            "course_code": "ECE 482",
+            "course_semester": 1,
+            "course_level": 4,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 61,
+        "fields": {
+            "course_title": "Control Laboratory",
+            "course_code": "ECE 483",
+            "course_semester": 1,
+            "course_level": 4,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 62,
+        "fields": {
+            "course_title": "Computational Methods",
+            "course_code": "ENG 401",
+            "course_semester": 1,
+            "course_level": 4,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 63,
+        "fields": {
+            "course_title": "Electronic Instrumentation",
+            "course_code": "ECE 461",
+            "course_semester": 2,
+            "course_level": 4,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 64,
+        "fields": {
+            "course_title": "Digital Logic Theory II",
+            "course_code": "ECE 473",
+            "course_semester": 2,
+            "course_level": 4,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 65,
+        "fields": {
+            "course_title": "Technical Writing and Seminars",
+            "course_code": "ECE 491",
+            "course_semester": 2,
+            "course_level": 4,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 66,
+        "fields": {
+            "course_title": "Students Industrial Work Experience Scheme (SIWES)",
+            "course_code": "ENG 402",
+            "course_semester": 2,
+            "course_level": 4,
+            "credit_load": null,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 67,
+        "fields": {
+            "course_title": "Advanced Circuit Techniques",
+            "course_code": "ECE 521",
+            "course_semester": 1,
+            "course_level": 5,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 68,
+        "fields": {
+            "course_title": "Solid State Electronics",
+            "course_code": "ECE 522",
+            "course_semester": 1,
+            "course_level": 5,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 69,
+        "fields": {
+            "course_title": "Communications Systems",
+            "course_code": "ECE 541",
+            "course_semester": 1,
+            "course_level": 5,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 70,
+        "fields": {
+            "course_title": "Control Systems",
+            "course_code": "ECE 551",
+            "course_semester": 1,
+            "course_level": 5,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 71,
+        "fields": {
+            "course_title": "Microprocessing Systems",
+            "course_code": "ECE 571",
+            "course_semester": 1,
+            "course_level": 5,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 72,
+        "fields": {
+            "course_title": "Analogue and Digital Computer Systems",
+            "course_code": "ECE 572",
+            "course_semester": 1,
+            "course_level": 5,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 73,
+        "fields": {
+            "course_title": "Software Engineering",
+            "course_code": "ECE 573",
+            "course_semester": 1,
+            "course_level": 5,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 74,
+        "fields": {
+            "course_title": "Systems Engineering",
+            "course_code": "ECE 511",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 75,
+        "fields": {
+            "course_title": "Industrial Electronics Design",
+            "course_code": "ECE 523",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 76,
+        "fields": {
+            "course_title": "Telecommunication Engineering",
+            "course_code": "ECE 542",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 77,
+        "fields": {
+            "course_title": "Digital Signal Processing",
+            "course_code": "ECE 574",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 78,
+        "fields": {
+            "course_title": "Project",
+            "course_code": "ECE 591",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 4,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 79,
+        "fields": {
+            "course_title": "Communication Networks",
+            "course_code": "ECE 512",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 3,
+            "elective": true
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 80,
+        "fields": {
+            "course_title": "Electroacoustics",
+            "course_code": "ECE 525",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 3,
+            "elective": true
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 81,
+        "fields": {
+            "course_title": "Television and Radio",
+            "course_code": "ECE 543",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 3,
+            "elective": true
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 82,
+        "fields": {
+            "course_title": "Microwave Communication Systems Design",
+            "course_code": "ECE 544",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 3,
+            "elective": true
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 83,
+        "fields": {
+            "course_title": "Introduction to Radar and Navigation Systems",
+            "course_code": "ECE 545",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 3,
+            "elective": true
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 84,
+        "fields": {
+            "course_title": "Advanced Control Engineering",
+            "course_code": "ECE 552",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 3,
+            "elective": true
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 85,
+        "fields": {
+            "course_title": "Linear Systems Theory",
+            "course_code": "ECE 553",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 3,
+            "elective": true
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 86,
+        "fields": {
+            "course_title": "Process Control",
+            "course_code": "ECE 554",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 3,
+            "elective": true
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 87,
+        "fields": {
+            "course_title": "Digital Systems Design",
+            "course_code": "ECE 575",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 3,
+            "elective": true
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 88,
+        "fields": {
+            "course_title": "Microprocessor Systems Design",
+            "course_code": "ECE 576",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 3,
+            "elective": true
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 89,
+        "fields": {
+            "course_title": "Computer Systems Design",
+            "course_code": "ECE 577",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 3,
+            "elective": true
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 90,
+        "fields": {
+            "course_title": "Artificial Intelligence and Robotics",
+            "course_code": "ECE 578",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 3,
+            "elective": true
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 91,
+        "fields": {
+            "course_title": "Database Management Systems",
+            "course_code": "ECE 579",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 3,
+            "elective": true
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 92,
+        "fields": {
+            "course_title": "Optoelectronics",
+            "course_code": "ECE 524",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 3,
+            "elective": true
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 93,
+        "fields": {
+            "course_title": "Medical Electronics",
+            "course_code": "ECE 526",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 3,
+            "elective": true
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 94,
+        "fields": {
+            "course_title": "Digital Instrumentation",
+            "course_code": "ECE 561",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 3,
+            "elective": true
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 95,
+        "fields": {
+            "course_title": "General Physics for Physical Sciences II",
+            "course_code": "PHY 116",
+            "course_semester": 2,
+            "course_level": 1,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 96,
+        "fields": {
+            "course_title": "System Programming",
+            "course_code": "ECE 371",
+            "course_semester": 1,
+            "course_level": 3,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 97,
+        "fields": {
+            "course_title": "Physical Electronics Laboratory",
+            "course_code": "ECE 363",
+            "course_semester": 1,
+            "course_level": 3,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 102,
+        "fields": {
+            "course_title": "Issues in Peace and Conflict Resolution Studies",
+            "course_code": "GSP 202",
+            "course_semester": 2,
+            "course_level": 2,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 103,
+        "fields": {
+            "course_title": "Basic Concept and Theory of Peace",
+            "course_code": "GSP 201",
+            "course_semester": 1,
+            "course_level": 2,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 104,
+        "fields": {
+            "course_title": "Advanced Mathematics VII",
+            "course_code": "MTH 207",
+            "course_semester": 1,
+            "course_level": 2,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 105,
+        "fields": {
+            "course_title": "Engineering Drawing I",
+            "course_code": "MEC 211",
+            "course_semester": 1,
+            "course_level": 2,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 106,
+        "fields": {
+            "course_title": "Applied Electronics Laboratory",
+            "course_code": "ECE 362",
+            "course_semester": 2,
+            "course_level": 3,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 107,
+        "fields": {
+            "course_title": "Measurement and Instrumentation Laboratory",
+            "course_code": "ECE 364",
+            "course_semester": 2,
+            "course_level": 3,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 108,
+        "fields": {
+            "course_title": "Electrical Power Systems Principles",
+            "course_code": "EEE 332",
+            "course_semester": 2,
+            "course_level": 3,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 109,
+        "fields": {
+            "course_title": "Electrical Power Systems Laboratory",
+            "course_code": "EEE 352",
+            "course_semester": 2,
+            "course_level": 3,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 110,
+        "fields": {
+            "course_title": "ENGINEERING COMPUTER PROGRAMMING",
+            "course_code": "ECE 272",
+            "course_semester": 2,
+            "course_level": 2,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 111,
+        "fields": {
+            "course_title": "INTRODUCTION TO ENGINEERING COMPUTER PROGRAMMING",
+            "course_code": "ECE 282",
+            "course_semester": 2,
+            "course_level": 2,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 113,
+        "fields": {
+            "course_title": "TECHNICAL WRITING",
+            "course_code": "ECE 494",
+            "course_semester": 2,
+            "course_level": 4,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 114,
+        "fields": {
+            "course_title": "CONTROL ENGINEERING LABORATORY",
+            "course_code": "ECE 463",
+            "course_semester": 1,
+            "course_level": 4,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 115,
+        "fields": {
+            "course_title": "APPLIED ELECTRONICS AND DIGITAL LOGIC LABORATORY",
+            "course_code": "ECE 465",
+            "course_semester": 1,
+            "course_level": 4,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 116,
+        "fields": {
+            "course_title": "DATA COMMUNICATION AND NETWORKING FUNDAMENTALS",
+            "course_code": "ECE 443",
+            "course_semester": 1,
+            "course_level": 4,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 117,
+        "fields": {
+            "course_title": "TELECOMMUNICATIONS AND FIELDS LABORATORY",
+            "course_code": "ECE 481",
+            "course_semester": 1,
+            "course_level": 4,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 118,
+        "fields": {
+            "course_title": "Telecommunications and Fields Laboratory",
+            "course_code": "ECE 461",
+            "course_semester": 1,
+            "course_level": 4,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 119,
+        "fields": {
+            "course_title": "Engineering Analysis",
+            "course_code": "ENG 302",
+            "course_semester": 2,
+            "course_level": 3,
+            "credit_load": 4,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 120,
+        "fields": {
+            "course_title": "Materials Science Laboratory",
+            "course_code": "ENG 203",
+            "course_semester": 1,
+            "course_level": 2,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 121,
+        "fields": {
+            "course_title": "Strength of Materials Laboratory",
+            "course_code": "CVE 213",
+            "course_semester": 1,
+            "course_level": 2,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 122,
+        "fields": {
+            "course_title": "Engineering Computer Programming Laboratory",
+            "course_code": "ECE 262",
+            "course_semester": 2,
+            "course_level": 2,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 123,
+        "fields": {
+            "course_title": "Basic Electrical Engineering Laboratory/Practice",
+            "course_code": "EEE 252",
+            "course_semester": 2,
+            "course_level": 2,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 124,
+        "fields": {
+            "course_title": "Fluid Mechanics Laboratory",
+            "course_code": "CVE 224",
+            "course_semester": 2,
+            "course_level": 3,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 125,
+        "fields": {
+            "course_title": "Fundamentals of Physics III",
+            "course_code": "PHY 109",
+            "course_semester": 2,
+            "course_level": 1,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 126,
+        "fields": {
+            "course_title": "General Physics for Physical Sciences",
+            "course_code": "PHY 105",
+            "course_semester": 2,
+            "course_level": 1,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 127,
+        "fields": {
+            "course_title": "Practical Physics",
+            "course_code": "PHY 192",
+            "course_semester": 1,
+            "course_level": 1,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 128,
+        "fields": {
+            "course_title": "Fundamentals of Physics I",
+            "course_code": "PHY 107",
+            "course_semester": 1,
+            "course_level": 1,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 129,
+        "fields": {
+            "course_title": "Elementary Mathematics II",
+            "course_code": "MTH 112",
+            "course_semester": 2,
+            "course_level": 1,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 132,
+        "fields": {
+            "course_title": "SOLID STATE ELECTRONICS",
+            "course_code": "ECE 524",
+            "course_semester": 2,
+            "course_level": 5,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 133,
+        "fields": {
+            "course_title": "SEMINARS",
+            "course_code": "ECE 482",
+            "course_semester": 2,
+            "course_level": 4,
+            "credit_load": 2,
+            "elective": true
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 200,
+        "fields": {
+            "course_title": "DIGITAL LOGIC",
+            "course_code": "ECE 473",
+            "course_semester": 1,
+            "course_level": 4,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 201,
+        "fields": {
+            "course_title": "STATISTICS FOR PHYSICAL SCIENCES AND ENGINEERING",
+            "course_code": "STA 203",
+            "course_semester": 1,
+            "course_level": 3,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 203,
+        "fields": {
+            "course_title": "MATERIAL SCIENCE I",
+            "course_code": "EGR 201",
+            "course_semester": 1,
+            "course_level": 2,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 204,
+        "fields": {
+            "course_title": "MATERIAL SCIENCE LABORATORY",
+            "course_code": "EGR 203",
+            "course_semester": 1,
+            "course_level": 2,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 205,
+        "fields": {
+            "course_title": "BASIC ELECTRICAL ENGINEERING",
+            "course_code": "EEE 211",
+            "course_semester": 1,
+            "course_level": 2,
+            "credit_load": 3,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 206,
+        "fields": {
+            "course_title": "FLUID MECHANICS I",
+            "course_code": "CVE 222",
+            "course_semester": 2,
+            "course_level": 2,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 207,
+        "fields": {
+            "course_title": "FLUID MECHANICS LABORATORY",
+            "course_code": "CVE 224",
+            "course_semester": 2,
+            "course_level": 2,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 208,
+        "fields": {
+            "course_title": "INTRODUCTION TO ENGINEERING",
+            "course_code": "EGR 101",
+            "course_semester": 1,
+            "course_level": 1,
+            "credit_load": 2,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.course",
+        "pk": 210,
+        "fields": {
+            "course_title": "tu",
+            "course_code": "fghu",
+            "course_semester": 1,
+            "course_level": 1,
+            "credit_load": 1,
+            "elective": false
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 258,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 1,
+            "level_of_study": 1,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 260,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 3,
+            "level_of_study": 1,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 261,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 4,
+            "level_of_study": 1,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 262,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 5,
+            "level_of_study": 1,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 263,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 6,
+            "level_of_study": 1,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 264,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 8,
+            "level_of_study": 1,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 266,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 9,
+            "level_of_study": 1,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 268,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 10,
+            "level_of_study": 1,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 270,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 12,
+            "level_of_study": 1,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 271,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 13,
+            "level_of_study": 1,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 272,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 14,
+            "level_of_study": 1,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 273,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 15,
+            "level_of_study": 1,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 275,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 18,
+            "level_of_study": 2,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 277,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 21,
+            "level_of_study": 2,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 279,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 22,
+            "level_of_study": 2,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 281,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 23,
+            "level_of_study": 2,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 283,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 30,
+            "level_of_study": 2,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 285,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 32,
+            "level_of_study": 2,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 287,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 34,
+            "level_of_study": 2,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 289,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 36,
+            "level_of_study": 3,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 291,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 37,
+            "level_of_study": 3,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 293,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 38,
+            "level_of_study": 3,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 295,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 39,
+            "level_of_study": 3,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 297,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 41,
+            "level_of_study": 3,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 299,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 42,
+            "level_of_study": 3,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 301,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 43,
+            "level_of_study": 3,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 303,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 44,
+            "level_of_study": 3,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 305,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 45,
+            "level_of_study": 3,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 307,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 46,
+            "level_of_study": 3,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 309,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 47,
+            "level_of_study": 3,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 311,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 53,
+            "level_of_study": 3,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 313,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 54,
+            "level_of_study": 4,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 315,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 55,
+            "level_of_study": 4,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 317,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 56,
+            "level_of_study": 4,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 319,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 57,
+            "level_of_study": 4,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 321,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 62,
+            "level_of_study": 4,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 323,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 66,
+            "level_of_study": 4,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 325,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 95,
+            "level_of_study": 1,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 327,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 96,
+            "level_of_study": 3,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 329,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 97,
+            "level_of_study": 3,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 331,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 102,
+            "level_of_study": 2,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 333,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 103,
+            "level_of_study": 2,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 335,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 105,
+            "level_of_study": 2,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 337,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 106,
+            "level_of_study": 3,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 339,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 107,
+            "level_of_study": 3,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 341,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 108,
+            "level_of_study": 3,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 343,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 109,
+            "level_of_study": 3,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 345,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 110,
+            "level_of_study": 2,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 347,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 113,
+            "level_of_study": 4,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 349,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 114,
+            "level_of_study": 4,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 351,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 115,
+            "level_of_study": 4,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 353,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 116,
+            "level_of_study": 4,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 355,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 118,
+            "level_of_study": 4,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 357,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 119,
+            "level_of_study": 3,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 359,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 121,
+            "level_of_study": 2,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 361,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 122,
+            "level_of_study": 2,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 363,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 123,
+            "level_of_study": 2,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 365,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 127,
+            "level_of_study": 1,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 367,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 128,
+            "level_of_study": 1,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 369,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 133,
+            "level_of_study": 4,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 371,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 200,
+            "level_of_study": 4,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 373,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 202,
+            "level_of_study": 2,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 375,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 203,
+            "level_of_study": 2,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 377,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 204,
+            "level_of_study": 2,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 379,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 205,
+            "level_of_study": 2,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 381,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 206,
+            "level_of_study": 2,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 383,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 207,
+            "level_of_study": 2,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 385,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 209,
+            "level_of_study": 1,
+            "session": 38
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 389,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 3,
+            "level_of_study": 1,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 390,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 4,
+            "level_of_study": 1,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 391,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 5,
+            "level_of_study": 1,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 392,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 6,
+            "level_of_study": 1,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 393,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 8,
+            "level_of_study": 1,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 395,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 9,
+            "level_of_study": 1,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 397,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 10,
+            "level_of_study": 1,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 399,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 12,
+            "level_of_study": 1,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 400,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 13,
+            "level_of_study": 1,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 401,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 14,
+            "level_of_study": 1,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 402,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 15,
+            "level_of_study": 1,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 404,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 18,
+            "level_of_study": 2,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 406,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 21,
+            "level_of_study": 2,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 408,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 22,
+            "level_of_study": 2,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 410,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 23,
+            "level_of_study": 2,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 412,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 30,
+            "level_of_study": 2,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 414,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 32,
+            "level_of_study": 2,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 416,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 34,
+            "level_of_study": 2,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 418,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 36,
+            "level_of_study": 3,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 420,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 37,
+            "level_of_study": 3,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 422,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 38,
+            "level_of_study": 3,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 424,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 39,
+            "level_of_study": 3,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 426,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 41,
+            "level_of_study": 3,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 428,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 42,
+            "level_of_study": 3,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 430,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 43,
+            "level_of_study": 3,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 432,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 44,
+            "level_of_study": 3,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 434,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 45,
+            "level_of_study": 3,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 436,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 46,
+            "level_of_study": 3,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 438,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 47,
+            "level_of_study": 3,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 440,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 53,
+            "level_of_study": 3,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 442,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 54,
+            "level_of_study": 4,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 444,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 55,
+            "level_of_study": 4,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 446,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 56,
+            "level_of_study": 4,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 448,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 57,
+            "level_of_study": 4,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 450,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 62,
+            "level_of_study": 4,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 452,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 66,
+            "level_of_study": 4,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 454,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 95,
+            "level_of_study": 1,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 456,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 96,
+            "level_of_study": 3,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 458,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 97,
+            "level_of_study": 3,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 460,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 102,
+            "level_of_study": 2,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 462,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 103,
+            "level_of_study": 2,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 464,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 105,
+            "level_of_study": 2,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 466,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 106,
+            "level_of_study": 3,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 468,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 107,
+            "level_of_study": 3,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 470,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 108,
+            "level_of_study": 3,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 472,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 109,
+            "level_of_study": 3,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 474,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 110,
+            "level_of_study": 2,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 476,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 113,
+            "level_of_study": 4,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 478,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 114,
+            "level_of_study": 4,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 480,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 115,
+            "level_of_study": 4,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 482,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 116,
+            "level_of_study": 4,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 484,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 118,
+            "level_of_study": 4,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 486,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 119,
+            "level_of_study": 3,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 488,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 121,
+            "level_of_study": 2,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 490,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 122,
+            "level_of_study": 2,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 492,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 123,
+            "level_of_study": 2,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 494,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 127,
+            "level_of_study": 1,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 496,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 128,
+            "level_of_study": 1,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 498,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 133,
+            "level_of_study": 4,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 500,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 200,
+            "level_of_study": 4,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 502,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 202,
+            "level_of_study": 2,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 504,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 203,
+            "level_of_study": 2,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 506,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 204,
+            "level_of_study": 2,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 508,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 205,
+            "level_of_study": 2,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 510,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 206,
+            "level_of_study": 2,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 512,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 207,
+            "level_of_study": 2,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 517,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 1,
+            "level_of_study": 1,
+            "session": 39
+        }
+    },
+    {
+        "model": "results.programrequirement",
+        "pk": 522,
+        "fields": {
+            "mode_of_admission": 1,
+            "course": 1,
+            "level_of_study": 1,
+            "session": 40
+        }
+    },
+    {
+        "model": "results.student",
+        "pk": 10,
+        "fields": {
+            "student_reg_no": "1990/123456",
+            "last_name": "Klever",
+            "first_name": "Son",
+            "other_names": "C.",
+            "email": null,
+            "phone_number": null,
+            "sex": null,
+            "marital_status": null,
+            "date_of_birth": null,
+            "town_of_origin": null,
+            "lga_of_origin": null,
+            "state_of_origin": null,
+            "nationality": null,
+            "mode_of_admission": null,
+            "level_admitted_to": null,
+            "mode_of_study": null,
+            "year_of_admission": null,
+            "expected_yr_of_grad": "2020",
+            "graduated": false,
+            "address_line1": null,
+            "address_line2": null,
+            "city": null,
+            "state": null,
+            "country": null,
+            "class_rep": false,
+            "current_level_of_study": 5,
+            "cgpa": "4.88",
+            "jamb_number": null
+        }
+    },
+    {
+        "model": "results.student",
+        "pk": 181,
+        "fields": {
+            "student_reg_no": "1234/654321",
+            "last_name": "Jefferson",
+            "first_name": "Mike",
+            "other_names": "O",
+            "email": null,
+            "phone_number": null,
+            "sex": null,
+            "marital_status": null,
+            "date_of_birth": null,
+            "town_of_origin": null,
+            "lga_of_origin": null,
+            "state_of_origin": null,
+            "nationality": "NIGERIAN",
+            "mode_of_admission": 1,
+            "level_admitted_to": 1,
+            "mode_of_study": 1,
+            "year_of_admission": null,
+            "expected_yr_of_grad": "2020",
+            "graduated": false,
+            "address_line1": null,
+            "address_line2": null,
+            "city": null,
+            "state": null,
+            "country": null,
+            "class_rep": false,
+            "current_level_of_study": 4,
+            "cgpa": "1.92",
+            "jamb_number": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 39846,
+        "fields": {
+            "course": 8,
+            "semester": 242,
+            "student_reg_no": "1234/654321",
+            "student_level": 1,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "B",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 39971,
+        "fields": {
+            "course": 7,
+            "semester": 242,
+            "student_reg_no": "1234/654321",
+            "student_level": 1,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "F",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 40230,
+        "fields": {
+            "course": 2,
+            "semester": 242,
+            "student_reg_no": "1234/654321",
+            "student_level": 1,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "B",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 40427,
+        "fields": {
+            "course": 9,
+            "semester": 242,
+            "student_reg_no": "1234/654321",
+            "student_level": 1,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "C",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 40486,
+        "fields": {
+            "course": 5,
+            "semester": 242,
+            "student_reg_no": "1234/654321",
+            "student_level": 1,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "C",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 40651,
+        "fields": {
+            "course": 4,
+            "semester": 242,
+            "student_reg_no": "1234/654321",
+            "student_level": 1,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "B",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 40765,
+        "fields": {
+            "course": 1,
+            "semester": 242,
+            "student_reg_no": "1234/654321",
+            "student_level": 1,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "E",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 40925,
+        "fields": {
+            "course": 3,
+            "semester": 242,
+            "student_reg_no": "1234/654321",
+            "student_level": 1,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "B",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 41041,
+        "fields": {
+            "course": 6,
+            "semester": 242,
+            "student_reg_no": "1234/654321",
+            "student_level": 1,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "B",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 41979,
+        "fields": {
+            "course": 15,
+            "semester": 243,
+            "student_reg_no": "1234/654321",
+            "student_level": 1,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "F",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 42359,
+        "fields": {
+            "course": 10,
+            "semester": 243,
+            "student_reg_no": "1234/654321",
+            "student_level": 1,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "C",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 42872,
+        "fields": {
+            "course": 14,
+            "semester": 243,
+            "student_reg_no": "1234/654321",
+            "student_level": 1,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "F",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 43294,
+        "fields": {
+            "course": 11,
+            "semester": 243,
+            "student_reg_no": "1234/654321",
+            "student_level": 1,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "F",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 44136,
+        "fields": {
+            "course": 95,
+            "semester": 243,
+            "student_reg_no": "1234/654321",
+            "student_level": 1,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "F",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 44256,
+        "fields": {
+            "course": 13,
+            "semester": 243,
+            "student_reg_no": "1234/654321",
+            "student_level": 1,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "F",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 44377,
+        "fields": {
+            "course": 12,
+            "semester": 243,
+            "student_reg_no": "1234/654321",
+            "student_level": 1,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "F",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 45083,
+        "fields": {
+            "course": 19,
+            "semester": 244,
+            "student_reg_no": "1234/654321",
+            "student_level": 2,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "F",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.studentprogresshistory",
+        "pk": 186751,
+        "fields": {
+            "session": 40,
+            "student_reg_no": "1234/654321",
+            "level_of_study": 4
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 33131,
+        "fields": {
+            "course": 19,
+            "semester": 240,
+            "student_reg_no": "1990/123456",
+            "student_level": 2,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 33260,
+        "fields": {
+            "course": 20,
+            "semester": 240,
+            "student_reg_no": "1990/123456",
+            "student_level": 2,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 33394,
+        "fields": {
+            "course": 16,
+            "semester": 240,
+            "student_reg_no": "1990/123456",
+            "student_level": 2,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 33521,
+        "fields": {
+            "course": 18,
+            "semester": 240,
+            "student_reg_no": "1990/123456",
+            "student_level": 2,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 33633,
+        "fields": {
+            "course": 103,
+            "semester": 240,
+            "student_reg_no": "1990/123456",
+            "student_level": 2,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "B",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 33645,
+        "fields": {
+            "course": 104,
+            "semester": 240,
+            "student_reg_no": "1990/123456",
+            "student_level": 2,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 33899,
+        "fields": {
+            "course": 23,
+            "semester": 240,
+            "student_reg_no": "1990/123456",
+            "student_level": 2,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "B",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 33908,
+        "fields": {
+            "course": 105,
+            "semester": 240,
+            "student_reg_no": "1990/123456",
+            "student_level": 2,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "B",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 34035,
+        "fields": {
+            "course": 21,
+            "semester": 240,
+            "student_reg_no": "1990/123456",
+            "student_level": 2,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 36203,
+        "fields": {
+            "course": 28,
+            "semester": 241,
+            "student_reg_no": "1990/123456",
+            "student_level": 2,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 36342,
+        "fields": {
+            "course": 31,
+            "semester": 241,
+            "student_reg_no": "1990/123456",
+            "student_level": 2,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 36410,
+        "fields": {
+            "course": 26,
+            "semester": 241,
+            "student_reg_no": "1990/123456",
+            "student_level": 2,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 36492,
+        "fields": {
+            "course": 27,
+            "semester": 241,
+            "student_reg_no": "1990/123456",
+            "student_level": 2,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 36609,
+        "fields": {
+            "course": 102,
+            "semester": 241,
+            "student_reg_no": "1990/123456",
+            "student_level": 2,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 36700,
+        "fields": {
+            "course": 34,
+            "semester": 241,
+            "student_reg_no": "1990/123456",
+            "student_level": 2,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 36810,
+        "fields": {
+            "course": 32,
+            "semester": 241,
+            "student_reg_no": "1990/123456",
+            "student_level": 2,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "C",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 36898,
+        "fields": {
+            "course": 22,
+            "semester": 241,
+            "student_reg_no": "1990/123456",
+            "student_level": 2,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 38617,
+        "fields": {
+            "course": 41,
+            "semester": 242,
+            "student_reg_no": "1990/123456",
+            "student_level": 3,
+            "ca_score": "27",
+            "exam_score": "61",
+            "total_score": "88",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 38656,
+        "fields": {
+            "course": 39,
+            "semester": 242,
+            "student_reg_no": "1990/123456",
+            "student_level": 3,
+            "ca_score": "28",
+            "exam_score": "69",
+            "total_score": "97",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 38758,
+        "fields": {
+            "course": 38,
+            "semester": 242,
+            "student_reg_no": "1990/123456",
+            "student_level": 3,
+            "ca_score": "30",
+            "exam_score": "58",
+            "total_score": "88",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 38875,
+        "fields": {
+            "course": 96,
+            "semester": 242,
+            "student_reg_no": "1990/123456",
+            "student_level": 3,
+            "ca_score": "27",
+            "exam_score": "62",
+            "total_score": "89",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 39113,
+        "fields": {
+            "course": 97,
+            "semester": 242,
+            "student_reg_no": "1990/123456",
+            "student_level": 3,
+            "ca_score": "17",
+            "exam_score": "45",
+            "total_score": "62",
+            "letter_grade": "B",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 39242,
+        "fields": {
+            "course": 44,
+            "semester": 242,
+            "student_reg_no": "1990/123456",
+            "student_level": 3,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 39266,
+        "fields": {
+            "course": 36,
+            "semester": 242,
+            "student_reg_no": "1990/123456",
+            "student_level": 3,
+            "ca_score": "29",
+            "exam_score": "69",
+            "total_score": "98",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 39344,
+        "fields": {
+            "course": 43,
+            "semester": 242,
+            "student_reg_no": "1990/123456",
+            "student_level": 3,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 39444,
+        "fields": {
+            "course": 37,
+            "semester": 242,
+            "student_reg_no": "1990/123456",
+            "student_level": 3,
+            "ca_score": "23",
+            "exam_score": "59",
+            "total_score": "82",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 39606,
+        "fields": {
+            "course": 42,
+            "semester": 242,
+            "student_reg_no": "1990/123456",
+            "student_level": 3,
+            "ca_score": "35",
+            "exam_score": "44",
+            "total_score": "79",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 41765,
+        "fields": {
+            "course": 53,
+            "semester": 243,
+            "student_reg_no": "1990/123456",
+            "student_level": 3,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 41881,
+        "fields": {
+            "course": 52,
+            "semester": 243,
+            "student_reg_no": "1990/123456",
+            "student_level": 3,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 42296,
+        "fields": {
+            "course": 109,
+            "semester": 243,
+            "student_reg_no": "1990/123456",
+            "student_level": 3,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 42492,
+        "fields": {
+            "course": 46,
+            "semester": 243,
+            "student_reg_no": "1990/123456",
+            "student_level": 3,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 42538,
+        "fields": {
+            "course": 106,
+            "semester": 243,
+            "student_reg_no": "1990/123456",
+            "student_level": 3,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 42637,
+        "fields": {
+            "course": 107,
+            "semester": 243,
+            "student_reg_no": "1990/123456",
+            "student_level": 3,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "B",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 42685,
+        "fields": {
+            "course": 47,
+            "semester": 243,
+            "student_reg_no": "1990/123456",
+            "student_level": 3,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 42762,
+        "fields": {
+            "course": 108,
+            "semester": 243,
+            "student_reg_no": "1990/123456",
+            "student_level": 3,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 42949,
+        "fields": {
+            "course": 45,
+            "semester": 243,
+            "student_reg_no": "1990/123456",
+            "student_level": 3,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 47329,
+        "fields": {
+            "course": 54,
+            "semester": 244,
+            "student_reg_no": "1990/123456",
+            "student_level": 4,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 47738,
+        "fields": {
+            "course": 116,
+            "semester": 244,
+            "student_reg_no": "1990/123456",
+            "student_level": 4,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 47825,
+        "fields": {
+            "course": 58,
+            "semester": 244,
+            "student_reg_no": "1990/123456",
+            "student_level": 4,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 48209,
+        "fields": {
+            "course": 56,
+            "semester": 244,
+            "student_reg_no": "1990/123456",
+            "student_level": 4,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 48281,
+        "fields": {
+            "course": 55,
+            "semester": 244,
+            "student_reg_no": "1990/123456",
+            "student_level": 4,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 48929,
+        "fields": {
+            "course": 62,
+            "semester": 244,
+            "student_reg_no": "1990/123456",
+            "student_level": 4,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 49013,
+        "fields": {
+            "course": 59,
+            "semester": 244,
+            "student_reg_no": "1990/123456",
+            "student_level": 4,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 49028,
+        "fields": {
+            "course": 114,
+            "semester": 244,
+            "student_reg_no": "1990/123456",
+            "student_level": 4,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 52620,
+        "fields": {
+            "course": 113,
+            "semester": 245,
+            "student_reg_no": "1990/123456",
+            "student_level": 4,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 52695,
+        "fields": {
+            "course": 63,
+            "semester": 245,
+            "student_reg_no": "1990/123456",
+            "student_level": 4,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 52761,
+        "fields": {
+            "course": 64,
+            "semester": 245,
+            "student_reg_no": "1990/123456",
+            "student_level": 4,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    },
+    {
+        "model": "results.result",
+        "pk": 55395,
+        "fields": {
+            "course": 57,
+            "semester": 244,
+            "student_reg_no": "1990/123456",
+            "student_level": 4,
+            "ca_score": "0",
+            "exam_score": "0",
+            "total_score": "0",
+            "letter_grade": "A",
+            "upload_date": null
+        }
+    }
+]
