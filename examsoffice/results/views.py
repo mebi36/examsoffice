@@ -130,8 +130,8 @@ def student_records(request, reg_no):
             messages.add_message(
                 request,
                 messages.INFO,
-                """No academic records were found for the 
-                                    registration number entered.""",
+                "No academic records were found for the "
+                "registration number entered.",
                 extra_tags="text-danger",
             )
 
@@ -147,7 +147,7 @@ def student_records(request, reg_no):
         messages.add_message(
             request,
             messages.ERROR,
-            """Invalid Student Registration Number""",
+            "Invalid Student Registration Number",
             extra_tags="text-danger",
         )
         context = {}
@@ -306,10 +306,6 @@ def recent_results_bulk(request):
     return render(request, template, {"qs": grouped_dict})
 
 
-# @login_required
-# def results_view_filtered(request, )
-
-
 @login_required
 def all_results_agg(request):
     """This view will aggregate all results currently
@@ -370,12 +366,10 @@ def all_results_agg(request):
     return render(request, template, context)
 
 
-"""For bulk result operations like:
-    class result uploads
-    deletion of entire results for a particular session
-"""
-
-
+# Views for bulk result operations like:
+# class result uploads
+# deletion of entire results for a particular session
+# =====================================================================
 @login_required
 def result_upload_options(request):
     RESULT_UPLOAD_OPTIONS = (
@@ -570,8 +564,8 @@ def upload_result_file(request):
                     messages.add_message(
                         request,
                         messages.ERROR,
-                        """File does not comply with provided format. 
-                                Please download and use a valid format.""",
+                        "File does not comply with provided format. "
+                        "Please download and use a valid format.",
                         extra_tags="text-danger",
                     )
                     return HttpResponseRedirect(
@@ -601,12 +595,11 @@ def upload_result_file(request):
                 for row in invalid_result_index_list:
                     if row not in invalid_rows:
                         invalid_rows.append(row + 2)
-                error_text = f"""The following rows in the file contains invalid entries:
-                                {sorted(invalid_rows)}"""
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    error_text,
+                    f"The following rows in the file contains invalid entries: "
+                    f"{sorted(invalid_rows)}",
                     extra_tags="text-danger",
                 )
             return HttpResponseRedirect(reverse("results:upload_result_file"))
@@ -811,8 +804,8 @@ def generic_class_info_handler(
         messages.add_message(
             request,
             messages.ERROR,
-            f"""No students are currently registered with 
-                    {expected_yr_of_grad} as their year of graduation""",
+            f"No students are currently registered with "
+            f"{expected_yr_of_grad} as their year of graduation",
             extra_tags="text-danger",
         )
         return HttpResponseRedirect(reverse("results:spreadsheets"))
