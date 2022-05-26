@@ -576,7 +576,8 @@ def upload_result_file(request):
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    "Error. File may be missing either column headers or result entries",
+                    "Error. File may be missing "
+                    "either column headers or result entries",
                     extra_tags="text-danger",
                 )
                 return HttpResponseRedirect(
