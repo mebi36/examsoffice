@@ -1,24 +1,22 @@
-{% extends 'base.html' %}
+{% extends 'results/base.html' %}
 {% load static %}
+{% block title %}Search {% endblock %}
 {% block content %}
-<div id="form-body">
-    <div class="card mx-auto w-75">
+<div id="form-body" class="col-md-8 mx-auto">
+    <div class="card mx-auto bg-secondary bg-opacity-10 p-5 m-5">
+        <h2 class="mb-4 text-center text-success">Enter Student Registration Number</h2>
         {% include 'message_display.html' %}
         <form action='.' method="post">
             {% csrf_token %}
             <div class="form-group">
-                <label for="reg_no">Enter Student Registration Number</label>
-                <input type="text" class="form-control w-75" name="reg_no" 
+                <input type="text" class="form-control" name="reg_no" 
                     placeholder="Registration Number . . ." required="required">
             </div>
             {% include 'next_url_form_field.html' %}
-            <div class="form-group">
-                <button type="submit" class="btn btn-success"
-                hx-target="#form-body"
-                >
-                    <img class="img-fluid mr-2" src="{% static 'images/search.svg' %}" alt="search-button">Search
+                <button type="submit" class="btn btn-lg btn-success mt-3" hx-target="#form-body">
+                    <img class="img-fluid me-2" src="{% static 'images/search.svg' %}" alt="search-button">
+                    <span>Search</span>
                 </button>
-            </div>
             </form>
     </div>
 </div>

@@ -1,4 +1,23 @@
 {% extends 'base.html' %}
-{% block jumbo_heading %}
-<div class="jumbotron mx-auto"><h1>{{ message }}</h1></div>
+{% load static %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<div class="row d-block d-md-flex bg-secondary bg-opacity-10 p-2">
+    <div class="col order-md-2">
+        <img class="img-fluid" src="{% static 'images/hero.svg' %}" alt="" style="max-height:75vh;">
+    </div>
+    <div class="col d-flex align-items-center order-md-1">
+        <p class="mx-auto display-2 text-success mt-5">Welcome to Exams Office</p>
+    </div>
+</div>
+{% endblock %}
+{% block sidebar_menu %}
+<div>
+    <h4>Useful Links</h4>
+    <ul>
+        <li><a href="{% url 'results:transcripts' %}">Student Transcripts</a></li>
+        <li><a href="{% url 'results:collation' %}">Collate Results by Session/Level</a></li>
+        <li><a href="{% url 'results:all' %}">All Currently Available Results</a></li>
+    </ul>
+</div>
 {% endblock %}

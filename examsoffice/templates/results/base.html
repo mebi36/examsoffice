@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}{% endblock %}
+{% block content %}
+{% endblock %}
+{% block sidebar_menu %}
+<h4>Results & Transcripts</h4>
+    <ul>
+        <li><a href="{% url 'results:transcripts' %}">Student Transcripts</a></li>
+        <li><a href="{% url 'results:collation' %}">Collate Results by Session/Level</a></li>
+        <li><a href="{% url 'results:all' %}">All Currently Available Results</a></li>
+    </ul>
+{% endblock %}

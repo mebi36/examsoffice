@@ -1040,12 +1040,7 @@ def student_transcript_form(request):
                 + "?next=%s" % next_url
             )
         else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                "Invalid Student Registration Number",
-                extra_tags="text-danger",
-            )
+            messages.error(request, "Invalid Student Registration Number", extra_tags="text-danger")
     return render(request, template, {})
 
 

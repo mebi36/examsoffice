@@ -7,32 +7,50 @@
         <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
         <link rel="stylesheet" href="{% static 'css/custom.css' %}">
         <script src="{% static 'htmx.js' %}"></script>
-        <title>{% block title %}{% endblock %}</title>
+        <title>{% block title %}{% endblock %} | Exams Office</title>
     </head>
 
 
     <body>
-        <div class="shadow  p-1 mb-5 bg-white rounded">
-            <nav class="nav-bar navbar-default ">
-            </nav>
-            <nav class="navbar navbar-expand-lg navbar-light bg-white">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white">
+            <div class="container-fluid mx-3">
                 <a href="{% url 'index' %}" class="navbar-brand">
-                    <img height="35%" width="35%" src="{% static 'images/logo.svg' %}" alt="UNN EXAMS OFFICE">
+                    <img class="ms-1" height="40px" width="40px" src="{% static 'images/logo.png' %}" alt="UNN EXAMS OFFICE">
+                    <span class="text-success ms-2">Exams Office</span>
                 </a>
-                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav mr-auto">
+                <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+                    <ul class="navbar-nav">
                         <li class="navbar-item">
                             <a class="nav-link" href="{% url 'index' %}">Home</a>
                         </li>
-                        <li class="navbar-item">
-                            <a class="nav-link" href="{% url 'results:menu' %}">Results & Transcripts</a>
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Results</a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li>
+                                    <a class="nav-link" href="{% url 'results:transcripts' %}">Student Transcripts</a>
+                                </li>
+                                <li>
+                                    <a class="nav-link" href="{% url 'results:collation' %}">Result Collation</a>
+                                </li>
+                                <li>
+                                    <a class="nav-link" href="{% url 'results:spreadsheets' %}">Result Spreadsheets</a>
+                                </li>
+                                <li>
+                                    <a class="nav-link" href="{% url 'results:collation' %}">Performance Breakdown</a>
+                                </li>
+                            </ul>
                         </li>
-                        <li class="navbar-item">
-                            <a class="nav-link" href="{% url 'students:menu' %}">Students Bio Data</a>
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Students</a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li>
+                                    <a class="nav-link" href="{% url 'students:menu' %}">Students Bio Data</a>
+                                </li>
+                            </ul>
                         </li>
                         <li class="navbar-item">
                             <a class="nav-link" href="{% url 'programs:menu' %}">Program Requirements</a>
@@ -42,36 +60,28 @@
                         </li>
                     </ul>
                 </div>
-            </nav>
-        </div>
-        <div class="container-fluid bg-white mt-5">
-            <div class="col-sm">        
-            {% block jumbo_heading %}
-            {% endblock%}       
             </div>
+        </nav>
+        <div class="container-fluid bg-white mt-5">
             <div class="row">
-                <div class="col-sm-9">
+                <div class="col col-pull">
                     <div class="mt-2">        
                     {% block content%}
                     {% endblock%}       
                     </div>
                 </div>
-                <div class="col-sm-3 border-left">
-                    <h4>Useful Links</h4>
-                    <ul>
-                        <li><a href="{% url 'results:transcripts' %}">Student Transcripts</a></li>
-                        <li><a href="{% url 'results:collation' %}">Collate Results by Session/Level</a></li>
-                        <li><a href="{% url 'results:all' %}">All Currently Available Results</a></li>
-                    </ul>
-                    <br><br><br><br><br><br><br><br><br><br><br><br>
-                    <br><br><br><br><br><br><br><br><br><br><br>
+                <div class="col-md-3 border-left vh-100 d-none d-md-flex">
+                    <div class="mt-3">
+                        {% block sidebar_menu %}
+                        {% endblock %}
+                    </div>
                 </div>
                 </div>
             </div>
         </div>
-        <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
         <script src="{% static 'js/popper.min.js' %}"></script>
         <script src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script src="{% static 'js/vue.global.js' %}"></script>
         <script>
             document.body.addEventListener('htmx:configRequest', (e) => {
                 e.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
