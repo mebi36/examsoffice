@@ -1,16 +1,11 @@
-<svg viewBox="0 0 150 75" xmlns="http://www.w3.org/2000/svg">
-  <style>
-    .small { font: italic 13px sans-serif; }
-    .heavy { font: bold 20px sans-serif; }
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
+ "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+ width="512.000000pt" height="512.000000pt" viewBox="0 0 512.000000 512.000000"
+ preserveAspectRatio="xMidYMid meet">
 
-    /* Note that the color of the text is set with the    *
-     * fill property, the color property is for HTML only */
-    .Rrrrr { font: italic 30px serif; fill: green; }
-  </style>
-
-  <text x="20" y="21" class="heavy">U</text>
-  <text x="20" y="38" class="heavy">N</text>
-  <text x="20" y="55" class="heavy">N</text>
-  <text x="40" y="25" class="Rrrrr">Exams</text>
-<text x="40" y="48" class="Rrrrr">Office</text>
+<g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
+fill="#000000" stroke="none">
+</g>
 </svg>
