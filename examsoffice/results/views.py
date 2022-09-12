@@ -1027,7 +1027,12 @@ def student_transcript_form(request):
 
     if request.method == "POST":
         reg_no = request.POST["reg_no"] or None
+
         if ex.Student.is_valid_reg_no(reg_no):
+            if  not ex.Student.objects.filter(student_reg_no=reg_no).exists():
+                messages.error(request, "No student found with registration number: %s" % reg_no, extra_tags="text-danger")
+                return render(request, template, {})
+
             next_url = reverse(
                 "results:generate_transcript",
                 kwargs={"reg_no": reg_no.replace("/", "_")},

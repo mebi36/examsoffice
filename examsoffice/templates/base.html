@@ -12,7 +12,7 @@
 
 
     <body>
-        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white p-1 border-bottom">
             <div class="container-fluid mx-3">
                 <a href="{% url 'index' %}" class="navbar-brand">
                     <img class="ms-1" height="40px" width="40px" src="{% static 'images/logo.png' %}" alt="UNN EXAMS OFFICE">
@@ -40,7 +40,7 @@
                                     <a class="nav-link" href="{% url 'results:spreadsheets' %}">Result Spreadsheets</a>
                                 </li>
                                 <li>
-                                    <a class="nav-link" href="{% url 'results:collation' %}">Performance Breakdown</a>
+                                    <a class="nav-link" href="{% url 'results:collation' %}">Collated Results</a>
                                 </li>
                             </ul>
                         </li>
@@ -48,15 +48,21 @@
                             <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Students</a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                 <li>
-                                    <a class="nav-link" href="{% url 'students:menu' %}">Students Bio Data</a>
+                                    <a class="nav-link" href="{% url 'students:search' %}">Students Bio Data</a>
+                                </li>
+                                <li>
+                                    <a class="nav-link" href="{% url 'students:bio_update_format' %}">Bio of Entire Class</a>
+                                </li>
+                                <li>
+                                    <a class="nav-link" href="#">Student Academic Progress History</a>
                                 </li>
                             </ul>
                         </li>
                         <li class="navbar-item">
-                            <a class="nav-link" href="{% url 'programs:menu' %}">Program Requirements</a>
+                            <a class="nav-link" href="{% url 'programs:add_prog_requirement_form' %}">Program Requirements</a>
                         </li>
                         <li class="navbar-item">
-                            <a class="nav-link" href="{% url 'staff:menu' %}">Staff Info</a>
+                            <a class="nav-link" href="{% url 'staff:bios_main' %}">Staff Info</a>
                         </li>
                     </ul>
                 </div>
@@ -67,7 +73,7 @@
                 <div class="col col-pull">
                     <div class="mt-2">        
                     {% block content%}
-                    {% endblock%}       
+                    {% endblock%}
                     </div>
                 </div>
                 <div class="col-md-3 border-left vh-100 d-none d-md-flex">

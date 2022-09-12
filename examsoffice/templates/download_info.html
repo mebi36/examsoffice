@@ -1,9 +1,9 @@
-{% extends 'base.html' %}
+{% extends 'results/base.html' %}
 {% block title %}Download{% endblock %}
 {% block content %}
 <div class="col col-md-8 mx-auto">
     <div class="card mx-auto bg-secondary bg-opacity-10 p-5 m-5">
-        <h2 class="text-center mb-3  pb-1 border-bottom">{% block page_desc %}{% endblock %}</h2>
+        <h2 class="text-center mb-3  pb-1">{% block page_desc %}{% endblock %}</h2>
         <p class="card-text mx-auto">
             {% block extra_info %}
             {% endblock %}

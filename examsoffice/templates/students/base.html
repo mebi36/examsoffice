@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}{% endblock %}
+{% block content %}
+{% endblock %}
+{% block sidebar_menu %}
+<h4>Results & Transcripts</h4>
+    <ul>
+        <li>
+            <a href="{% url 'students:search' %}">Students Bio Data</a>
+        </li>
+        <li>
+            <a href="{% url 'students:bio_update_format' %}">Bio of Entire Class</a>
+        </li>
+        <li>
+            <a href="#">Student Academic Progress History</a>
+        </li>
+    </ul>
+{% endblock %}

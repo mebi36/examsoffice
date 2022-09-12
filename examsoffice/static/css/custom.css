@@ -59,3 +59,7 @@ a:hover{
     background:none;
     
 }
+
+.filter-black {
+  filter: invert(0%) sepia(1%) saturate(0%) hue-rotate(148deg) brightness(103%) contrast(102%);
+}

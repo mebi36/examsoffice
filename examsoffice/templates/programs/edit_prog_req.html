@@ -1,37 +1,40 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block title %}Modify Program Requirements{% endblock %}
 {% block content %}
 {% include 'message_display.html' %}
-<form action="" method="post">
-    {% csrf_token %}
-    {{ formset.management_form }}
-    <h3>Program Requirements for {{ session_title.session }} - {{ level_title.level_description }}</h3><hr>
-    <h4 class="mt-2">First Semester</h4>
-    {% for form in formset %}
-    {% if form.instance.course.course_semester.id == 1 %}
-    <div>{{ form.as_table }} </div>
-    <hr>
-    {% endif %}
-    {% endfor %}
+<div class="col-md-8 mx-auto">
+    <div class="card bg-secondary bg-opacity-10 p-5">
+        <form action="" method="post">
+            {% csrf_token %}
+            {{ formset.management_form }}
+            <h3 class="text-success text-center mb-3">Program Requirements for {{ session_title.session }} - {{ level_title.level_description }}</h3><hr>
+            <h4 class="mt-2 border-bottom mb-3">First Semester</h4>
+            {% for form in formset %}
+            {% if form.instance.course.course_semester.id == 1 %}
+            <div>{{ form.as_table }} </div>
+            {% endif %}
+            {% endfor %}
 
-    <h4>Second Semester</h4>
-    {% for form in formset %}
-    {% if form.instance.course.course_semester.id == 2 %}
-    <div>{{ form.as_table }} </div>
-    <hr>
-    {% endif %}
-    {% endfor %}
+            <h4 class="border-bottom mb-3">Second Semester</h4>
+            {% for form in formset %}
+            {% if form.instance.course.course_semester.id == 2 %}
+            <div>{{ form.as_table }} </div>
+            <hr>
+            {% endif %}
+            {% endfor %}
 
-    <h4>Add Course</h4>
-    {% for form in formset %}
-    {% if form.instance.course.course_semester.id != 2 and form.instance.course.course_semester.id != 1 %}
-    <div>{{ form.as_table }} </div>
-    <hr>
-    {% endif %}
-    {% endfor %}
+            <h4>Add Course</h4>
+            {% for form in formset %}
+            {% if form.instance.course.course_semester.id != 2 and form.instance.course.course_semester.id != 1 %}
+            <div>{{ form.as_table }} </div>
+            <hr>
+            {% endif %}
+            {% endfor %}
 
-    <input class="btn btn-success" type="submit" value="Save and Continue" name="submit">
-    <input class="btn btn-success" type="submit" value="Finish" name="submit">
+            <input class="btn btn-success" type="submit" value="Save and Continue" name="submit">
+            <input class="btn btn-success" type="submit" value="Finish" name="submit">
 
-</form>
+        </form>
+    </div>
 {% endblock %}

@@ -2,21 +2,18 @@
 {% load static %}
 {% block content %}
 {% include 'message_display.html' %}
-<div class="row">
-    <div class="col-sm-2"></div>
-    <div class="col-sm-8">
-        <h3>Staff Bio Update</h3>
+<div class="col-md-8 mx-auto">
+    <div class="card bg-secondary bg-opacity-10 p-5">
+        <h2 class="text-success text-center mb-3">Staff Bio Update</h2>
         {% if staff %}
-        <label for="staff">Select Staff:</label>
-            <div name="staff" class="overflow-auto" cols="70" rows="15">
+        <p class="lead my-3">Select Staff:</p>
+            <div name="staff" class="overflow-auto border bg-white bg-opacity-10 p-3" style="height:500px;">
             {% for staff_obj in staff %}
             <p><a href="{% url 'staff:edit' staff_obj.id %}">{{ staff_obj|upper}}</a></p>
             {% endfor %}
             </div>
         {% endif %}
-        <br><br><br>
-        <a href="{% url 'staff:create' %}">Create Bio for New Staff </a>
+        <a href="{% url 'staff:create' %}" class="lead mt-5 mx-auto">Create Bio for New Staff </a>
     </div>
-    <div class="col-sm-2"></div>
 </div>
 {% endblock %}

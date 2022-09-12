@@ -1,24 +1,30 @@
-{% extends 'base.html' %}
+{% extends 'students/base.html' %}
 {% load static %}
-
+{% block title %}Bio data File Upload {% endblock %}
 {% block content %}
-<div class="card wx-75 mx-auto">
-    {% include 'message_display.html' %}
-    <h6 class="text-warning">
-        **Please ensure the headers and file format of the result 
-        format provided is not modified in the file to be uploaded.</h6>
-    <form action="{% url 'students:upload_bio_file' %}" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
+<div class="col-md-8 mx-auto">
+    <div class="card bg-secondary bg-opacity-10 p-5">
+        {% include 'message_display.html' %}
+        <h2 class="text-success text-center mb-5">Upload Bio data for Entire class</h2>
+        <h6 class="text-danger lead">
+            ** Please ensure the headers and file format of the result 
+            format provided is not modified in the file to be uploaded.</h6>
+        <form action="{% url 'students:upload_bio_file' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
 
-        <div class="form-group">
-            <label for="result_file">Select Bio File:</label>
-            <input class="form-control wx-75" type="file" name="result_file" 
-            required="required" accept=".csv">
-        </div>
-        <button type="submit" class="btn btn-success">
-            <img src="{% static 'images/save.svg' %}" alt="save-icon" class="mr-2">
-            Upload Files
-        </button>
-    </form>
+            <div class="form-group">
+                <label for="result_file">Select Bio File:</label>
+                <input class="form-control wx-75" type="file" name="result_file" 
+                required="required" accept=".csv">
+            </div>
+            <button type="submit" class="btn btn-success mt-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-upload me-1" viewBox="0 0 16 16">
+                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                    <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+                </svg>
+                Upload Files
+            </button>
+        </form>
+    </div>
 </div>
 {% endblock %}
