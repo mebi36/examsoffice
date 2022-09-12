@@ -1,14 +1,17 @@
 {% extends 'base.html' %}
+{% block title %}Download{% endblock %}
 {% block content %}
-<div class="card mx-auto w-75">
-    <p class="card-text mx-auto">
-        {% block extra_info %}
-        {% endblock %}
-        <br>
-        <a class="btn btn-success" href="{{ request.scheme }}://{{ request.get_host }}{{ next }}">
-        Click here to start download
-        </a>
-    </p>
-    <p class="text-danger">Please be patient after clicking link. The download may take a few moments to start.</p>
+<div class="col col-md-8 mx-auto">
+    <div class="card mx-auto bg-secondary bg-opacity-10 p-5 m-5">
+        <h2 class="text-center mb-3  pb-1 border-bottom">{% block page_desc %}{% endblock %}</h2>
+        <p class="card-text mx-auto">
+            {% block extra_info %}
+            {% endblock %}
+            <a class="btn btn-success mt-3" href="{{ request.scheme }}://{{ request.get_host }}{{ next }}">
+            Click here to start download
+            </a>
+        </p>
+        <p class="text-danger">Please be patient after clicking link. The download may take a few moments to start.</p>
+    </div>
 </div>
 {% endblock %}

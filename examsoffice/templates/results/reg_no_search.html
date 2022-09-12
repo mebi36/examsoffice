@@ -2,7 +2,7 @@
 {% load static %}
 {% block title %}Search {% endblock %}
 {% block content %}
-<div id="form-body" class="col-md-8 mx-auto">
+<div class="col-md-8 mx-auto">
     <div class="card mx-auto bg-secondary bg-opacity-10 p-5 m-5">
         <h2 class="mb-4 text-center text-success">Enter Student Registration Number</h2>
         {% include 'message_display.html' %}
@@ -13,7 +13,7 @@
                     placeholder="Registration Number . . ." required="required">
             </div>
             {% include 'next_url_form_field.html' %}
-                <button type="submit" class="btn btn-lg btn-success mt-3" hx-target="#form-body">
+                <button type="submit" class="btn btn-lg btn-success mt-3">
                     <img class="img-fluid me-2" src="{% static 'images/search.svg' %}" alt="search-button">
                     <span>Search</span>
                 </button>

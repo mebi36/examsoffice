@@ -1,24 +1,33 @@
 {% extends 'download_info.html' %}
+{% block page_desc %}Transcript Download Details{% endblock %}
 {% block extra_info %}
-<div class='card mx-auto w-75'>
-    <p class="card-text">Available Student Information:</p>
-    <ul>
-        <li>Registration Number: {{ student.student_reg_no }}</li>
-        <li>Last Name: {{ student.last_name }}</li>
-        <li>First Name: {{ student.first_name }}</li>
-        <li>Other Names: {{ student.other_names }}</li>
-        <li>Current Level Of Study: {{ student.current_level_of_study }}</li>
-    </ul>
-    <a class="btn btn-success" href="{{ student.get_absolute_url }}/?next={{ next }}">
-        Edit Student Bio Data
-    </a>
+<div class='mx-auto'>
+    <p class="lead fw-bold text-center">Student Information</p>
+    <table class="table table-sm table-borderless">
+        <tbody>
+            <tr>
+                <td>Registration Number: {{ student.student_reg_no }}</td>
+                <td>Last Name: {{ student.last_name }}</p></td>
+            </tr>
+            <tr>
+                <td>First Name: {{ student.first_name }}</td>
+                <td>Other Names: {{ student.other_names }}</td>
+            </tr>
+            <tr>
+                <td>
+                    Current Level Of Study: {{ student.current_level_of_study }}</p>
+                </td>
+                <td>
+                    <a href="{{ student.get_absolute_url }}?next={{ next }}">
+                        Edit
+                    </a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </div>
-<div class='card mx-auto w-75'>
-    <p class="card-text">Head of Department: {{ hod.title }} {{hod.first_name.0 }}. {{ hod.other_names.0 }}. {{ hod.last_name }}</p>
-    <a class="btn btn-success" href="#">
-        Edit Head of Dep Bio Data
-    </a>
-    <br><br>
+<div class='mx-auto'>
+    <div class="card-text mb-4">Head of Department:<a href="#"> {{ hod.title }} {{hod.first_name.0 }}. {{ hod.other_names.0 }}. {{ hod.last_name }}</a></div>
     <a class="mx-auto" href="#">
         New Head of Department?
     </a>
