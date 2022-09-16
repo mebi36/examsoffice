@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<div class="card mx-auto w-75 ml-3">
+<div class="mx-auto w-75 ml-3">
 {% include 'message_display.html' %}
 <h5>Academic Progress History for {{ student.student_reg_no }} - {{ student.last_name }}, {{ student.first_name }}</h5>
 <h5 class="mb-2">
@@ -10,7 +10,7 @@
                         {% else %}Unknown{% endif %}
 </h5>
 
-<div class="card mx-auto w-75 ml-3">
+<div class="mx-auto w-75 ml-3">
 <form action="{{ student.get_progress_history_url }}" method="post">
 {% csrf_token %}
 {{ formset.management_form }}

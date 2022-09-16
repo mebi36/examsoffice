@@ -3,8 +3,8 @@
 {% block title %}Modify Program Requirements{% endblock %}
 {% block content %}
 {% include 'message_display.html' %}
-<div class="col-md-8 mx-auto">
-    <div class="card bg-secondary bg-opacity-10 p-5">
+<div class="col-md-6 mt-5 mx-auto">
+    <div class="bg-secondary bg-opacity-10 p-5">
         <form action="" method="post">
             {% csrf_token %}
             {{ formset.management_form }}
@@ -37,4 +37,5 @@
 
         </form>
     </div>
+</div>
 {% endblock %}

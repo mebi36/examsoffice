@@ -1,9 +1,11 @@
 {% extends 'base.html' %}
 {% block title %}{% endblock %}
+<div class="mt-5">
 {% block content %}
 {% endblock %}
+</div>
 {% block sidebar_menu %}
-<h4>Results & Transcripts</h4>
+<h4>Students Info</h4>
     <ul>
         <li>
             <a href="{% url 'students:search' %}">Students Bio Data</a>

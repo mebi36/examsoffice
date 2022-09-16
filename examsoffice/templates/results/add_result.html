@@ -3,10 +3,10 @@
 {% block content %}
 {% load to_underscore %}
 
-<div class="card mx-auto w-75">
+<div class="mx-auto w-75">
     <div class="card-title">Add a record for {{ reg_no }}</div>
     {% include "message_display.html" %}
-    <form action="{% url 'results:add_processor' %}", method="post">
+    <form action="{% url 'results:add_processor' %}" method="post">
         {% csrf_token %}
 
         <div class="form-group">

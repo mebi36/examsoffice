@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-        <div class="card w-75 mx-auto">
+        <div class="w-75 mx-auto">
             <h5 class="card-title">Student Transcripts</h5>
             <p class="card-text">
                 Print student transcripts and academic progress reports
@@ -9,7 +9,7 @@
             <a href="{% url 'results:transcripts' %}" class="btn btn-success" id="go-button">
                 <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">    Go</a>    
         </div> 
-        <div class="card w-75 mx-auto">
+        <div class="w-75 mx-auto">
             <h5 class="card-title">Collated Results</h5>
             <p class="card-text">
                 Download Spreadsheet of Collated results for a given session and level
@@ -17,7 +17,7 @@
             <a href="{% url 'results:collation' %}" class="btn btn-success" id="go-button">
                 <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">    Go</a>    
         </div> 
-        <div class="card w-75 mx-auto">
+        <div class="w-75 mx-auto">
             <h5 class="card-title">Class Spreadsheets</h5>
             <p class="card-text">
                 Download Spreadsheet of academic records of entire class
@@ -25,7 +25,7 @@
             <a href="{% url 'results:spreadsheets' %}" class="btn btn-success" id="go-button">
                 <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">    Go</a>    
         </div> 
-        <div class="card w-75 mx-auto">
+        <div class="w-75 mx-auto">
             <h5 class="card-title">Outstanding Courses Summary</h5>
             <p class="card-text">
                 Download Spreadsheet that summarizes the current outstanding courses 
@@ -34,7 +34,7 @@
             <a href="{% url 'results:class_outstanding_courses' %}" class="btn btn-success" id="go-button">
                 <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">    Go</a>    
         </div> 
-        <div class="card w-75 mx-auto">
+        <div class="w-75 mx-auto">
             <h5 class="card-title">Modify Student Records</h5>
             <p class="card-text">
                 Edit Student Records here
@@ -43,7 +43,7 @@
                 <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">
                     Go</a>        
         </div> 
-        <div class="card w-75 mx-auto">
+        <div class="w-75 mx-auto">
             <h5 class="card-title">Result Uploads</h5>
             <p class="card-text">
                 Upload academic records
@@ -52,7 +52,7 @@
                 <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">Go</a>        
 
         </div>
-        <div class="card w-75 mx-auto">
+        <div class="w-75 mx-auto">
             <h5 class="card-title">Delete Results by Session</h5>
             <p class="card-text">
                 Delete all results for a course in a given session.
@@ -60,7 +60,7 @@
             <a href="{% url 'results:delete_by_session' %}" class="btn btn-success" id="go-button">
                 <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">Go</a>    
         </div>
-        <div class="card w-75 mx-auto">
+        <div class="w-75 mx-auto">
             <h5 class="card-title">View Recently Added Results</h5>
             <p class="card-text">
                 View results that were added recently.
@@ -68,7 +68,7 @@
             <a href="{% url 'results:recent_uploads' %}" class="btn btn-success" id="go-button">
                 <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">Go</a>    
         </div>
-        <div class="card w-75 mx-auto">
+        <div class="w-75 mx-auto">
             <h5 class="card-title">List of Possible Graduands</h5>
             <p class="card-text">
                 Download list of possible graduands for a given session
