@@ -1,0 +1,51 @@
+Project update todo
+    - re-do entire look and feel of app
+        what a frontend framework will help solve:
+            - handle icons, conditional rendering of components, reactivity, ease implementation of charts,
+                make project future-proof
+            - difficulties in using fontend: the project is download-heavy, backend generates lots of files,
+                a lot of work has gone into the backend-dependent design, 
+            - progress plan: progressively add vue/ re-do entire project to have a decoupled frontend/backend 
+                structure.
+
+======================================================
+Possible new Features
+    - implementation of groups and permissions: only a  certain group of staff should be allowed to    modify results and a group with higher clearance must be able to view all the modifications made
+    in the system. - a logging system may also be
+    necessary ***critical feature
+    
+    - student performance detail view: current cgpa/ possible class 
+        degree, position in class, etc (picture of student)
+    - entire class performance detail view: highest cgpa, number of 
+        students in different classes of degree
+    - view that displays students in a class, outstanding courses/  
+        unit load
+    - view that displays list of possible graduands for a particular
+        year (use analytics to give insights)
+    - view that displays all the results for a course in a given
+        academic session, makes it possible to edit any record and
+        synch changes to the backend
+
+vue should be the last resort for anything being implemented
+        add
+            cgpa calculator =done
+            outstanding courses = done
+            result breakdown(a's, b's) = done
+            best semester/session performance 
+        methods to models files
+
+        make an academicset class for manipulating results of students in the
+        same graduation set,
+            class average grades for a particular course,
+            highest/lowest cgpa in a class
+            class ranking by cgpa
+
+==============================================================================
+Project data modeling needs to improve:
+                Lecturer/Student models need to become robust enough for multi-department
+                    relations. The system does not understand the concept of departments:
+                    this is a significant rudimentary flaw in the design concept. 
+
+===============================
+There could be a popover for courses with no passing grades section with information
+such as how many times student has attempted a course and the sessions they attempted it.
