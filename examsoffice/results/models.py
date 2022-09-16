@@ -1,9 +1,9 @@
-from django.db import models
-from django.db.models.constraints import UniqueConstraint
-from django.db.models.deletion import CASCADE, PROTECT
-
+import math
 import re
 
+from django.db import models
+from django.db.models.deletion import CASCADE, PROTECT
+from django.db.models.functions import Upper
 from django.urls.base import reverse
 
 # the managed attribute of the model's meta classes needs
@@ -372,8 +372,13 @@ class Student(models.Model):
         db_column="JambNumber", max_length=20, blank=True, null=True
     )
 
+
     class Meta:
         db_table = "tbl1StudentBios"
+
+    def __str__(self):
+        return f"{self.student_reg_no} - {self.last_name}, {self.first_name}"
+
 
     def get_reg_no_for_url(self):
         return self.student_reg_no.replace("/", "_")
@@ -398,6 +403,88 @@ class Student(models.Model):
         return reverse(
             "students:progress_history", args=[self.get_reg_no_for_url()]
         )
+
+    def current_cgpa(self):
+        """
+        A method for calculating a student's CGPA.
+        
+        returns: 
+        student's CGPA to 3 decimal places if student has any
+        results in the database. 
+        None if no results were found for the student.
+        """
+        results = Result.objects.filter(student_reg_no=self.student_reg_no)
+
+        if not results.exists():
+            return None
+
+        grade_point = 0
+        credit_load = 0
+        for result in results:
+            grade_point += Result.grade_weights[result.letter_grade.upper()] * result.course.credit_load
+            credit_load += result.course.credit_load
+
+        return round(grade_point/credit_load, 3)
+
+    def cgpa_by_session(self):
+        """
+        A method for calculating a student's CGPA for every academic
+        session of their studentship.
+        
+        Returns:
+            A dict of the form {session:cgpa}.
+            None if no results were found for the student.
+        """
+        results = Result.objects.filter(student_reg_no=self.student_reg_no)
+
+        if not results.exists():
+            return None
+        
+        sessions = set(results.values_list('semester__session__session', flat=True))
+        cgpas_dict = {}
+        for session in sessions:
+            grade_point = 0
+            credit_load = 0
+            result_qs = results.filter(semester__session__session=session)
+            for result in result_qs:
+                grade_point += Result.grade_weights[result.letter_grade.upper()] * result.course.credit_load
+                credit_load += result.course.credit_load
+            cgpas_dict[session] = round(grade_point/credit_load, 3)
+        
+        return cgpas_dict
+
+    def outstanding_courses(self):
+        """
+        A method for finding a student's outstanding courses.
+        """
+        failed_courses = Result.objects.filter(
+            student_reg_no=self.student_reg_no, 
+            letter_grade__iexact="F"
+            ).values_list("course__id", flat=True)
+        cleared_courses = Result.objects.filter(
+            student_reg_no=self.student_reg_no
+            ).exclude(letter_grade__iexact="F").values_list("course__id", flat=True)
+        outstanding_courses = [Course.objects.filter(id=course).first() for course in failed_courses if course not in cleared_courses]
+        
+        return outstanding_courses
+
+    def grades_breakdown(self):
+        """
+        This method will return a dict of student's grades breakdown.
+        Or None if student has no results in the db.
+        """
+        results = Result.objects.filter(student_reg_no=self.student_reg_no)
+
+        if not results.exists():
+            return None
+        grades_dict = {"A":0, "B":0, "C":0, "D":0,"E":0, "F":0}
+        
+        for result in results:
+            grades_dict[result.letter_grade.upper()] += 1
+        
+
+        # return [{k:v} for (k,v) in grades_dict.items()]
+        return grades_dict
 
     @staticmethod
     def is_valid_reg_no(reg_no):
@@ -440,6 +527,8 @@ class Student(models.Model):
 
 
 class Result(models.Model):
+    grade_weights = {"A": 5, "B": 4, "C": 3, "D": 2, "E": 1, "F": 0}
+
     id = models.BigAutoField(db_column="ID", primary_key=True)
     course = models.ForeignKey(
         db_column="Course_ID", to=Course, on_delete=PROTECT
@@ -540,3 +629,42 @@ class StudentProgressHistory(models.Model):
 
     def get_update_url(self):
         return reverse("students:progress_history_edit", args=[self.id])
+
+
+class Faculty(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["name"], name="unique_faculty_name")
+        ]
+
+    def clean(self):
+        self.name = self.name.upper()
+        
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+
+class Department(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    name = models.CharField(max_length=500, unique=True)
+    alias = models.CharField(max_length=20, null=True, blank=True)
+    faculty = models.ForeignKey(to=Faculty, on_delete=models.CASCADE)
+    owns_current_sys_instance = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["name"], name="unique_department_name"),
+            models.UniqueConstraint(fields=["alias"], name="unique_department_short_name")
+        ]
+
+    def clean(self):
+        self.name = self.name.upper()
+        self.alias = self.alias.upper()
+        
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
