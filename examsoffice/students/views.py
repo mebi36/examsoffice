@@ -15,10 +15,13 @@ from .forms import (
     ProgressHistoryFormSet,
     StudentBioForm,
 )
+from .serializers import StudentSerializer
+from results.serializers import ResultSerializer
 from results.models import (
     LevelOfStudy,
     ModeOfAdmission,
     ModeOfStudy,
+    Result,
     Student,
     Sex,
     StudentProgressHistory,
@@ -95,7 +98,7 @@ def search(request):
     else:
         if "next" in request.GET.keys():
             context = {"next": request.GET["next"]}
-    return render(request, "results/reg_no_search.html", context)
+    return render(request, "students/reg_no_search.html", context)
 
 
 @never_cache
@@ -505,3 +508,28 @@ def upload_bio_file(request):
                 )
 
             return render(request, template, {})
+
+
+@login_required
+def profile(request, reg_no):
+    """
+    This view will display a information about a student, 
+    ranging from performance, bio-data, cgpa, results analytics 
+    (grades and performance in entire class).
+    """
+    reg_no = reg_no.replace("_", "/")
+    template = "students/profile.html"
+    student = Student.objects.filter(student_reg_no=reg_no)
+
+    if not student.exists():
+        messages.error(
+            "No student with that registration number was found", 
+            extra_tags="text-danger"
+        )
+        return render(request, template, {})
+    
+    context = {}
+    context["student_obj"] = student.first()
+    context["student"] = StudentSerializer(student.first(), many=False).data
+    context["results"] = ResultSerializer(Result.objects.filter(student_reg_no=reg_no), many=True).data
+    return render(request, template, context)
