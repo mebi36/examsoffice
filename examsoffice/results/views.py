@@ -45,7 +45,6 @@ _queryset = (
 
 _valid_grades = ["A", "B", "C", "D", "E", "F"]
 
-
 def results_menu(request):
     """A view to display all the actions a user can perform
     with regards to student results"""
@@ -1023,6 +1022,9 @@ def class_outstanding_courses_form(request):
 
 @login_required
 def student_transcript_form(request):
+    """
+    View responsible for searching for processing transcript request for a valid student
+    registration number"""
     template = "results/reg_no_search.html"
 
     if request.method == "POST":
@@ -1039,7 +1041,7 @@ def student_transcript_form(request):
             )
             return HttpResponseRedirect(
                 reverse(
-                    "results:transcript_download_info",
+                    "students:profile",
                     kwargs={"reg_no": reg_no.replace("/", "_")},
                 )
                 + "?next=%s" % next_url
