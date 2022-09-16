@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'courses',
     'staff',
     'programs',
+    'graduationclasses',
     'django_htmx',
 ]
 
@@ -157,3 +158,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #global settings
 
 SESSION_COOKIE_AGE = 60 * 60
+
+
+# login/logount redirect paths
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
