@@ -1,6 +1,6 @@
 from django.forms import ModelForm
+
 from results.models import Lecturer
-from django.core.exceptions import ValidationError
 
 
 class StaffBioForm(ModelForm):
