@@ -17,7 +17,8 @@ from django.db.models import OuterRef, Subquery, Value, Count
 from django.db.models.functions import Concat
 from django.core.paginator import Paginator
 
-from . import models as ex
+from results import models as ex
+from results.models import Result
 from results.utils import (
     possible_graduands_wb,
     student_transcript,
@@ -43,20 +44,13 @@ _queryset = (
     )
 )
 
-_valid_grades = ["A", "B", "C", "D", "E", "F"]
-
-def results_menu(request):
-    """A view to display all the actions a user can perform
-    with regards to student results"""
-    return render(request, "results/menu.html", {})
-
 
 @login_required
 def edit_result(request, pk):
     if request.method == "POST":
         result_details = get_object_or_404(ex.Result, id=pk)
         if (
-            request.POST["grade"].upper() in _valid_grades
+            request.POST["grade"].upper() in Result.VALID_GRADES
             and request.POST["grade"].upper() != result_details.letter_grade
         ):
             result_details.letter_grade = request.POST["grade"].upper()
@@ -165,7 +159,7 @@ def add_result(request, reg_no):
         "reg_no": reg_no,
         "courses": course_qs,
         "semesters": semester_qs,
-        "valid_grades": _valid_grades,
+        "valid_grades": Result.VALID_GRADES,
     }
 
     return render(request, "results/add_result.html", context)
@@ -177,7 +171,7 @@ def result_add_processor(request):
     if (
         request.POST["semester"] != None
         and request.POST["course"] != ""
-        and request.POST["grade"].upper() in _valid_grades
+        and request.POST["grade"].upper() in Result.VALID_GRADES
     ):
         course = ex.Course.objects.get(id=int(request.POST["course"]))
         semester = ex.SemesterSession.objects.get(
@@ -460,7 +454,7 @@ def upload_result_file(request):
                         inplace=True,
                     )
                     for index, row in df.iterrows():
-                        if row["grade"].upper() in _valid_grades:
+                        if row["grade"].upper() in Result.VALID_GRADES:
                             if ex.Student.is_valid_reg_no(row["reg_no"]):
                                 course = ex.Course.objects.get(
                                     id=int(request.POST["course"])
@@ -512,7 +506,7 @@ def upload_result_file(request):
                     for index, row in df.iterrows():
                         if isinstance(row["ca_score"], (int, float)):
                             if isinstance(row["exam_score"], (int, float)):
-                                if row["grade"].upper() in _valid_grades:
+                                if row["grade"].upper() in Result.VALID_GRADES:
                                     if ex.Student.is_valid_reg_no(
                                         row["reg_no"]
                                     ):
