@@ -27,26 +27,25 @@ from results.utils import (
     class_failure_spreadsheet,
 )
 
-# Generating querysets that will be used often in many views of this app
-_queryset = (
-    ex.Result.objects.all()
-    .select_related("course", "semester")
-    .values(
-        "id",
-        "course_id__course_title",
-        "course_id__course_semester",
-        "course_id__course_code",
-        "course_id__credit_load",
-        "semester_id__desc",
-        "letter_grade",
-        "semester_id__id",
-        "student_reg_no",
-    )
-)
-
 
 @login_required
 def edit_result(request, pk):
+    """View for editing result objects."""
+    _queryset = (
+        ex.Result.objects.all()
+        .select_related("course", "semester")
+        .values(
+            "id",
+            "course_id__course_title",
+            "course_id__course_semester",
+            "course_id__course_code",
+            "course_id__credit_load",
+            "semester_id__desc",
+            "letter_grade",
+            "semester_id__id",
+            "student_reg_no",
+        )
+    )
     if request.method == "POST":
         result_details = get_object_or_404(ex.Result, id=pk)
         if (
@@ -97,6 +96,21 @@ def find_student(request):
 def student_search_processor(request, reg_no):
     template_name = "results/student_records.html"
     reg_no = request.POST["reg_no"]
+    _queryset = (
+        ex.Result.objects.all()
+        .select_related("course", "semester")
+        .values(
+            "id",
+            "course_id__course_title",
+            "course_id__course_semester",
+            "course_id__course_code",
+            "course_id__credit_load",
+            "semester_id__desc",
+            "letter_grade",
+            "semester_id__id",
+            "student_reg_no",
+        )
+    )
     if ex.Student.is_valid_reg_no(reg_no):
         object_list = _queryset.filter(student_reg_no=reg_no)
         student_info, _ = ex.Student.objects.get_or_create(
