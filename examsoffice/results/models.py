@@ -1,20 +1,27 @@
-import math
+"""The models for all the apps in the project.
+
+This project is an adaptation of a legacy application, previously
+built with the MS Access software. Hence, the need to explicitly name some
+db tables in the Meta classes of certain models.
+
+
+NB:
+    The managed attribute of the model's meta classes needs
+    to be set to False after initial migrations are run as this
+    will adversely impact the use of forms in the project if left
+    as false.
+
+"""
+
 import re
 
 from django.db import models
 from django.db.models.deletion import CASCADE, PROTECT
-from django.db.models.functions import Upper
 from django.urls.base import reverse
-
-# the managed attribute of the model's meta classes needs
-# to be set to False after initial migrations are run as this
-# will adversely impact the use of forms in the project if left
-# as false
-
-# Create your models here.
 
 
 class LecturerRole(models.Model):
+    """Model for Roles a Lecturer could have in a course."""
     id = models.BigAutoField(db_column="RoleID", primary_key=True)
     role = models.CharField(
         db_column="Role", max_length=255, blank=True, null=True
@@ -25,6 +32,7 @@ class LecturerRole(models.Model):
 
 
 class Lecturer(models.Model):
+    """Model for Lecturers."""
     id = models.BigAutoField(db_column="LecturerID", primary_key=True)
     staff_number = models.CharField(
         db_column="StaffNumber",
@@ -77,6 +85,11 @@ class Lecturer(models.Model):
 
 
 class LevelOfStudy(models.Model):
+    """Model for the different Levels of study.
+    
+    The implementation choice stems from the fact that the project
+    was adapted to a legacy database.
+    """
     level = models.BigIntegerField(db_column="Level", primary_key=True)
     level_name = models.CharField(
         db_column="LevelName", max_length=255, blank=True, null=True
@@ -93,6 +106,7 @@ class LevelOfStudy(models.Model):
 
 
 class MaritalStatus(models.Model):
+    """Model for the different marital statuses of person models."""
     id = models.BigAutoField(db_column="ID", primary_key=True)
     marital_status = models.CharField(
         db_column="MaritalStatus", max_length=255, blank=True, null=True
@@ -106,6 +120,7 @@ class MaritalStatus(models.Model):
 
 
 class ModeOfAdmission(models.Model):
+    """Model for student modes of admission."""
     id = models.BigAutoField(db_column="ID", primary_key=True)
     mode_of_admission = models.CharField(
         db_column="ModeOfAdmission", max_length=255, blank=True, null=True
@@ -122,6 +137,7 @@ class ModeOfAdmission(models.Model):
 
 
 class ModeOfStudy(models.Model):
+    """Model for student modes of study."""
     id = models.IntegerField(db_column="ID", primary_key=True)
     mode_of_study = models.CharField(
         db_column="ModeOfStudy", max_length=255, blank=True, null=True
@@ -135,6 +151,7 @@ class ModeOfStudy(models.Model):
 
 
 class Relationship(models.Model):
+    """Model for person-to-person model relations."""
     id = models.BigAutoField(db_column="ID", primary_key=True)
     relationship = models.CharField(
         db_column="Relationship", max_length=255, blank=True, null=True
@@ -148,6 +165,7 @@ class Relationship(models.Model):
 
 
 class Semester(models.Model):
+    """Model for semesters."""
     id = models.BigIntegerField(db_column="ID", primary_key=True)
     semester = models.CharField(
         db_column="Semester", max_length=255, blank=True, null=True
@@ -161,6 +179,7 @@ class Semester(models.Model):
 
 
 class Session(models.Model):
+    """Model for academic sessions."""
     id = models.BigAutoField(db_column="SessionID", primary_key=True)
     session = models.CharField(
         db_column="Session",
@@ -178,6 +197,7 @@ class Session(models.Model):
 
 
 class Sex(models.Model):
+    """Model for sex of person models."""
     id = models.BigAutoField(db_column="ID", primary_key=True)
     sex = models.CharField(
         db_column="Sex", max_length=255, blank=True, null=True
@@ -191,6 +211,7 @@ class Sex(models.Model):
 
 
 class SemesterSession(models.Model):
+    """Linker model for academic sessions and semesters."""
     id = models.BigAutoField(db_column="SemesterNumber", primary_key=True)
     session = models.ForeignKey(
         db_column="Session",
@@ -215,6 +236,7 @@ class SemesterSession(models.Model):
 
 
 class Course(models.Model):
+    """Model for courses."""
     id = models.BigAutoField(db_column="CourseID", primary_key=True)
     course_title = models.CharField(db_column="CourseTitle", max_length=255)
     course_code = models.CharField(db_column="CourseCode", max_length=255)
@@ -238,6 +260,13 @@ class Course(models.Model):
 
 
 class ProgramRequirement(models.Model):
+    """Model for program requirement.
+    
+    Defines the curriculum and the courses students in a particular 
+    level of study are expected to pass as requirement to be eligible
+    to finally graduate with a degree. These requirements are expected
+    to change as teh curriculum of a department changes. 
+    """
     # DEFAULT_MODE_OF_ADMISSION = 1
     id = models.BigAutoField(db_column="ID", primary_key=True)
     mode_of_admission = models.ForeignKey(
@@ -262,6 +291,7 @@ class ProgramRequirement(models.Model):
 
 
 class Student(models.Model):
+    """Model for students."""
     id = models.BigAutoField(db_column="ID", primary_key=True)
     student_reg_no = models.CharField(
         db_column="StudentRegNo", unique=True, max_length=255
@@ -405,8 +435,7 @@ class Student(models.Model):
         )
 
     def current_cgpa(self):
-        """
-        A method for calculating a student's CGPA.
+        """Calculate a student's current CGPA.
         
         returns: 
         student's CGPA to 3 decimal places if student has any
@@ -421,15 +450,13 @@ class Student(models.Model):
         grade_point = 0
         credit_load = 0
         for result in results:
-            grade_point += Result.grade_weights[result.letter_grade.upper()] * result.course.credit_load
+            grade_point += Result.GRADE_WEIGHTS[result.letter_grade.upper()] * result.course.credit_load
             credit_load += result.course.credit_load
 
         return round(grade_point/credit_load, 3)
 
     def cgpa_by_session(self):
-        """
-        A method for calculating a student's CGPA for every academic
-        session of their studentship.
+        """Calculate a student's CGPA for every session of studentship.
         
         Returns:
             A dict of the form {session:cgpa}.
@@ -447,16 +474,14 @@ class Student(models.Model):
             credit_load = 0
             result_qs = results.filter(semester__session__session=session)
             for result in result_qs:
-                grade_point += Result.grade_weights[result.letter_grade.upper()] * result.course.credit_load
+                grade_point += Result.GRADE_WEIGHTS[result.letter_grade.upper()] * result.course.credit_load
                 credit_load += result.course.credit_load
             cgpas_dict[session] = round(grade_point/credit_load, 3)
         
         return cgpas_dict
 
     def outstanding_courses(self):
-        """
-        A method for finding a student's outstanding courses.
-        """
+        """Find a student's outstanding courses."""
         failed_courses = Result.objects.filter(
             student_reg_no=self.student_reg_no, 
             letter_grade__iexact="F"
@@ -469,9 +494,9 @@ class Student(models.Model):
         return outstanding_courses
 
     def grades_breakdown(self):
-        """
-        This method will return a dict of student's grades breakdown.
-        Or None if student has no results in the db.
+        """Method will return a dict of student's grades breakdown.
+        
+        It will return None if student has no results in the db.
         """
         results = Result.objects.filter(student_reg_no=self.student_reg_no)
 
@@ -527,7 +552,9 @@ class Student(models.Model):
 
 
 class Result(models.Model):
-    grade_weights = {"A": 5, "B": 4, "C": 3, "D": 2, "E": 1, "F": 0}
+    """Model for student results."""
+    VALID_GRADES = ["A", "B", "C", "D", "E", "F"]
+    GRADE_WEIGHTS = {"A": 5, "B": 4, "C": 3, "D": 2, "E": 1, "F": 0}
 
     id = models.BigAutoField(db_column="ID", primary_key=True)
     course = models.ForeignKey(
@@ -559,6 +586,7 @@ class Result(models.Model):
 
 
 class StudentSponsor(models.Model):
+    """Model for student's sponsor."""
     id = models.BigAutoField(db_column="ID", primary_key=True)
     student = models.ForeignKey(
         Student, db_column="Student_ID", on_delete=models.CASCADE
@@ -608,6 +636,14 @@ class StudentSponsor(models.Model):
 
 
 class StudentProgressHistory(models.Model):
+    """Model for student progress history.
+    
+    Keeps track of how a student progressed in their years as
+    a student. Will help to determine deferred sessions, cases
+    of a student repeating a particular level of study, will 
+    make it easier to find progression of transfer and direct
+    entry students.
+    """
     id = models.BigAutoField(db_column="histID", primary_key=True)
     session = models.ForeignKey(
         db_column="SessionID", to="Session", on_delete=PROTECT
@@ -632,6 +668,7 @@ class StudentProgressHistory(models.Model):
 
 
 class Faculty(models.Model):
+    """Model for faculties."""
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
 
@@ -649,6 +686,7 @@ class Faculty(models.Model):
 
 
 class Department(models.Model):
+    """Model for departments."""
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=500, unique=True)
     alias = models.CharField(max_length=20, null=True, blank=True)
