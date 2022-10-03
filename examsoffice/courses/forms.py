@@ -1,8 +1,6 @@
 from django.forms.models import ModelForm
 from results.models import Course, LevelOfStudy
-from students.forms import add_bootstrap_formatting
-
-# CourseForm = modelform_factory(Course, exclude=[])
+from examsoffice.utils.forms import add_bootstrap_formatting
 
 
 class CourseForm(ModelForm):
