@@ -1,13 +1,29 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from django.forms.models import modelformset_factory
 
+from examsoffice.utils.forms import add_bootstrap_formatting
 from results.models import Student, StudentProgressHistory
 
 
-def add_bootstrap_formatting(self):
-    for myField in self.fields:
-        self.fields[myField].widget.attrs["class"] = "form-control w-75"
+class StudentProfileSearchForm(forms.Form):
+    """Form for finding a student obj by registration number."""
+    student_reg_no = forms.CharField(label="Registration Number", max_length=12, required=True)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        add_bootstrap_formatting(self)
+    
+    def clean_student_reg_no(self):
+        student_reg_no = self.cleaned_data['student_reg_no']
+
+        if not Student.is_valid_reg_no(student_reg_no):
+            raise ValidationError("Invalid student registration number")
+
+        if not Student.objects.filter(student_reg_no=student_reg_no).exists():
+            raise ValidationError("No registered student found with the provided registration number")
+
+        return student_reg_no
 
 class StudentBioForm(forms.ModelForm):
     student_reg_no = forms.CharField(
@@ -48,7 +64,6 @@ class StudentBioForm(forms.ModelForm):
             "country",
             "class_rep",
             "current_level_of_study",
-            "cgpa",
         ]
 
 

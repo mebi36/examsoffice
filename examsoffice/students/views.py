@@ -8,12 +8,14 @@ from django.shortcuts import render
 from django.contrib import messages
 from django.urls import reverse
 from django.views.decorators.cache import never_cache
-from django.views.generic.edit import UpdateView
+from django.views.generic.edit import FormView
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
 from .forms import (
     ProgressHistoryFormSet,
     StudentBioForm,
+    StudentProfileSearchForm
 )
 from .serializers import StudentSerializer
 from results.serializers import ResultSerializer
@@ -57,48 +59,26 @@ STUDENT_BIO_FIELDS = [
     "current_level_of_study",
     "jamb_number",
 ]
-# Create your views here.
+
+
 def students_menu(request):
     return render(request, "students/menu.html", {})
 
 
-@login_required
-def search(request):
-    context = {}
+@method_decorator(login_required, name="dispatch")
+class StudentProfileSearchView(FormView):
+    """View to find access student's profile by registration number.
+    
+    TODO: implement student search by name.
+    """
+    template_name = "students/reg_no_search.html"
+    form_class = StudentProfileSearchForm
 
-    if request.method == "POST":
-        if Student.is_valid_reg_no(request.POST["reg_no"]):
-            reg_no = request.POST["reg_no"]
-            try:
-                student = Student.objects.get(student_reg_no=reg_no)
-            except:
-                messages.add_message(
-                    request,
-                    messages.INFO,
-                    """No student bio data found. 
-                                    Please provide student details.""",
-                    extra_tags="text-primary",
-                )
-                return HttpResponseRedirect(
-                    reverse(
-                        "students:create_bio",
-                        kwargs={"reg_no": reg_no.replace("/", "_")},
-                    )
-                )
-            else:
-                return HttpResponseRedirect(student.get_absolute_url())
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                "Invalid Student Registration Number",
-                extra_tags="text-danger",
-            )
-            return HttpResponseRedirect(reverse("students:search"))
-    else:
-        if "next" in request.GET.keys():
-            context = {"next": request.GET["next"]}
-    return render(request, "students/reg_no_search.html", context)
+    def form_valid(self, form):
+        student_reg_no = form.cleaned_data["student_reg_no"]
+        self.success_url = reverse("students:profile", kwargs={"reg_no": student_reg_no.replace("/", "_")})
+        
+        return super().form_valid(form)
 
 
 @never_cache
@@ -523,6 +503,7 @@ def profile(request, reg_no):
 
     if not student.exists():
         messages.error(
+            request,
             "No student with that registration number was found", 
             extra_tags="text-danger"
         )
