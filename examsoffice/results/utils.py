@@ -1,32 +1,32 @@
-import os
-
-from results.models import Lecturer, Student, Result
 from itertools import chain
+import os
+from typing import Any, Dict, List
 
-import pandas as pd
-
-# from pandas.core.frame import DataFrame
+from django.db.models.query import QuerySet
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import cell, get_column_letter
 from openpyxl.styles import Alignment, PatternFill, Font, Border, Side
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.worksheet.pagebreak import Break
 from openpyxl.worksheet.worksheet import Worksheet
+from pandas import DataFrame
+
+from results.models import Lecturer, Student, Result
 
 
-normal_border = Border(
+NORMAL_BORDER = Border(
     left=Side(style="thin"),
     right=Side(style="thin"),
     top=Side(style="thin"),
     bottom=Side(style="thin"),
 )
-times_new_rom_style = Font("Times New Roman", 11)
-center_align = Alignment(horizontal="center")
-vertical_align_top = Alignment(vertical="top")
-top_bot_text_direction = Alignment(text_rotation=255, vertical="top")
+TIMES_NEW_ROM_STYLE = Font("Times New Roman", 11)
+CENTER_ALIGN = Alignment(horizontal="center")
+VERTICAL_ALIGN_TOP = Alignment(vertical="top")
+TOP_BOT_TEXT_DIRECTION = Alignment(text_rotation=255, vertical="top")
 
 
-def _list_to_cell(list_var):
+def _list_to_cell(list_var: List[str]) -> str:
     final_str = ""
     if isinstance(list_var, list) and len(list_var) > 0:
         for index, content in enumerate(list_var, 1):
@@ -38,21 +38,21 @@ def _list_to_cell(list_var):
     return final_str
 
 
-def _merge_row_wise(worksheet, row, col_start, col_end):
+def _merge_row_wise(worksheet: Worksheet, row: int, col_start: int, col_end: int) -> None:
     cell_start = get_column_letter(col_start) + str(row)
     cell_stop = get_column_letter(col_end) + str(row)
     _range = f"{cell_start}:{cell_stop}"
     worksheet.merge_cells(_range)
 
 
-def _merge_col_wise(worksheet, col, row_start, row_end):
+def _merge_col_wise(worksheet: Worksheet, col: int, row_start: int, row_end: int) -> None:
     cell_start = get_column_letter(col) + str(row_start)
     cell_stop = get_column_letter(col) + str(row_end)
     _range = f"{cell_start}:{cell_stop}"
     worksheet.merge_cells(_range)
 
 
-def failed_courses_breakdown(df):
+def failed_courses_breakdown(df: DataFrame) -> Dict[str, Any]:
     # collating and writing outstanding/failed courses
     failed_courses = df.loc[df["grade"] == "F"]
     failed_courses = failed_courses["course_code"].tolist()
@@ -102,13 +102,13 @@ def failed_courses_breakdown(df):
     }
 
 
-def student_transcript(transcript_data):
-    file_path = ["static", "excel_templates", "transcript_template.xlsx"]
-    wb = load_workbook(os.path.join(*file_path))
-    ws = wb.active
+def student_transcript(transcript_data: Dict[str, Any]) -> Workbook:
+    file_path: List[str] = ["static", "excel_templates", "transcript_template.xlsx"]
+    wb: Workbook = load_workbook(os.path.join(*file_path))
+    ws: Worksheet = wb.active
 
     # writing the biodata block
-    bio_info = [
+    bio_info: List[str] = [
         "ACADEMIC TRANSCRIPT OF",
         "REGISTRATION NUMBER: ",
         "LEVEL OF STUDY: ",
@@ -116,8 +116,7 @@ def student_transcript(transcript_data):
     row = 9
     col = 5
     # writing result block
-    student_bio = transcript_data["student_bio"]
-    # result_columns = [1,5,14,37,47,55,62]
+    student_bio: List[str] = transcript_data["student_bio"]
     result_columns = [1, 4, 11, 44, 51, 55, 62]
     for idx, el in enumerate(bio_info):
         _ = ws.cell(row=row + idx, column=col, value=el)
@@ -134,7 +133,7 @@ def student_transcript(transcript_data):
 
     row = 13
     col = 1
-    result_dict = transcript_data["transcript_body"]
+    result_dict: Dict[str, Dict[str, DataFrame]] = transcript_data["transcript_body"]
 
     credit_sum = 0
     weight_sum = 0
@@ -188,7 +187,7 @@ def student_transcript(transcript_data):
             for c_idx, header in enumerate(res_headings):
                 _ = ws.cell(row=row, column=result_columns[c_idx], value=header)
                 _.font = Font(bold=True)
-                _.border = normal_border
+                _.border = NORMAL_BORDER
                 _.alignment = Alignment(horizontal="center")
                 _merge_row_wise(
                     ws,
@@ -201,7 +200,7 @@ def student_transcript(transcript_data):
             count = 1
             for r_idx, df_row in enumerate(df_rows, row):
                 _ = ws.cell(row=r_idx, column=result_columns[0], value=count)
-                _.border = normal_border
+                _.border = NORMAL_BORDER
                 _merge_row_wise(
                     ws,
                     r_idx,
@@ -216,7 +215,7 @@ def student_transcript(transcript_data):
                         value=str(df_value).upper(),
                     )
                     _.alignment = Alignment(horizontal="center", wrap_text=True)
-                    _.border = normal_border
+                    _.border = NORMAL_BORDER
 
                     _merge_row_wise(
                         ws,
@@ -227,7 +226,7 @@ def student_transcript(transcript_data):
 
             for index, i in enumerate(result_columns):
                 _ = ws.cell(row=(r_idx + 1), column=i)
-                _.border = normal_border
+                _.border = NORMAL_BORDER
                 if index == 6:
                     _merge_row_wise(
                         ws, row=(r_idx + 1), col_start=i, col_end=(i + 4)
@@ -287,11 +286,11 @@ def student_transcript(transcript_data):
     return wb
 
 
-def class_result_spreadsheet(result_qs, class_list, expected_yr_of_grad):
+def class_result_spreadsheet(result_qs: QuerySet, class_list: List[str], expected_yr_of_grad: str) -> Workbook:
     wb = Workbook()
     ws = wb.active
 
-    def _format_summary_block(row, col):
+    def _format_summary_block(row: int, col: int) -> None:
         for i in range(row, (row + 4)):
             _ = ws.cell(row=i, column=(col + 20))
             _.fill = PatternFill(fgColor="50E2F2", fill_type="solid")
@@ -302,14 +301,14 @@ def class_result_spreadsheet(result_qs, class_list, expected_yr_of_grad):
                 bottom=Side(style="thick"),
             )
 
-    def _failed_crses_block(course_list, total_cred, first_sem=False):
+    def _failed_crses_block(course_list: List[str], total_cred: int, first_sem: bool = False) -> None:
 
         head_fill = "First" if first_sem else "Second"
         f1_head = f"""Courses with no passing grade ({head_fill})"""
         f1_head_cell = ws.cell(row=row - 1, column=(col), value=f1_head)
         _merge_row_wise(ws, row=(row - 1), col_start=col, col_end=(col + 19))
         f1_head_cell.font = Font(bold=True)
-        f1_head_cell.alignment = center_align
+        f1_head_cell.alignment = CENTER_ALIGN
         f1_head_cell.fill = PatternFill(fgColor="F7C5C1", fill_type="solid")
 
         i = 0
@@ -328,7 +327,7 @@ def class_result_spreadsheet(result_qs, class_list, expected_yr_of_grad):
                 j = j + 1
         for row_el in range(row, (row + 4)):
             for col_el in range(col, (col + 20)):
-                ws.cell(row=row_el, column=col_el).border = normal_border
+                ws.cell(row=row_el, column=col_el).border = NORMAL_BORDER
                 ws.column_dimensions[get_column_letter(col_el)].width = 3
 
         block_title = (
@@ -357,7 +356,7 @@ def class_result_spreadsheet(result_qs, class_list, expected_yr_of_grad):
             continue
 
         else:
-            df = pd.DataFrame.from_records(student_qs)
+            df = DataFrame.from_records(student_qs)
             df = df.rename(
                 columns={
                     0: "course_title",
@@ -368,11 +367,6 @@ def class_result_spreadsheet(result_qs, class_list, expected_yr_of_grad):
                     5: "grade",
                 }
             )
-            # df['weight'] = df['credit_load'] * [5 if x == 'A' else 4
-            #                                     if x == 'B' else 3 if
-            #                                     x == 'C' else 2 if x == 'D'
-            #                                     else 1 if x == 'E' else 0
-            #                                     for x in df['grade']]
             df = Student.get_weight_col(df)
             reg_no = student[0]
             name = student[1]
@@ -381,19 +375,19 @@ def class_result_spreadsheet(result_qs, class_list, expected_yr_of_grad):
 
             # writing and formatting student biodata to the excel sheet
             sn_cell = ws.cell(column=1, row=row, value=serial_number)
-            sn_cell.alignment = top_bot_text_direction
-            sn_cell.border = normal_border
+            sn_cell.alignment = TOP_BOT_TEXT_DIRECTION
+            sn_cell.border = NORMAL_BORDER
             _merge_col_wise(ws, col=1, row_start=row, row_end=row + 3)
 
             name_cell = ws.cell(column=2, row=row, value=name.upper())
             name_cell.alignment = Alignment(wrapText=True, vertical="top")
-            name_cell.border = normal_border
+            name_cell.border = NORMAL_BORDER
             _merge_col_wise(ws, col=2, row_start=row, row_end=row + 3)
             ws.column_dimensions["B"].width = 20
 
             reg_no_cell = ws.cell(column=3, row=row, value=reg_no)
             reg_no_cell.alignment = Alignment(textRotation=180, vertical="top")
-            reg_no_cell.border = normal_border
+            reg_no_cell.border = NORMAL_BORDER
             _merge_col_wise(ws, col=3, row_start=row, row_end=row + 3)
 
             adm_mode_cell = ws.cell(
@@ -402,7 +396,7 @@ def class_result_spreadsheet(result_qs, class_list, expected_yr_of_grad):
             adm_mode_cell.alignment = Alignment(
                 textRotation=180, vertical="top"
             )
-            adm_mode_cell.border = normal_border
+            adm_mode_cell.border = NORMAL_BORDER
             _merge_col_wise(ws, col=4, row_start=row, row_end=row + 3)
 
             for el in ["A", "C", "D"]:
@@ -454,7 +448,7 @@ def class_result_spreadsheet(result_qs, class_list, expected_yr_of_grad):
                 _merge_row_wise(
                     ws, row=(row - 1), col_start=col, col_end=(col + 19)
                 )
-                ws[header_start].alignment = center_align
+                ws[header_start].alignment = CENTER_ALIGN
                 ws[header_start].fill = PatternFill(
                     fgColor="50E2F2", fill_type="solid"
                 )
@@ -502,9 +496,9 @@ def class_result_spreadsheet(result_qs, class_list, expected_yr_of_grad):
     return wb
 
 
-def class_failure_spreadsheet(result_qs, class_list, expected_yr_of_grad):
-    wb = Workbook()
-    ws = wb.active
+def class_failure_spreadsheet(result_qs: QuerySet, class_list: List[str], expected_yr_of_grad: str) -> Worksheet:
+    wb: Workbook = Workbook()
+    ws: Worksheet = wb.active
 
     ws.title = f"Class of {expected_yr_of_grad} CO Summary List"
     headers = [
@@ -525,7 +519,7 @@ def class_failure_spreadsheet(result_qs, class_list, expected_yr_of_grad):
     for key, value in column_dimensions.items():
         ws.column_dimensions[get_column_letter(key)].width = value
         cell = ws.cell(row=1, column=key)
-        cell.border = normal_border
+        cell.border = NORMAL_BORDER
         cell.alignment = Alignment(
             horizontal="center", vertical="top", wrap_text=True
         )
@@ -542,7 +536,7 @@ def class_failure_spreadsheet(result_qs, class_list, expected_yr_of_grad):
 
         else:
             # convert student's result qs to dataframe
-            df = pd.DataFrame.from_records(student_qs)
+            df = DataFrame.from_records(student_qs)
             df = df.rename(
                 columns={
                     0: "course_title",
@@ -590,7 +584,7 @@ def class_failure_spreadsheet(result_qs, class_list, expected_yr_of_grad):
             for col_idx in range(1, 9):
                 cell = ws.cell(row=row, column=col_idx)
                 cell.alignment = entry_alignment
-                cell.border = normal_border
+                cell.border = NORMAL_BORDER
 
             row += 1
             serial_number += 1
@@ -599,14 +593,14 @@ def class_failure_spreadsheet(result_qs, class_list, expected_yr_of_grad):
     return wb
 
 
-def collated_results_spreadsheet(res_df):
+def collated_results_spreadsheet(res_df: DataFrame) -> Worksheet:
     """This function will process the result df into a spreadsheet which
     will be returned to the caller"""
 
     courses = res_df["course_code"].unique().tolist()
     students = res_df.groupby(["name", "reg_no"]).size().reset_index()
     students = students[["name", "reg_no"]].values.tolist()
-    collated_result = pd.DataFrame(students, columns=["Name", "RegNo"])
+    collated_result = DataFrame(students, columns=["Name", "RegNo"])
     for course in courses:
         x = ["X"] * len(students)
         j = course
@@ -634,7 +628,7 @@ def collated_results_spreadsheet(res_df):
     for idx, heading in enumerate(headings, 1):
         _ = ws.cell(row=1, column=idx, value=heading)
         _.font = Font("Times new Roman", 13, bold=True)
-        _.border = normal_border
+        _.border = NORMAL_BORDER
         _.alignment = Alignment(vertical="top", horizontal="center")
         if idx > 3:
             _.alignment = Alignment(
@@ -646,17 +640,17 @@ def collated_results_spreadsheet(res_df):
     count = 1
     for row_idx, df_row in enumerate(result_rows, row):
         _ = ws.cell(row=row_idx, column=1, value=count)
-        _.border = normal_border
-        _.font = times_new_rom_style
+        _.border = NORMAL_BORDER
+        _.font = TIMES_NEW_ROM_STYLE
         _.alignment = Alignment(horizontal="center", vertical="top")
         count += 1
         for col_idx, df_value in enumerate(df_row, col + 1):
             _ = ws.cell(row=row_idx, column=col_idx, value=df_value.upper())
-            _.border = normal_border
+            _.border = NORMAL_BORDER
             _.alignment = Alignment(
                 horizontal="center", vertical="top", wrap_text=True
             )
-            _.font = times_new_rom_style
+            _.font = TIMES_NEW_ROM_STYLE
 
     hod_name = Lecturer.objects.get(head_of_dept=True).full_name
 
@@ -675,8 +669,9 @@ def collated_results_spreadsheet(res_df):
     return wb
 
 
-def possible_graduands_wb(expected_yr_of_grad):
-    student_qs = (
+def possible_graduands_wb(expected_yr_of_grad: str) -> Worksheet:
+    """Returns a worksheet of possible graduands for a graduation year."""
+    student_qs: QuerySet = (
         Student.objects.all()
         .filter(expected_yr_of_grad=expected_yr_of_grad)
         .values(
@@ -696,13 +691,12 @@ def possible_graduands_wb(expected_yr_of_grad):
             "date_of_birth",
         )
     )
-    if len(student_qs) == 0:
+    if not student_qs.exists():
         raise ValueError(
             f"No student with expected year of graduation {expected_yr_of_grad}"
         )
-    bio_df = pd.DataFrame(student_qs)
+    bio_df = DataFrame(student_qs)
     class_list = bio_df["student_reg_no"].to_list()
-    # print(class_list)
     result_qs = (
         Result.objects.all()
         .select_related("semester", "course")
@@ -717,7 +711,7 @@ def possible_graduands_wb(expected_yr_of_grad):
         )
     )
 
-    eligible_students = []
+    eligible_students: List[str] = []
 
     # checking eligibility of every student in the class list
     for student in class_list:
@@ -725,11 +719,11 @@ def possible_graduands_wb(expected_yr_of_grad):
             "semester"
         )
 
-        if len(student_qs) == 0:
+        if not student_qs.exists():
             continue
 
         else:
-            df = pd.DataFrame.from_records(student_qs)
+            df = DataFrame.from_records(student_qs)
             df = df.rename(
                 columns={
                     0: "course_title",
@@ -793,8 +787,6 @@ def possible_graduands_wb(expected_yr_of_grad):
     ]
     grad_df = grad_df[req_cols]
     grad_df.sort_values("full_name", inplace=True)
-    # for field in grad_df.columns.to_list():
-    # print(grad_df[field])
 
     # writing to excel workbook
     wb = Workbook()
@@ -821,7 +813,7 @@ def possible_graduands_wb(expected_yr_of_grad):
     row = 5
 
     _ = ws.cell(row=row, column=1, value=ws_title)
-    _.alignment = center_align
+    _.alignment = CENTER_ALIGN
     _.font = Font(bold=True)
     _merge_row_wise(ws, row, 1, 13)
     row += 2
@@ -829,7 +821,7 @@ def possible_graduands_wb(expected_yr_of_grad):
     for c_idx, header in enumerate(ws_headings, 1):
         _ = ws.cell(row=row, column=c_idx, value=header)
         _.font = Font(bold=True)
-        _.border = normal_border
+        _.border = NORMAL_BORDER
         _.alignment = Alignment(
             horizontal="center", wrap_text=True, vertical="top"
         )
@@ -837,7 +829,7 @@ def possible_graduands_wb(expected_yr_of_grad):
 
     for r_idx, df_row in enumerate(df_rows, row):
         _ = ws.cell(row=r_idx, column=1, value=count)
-        _.border = normal_border
+        _.border = NORMAL_BORDER
         _.alignment = Alignment(vertical="top")
         count += 1
         for c_idx, df_value in enumerate(df_row, 2):
@@ -850,11 +842,10 @@ def possible_graduands_wb(expected_yr_of_grad):
             _.alignment = Alignment(
                 horizontal="center", wrap_text=True, vertical="top"
             )
-            _.border = normal_border
+            _.border = NORMAL_BORDER
     ws.print_title_rows = "7:7"
     ws.HeaderFooter.differentFirst = True
     ws.firstHeader.center.text = """&BUNIVERSITY OF NIGERIA, NSUKKA\nOFFICE OF THE REGISTRAR\n(EXAMINATIONS)\n\nFACULTY/SCHOOL: ____&UENGINEERING&U____  DEPARTMENT/COURSE COMBINATION: ____&UELECTRONIC&U____&B"""
     ws.firstHeader.size = 16
     Worksheet.set_printer_settings(ws, paper_size=9, orientation="landscape")
-    # wb.save('possible_grad.xlsx')
     return wb
