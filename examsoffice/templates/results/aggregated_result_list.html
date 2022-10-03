@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block title %}Result List{% endblock %}
 {% block content %}
 <div class="row">
     {% if sessions %}
@@ -36,15 +37,17 @@
     </thead>
     <tbody>
         
-        {% if qs %}
-        {% for key in qs %}
+        {% if object_list %}
+        {% for key in object_list %}
         
         <tr>
-        <td><a href="{% url 'results:recent' %}?course={{key.0.0}}&semester={{key.0.1}}">{{ key.0.0 }}</a></td>
+        <td><a href="{% url 'results:list' %}?course={{key.0.0}}&semester={{key.0.1}}">{{ key.0.0 }}</a></td>
         <td>{{ key.0.1 }}</td>
         <td>{{ key.1 }}</td>
         </tr>
         {% endfor %}
+        {% else%}
+        <p class="lead">No aggregated results found</p>
         {% endif%}
         
     </tbody>
@@ -53,18 +56,18 @@
             <td class="text-center">
         <div class="pagination">
             <span class="step-links">
-                {% if qs.has_previous %}
+                {% if page_obj.has_previous %}
                     <a href="?page=1">&laquo; first</a>
-                    <a href="?page= {{ qs.previous_page_number.num_pages }}">previous</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">previous</a>
                 {% endif %}
 
-                <span class="current">
-                    Page {{ qs.number }} of {{ qs.paginator.num_pages }}.
+                <span class="page-current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
                 </span>
 
-                {% if qs.has_next %}
-                <a href="?page={{ qs.next_page_number }}">next</a>
-                <a href="?page={{ qs.paginator.num_pages }}">last &raquo;</a>
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
                 {% endif %}
             </span>
         </div>

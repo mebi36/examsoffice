@@ -6,7 +6,7 @@
             <p class="card-text">
                 Print student transcripts and academic progress reports
             </p>
-            <a href="{% url 'results:transcripts' %}" class="btn btn-success" id="go-button">
+            <a href="{% url 'students:search' %}" class="btn btn-success" id="go-button">
                 <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">    Go</a>    
         </div> 
         <div class="w-75 mx-auto">
@@ -39,7 +39,7 @@
             <p class="card-text">
                 Edit Student Records here
             </p>
-            <a href="{% url 'results:student_search' %}" class="btn btn-success">
+            <a href="{% url 'students:search' %}" class="btn btn-success">
                 <img class="img-fluid mr-2" src="{% static 'images/arrow-right-circle-fill.svg' %}" alt="go-button">
                     Go</a>        
         </div> 

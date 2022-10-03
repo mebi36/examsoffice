@@ -3,36 +3,13 @@
 {% block content %}
 <div class="mx-auto w-75">
     <div class="card-title">Delete Entire Results of a Course for a given Session</div>
-    {% include "message_display.html" %}
     <form action=".", method="post">
         {% csrf_token %}
-        <div class="form-group">
-            <label for="semester"><b>Select Semester:</b></label>
-            <select name="semester" required="required" class="form-control w-75">
-                <option disabled selected value> -- select semester -- </option>
-                {% for semester in semesters %}
-                <option value="{{ semester.id }}">{{ semester.desc }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="course"><b>Select Course:</b></label>
-            <select name="course" class="form-control w-75" required="required">
-                <option disabled selected value> -- select a course -- </option>
-                {% for course in courses %}
-                <option value="{{ course.id }}">{{ course.course_code }}: {{ course.course_title }}: {{ course.credit_load }} Unit Load</option>
-                {% endfor %}
-            </select>
-        </div>
+        {{ form.as_p }}
         <button type="submit" class="btn btn-danger">
             <img class="img-fluid mr-2" src="{% static 'images/cancel.svg' %}" 
                 alt="delete-button">Delete
         </button>
     </form>
-    <div class="mx-auto wx-25">
-        <a href="{% url 'results:menu' %}">
-           <img class="mr-1" src="{% static 'images/back-b.svg' %}" alt="back-icon">Results Menu
-        </a>
-    </div>
 </div>
 {% endblock %}

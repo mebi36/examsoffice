@@ -3,14 +3,13 @@
 {% load to_underscore %}
 {% load static %}
     <div class="button-group">
-        <a class="btn btn-success" href="{% url 'results:student_search' %}">Find Another Student</a>
+        <a class="btn btn-success" href="{% url 'students:search' %}">Find Another Student</a>
         {% if object_list%}
             <a class="btn btn-success" href="{% url 'results:add' object_list.0.student_reg_no|to_underscore %}">
             Add A Result For Student</a>
         {% endif%}
     </div> 
     <div class="jumbotron card">
-    {% include "message_display.html" %}
     {% if object_list%}
     {% if student %}
     <h5 class="card-title">Academic Records for {{ student.student_reg_no }}</h5>

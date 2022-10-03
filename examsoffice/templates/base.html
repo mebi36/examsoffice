@@ -31,7 +31,7 @@
                             <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Results</a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                 <li>
-                                    <a class="nav-link" href="{% url 'results:transcripts' %}">Student Transcripts</a>
+                                    <a class="nav-link" href="{% url 'students:search' %}">Student Transcripts</a>
                                 </li>
                                 <li>
                                     <a class="nav-link" href="{% url 'results:collation' %}">Result Collation</a>
@@ -41,6 +41,12 @@
                                 </li>
                                 <li>
                                     <a class="nav-link" href="{% url 'results:collation' %}">Collated Results</a>
+                                </li>
+                                <li>
+                                    <a class="nav-link" href="{% url 'results:class_outstanding_courses' %}">Class Outstanding Courses</a>
+                                </li>
+                                <li>
+                                    <a class="nav-link" href="{% url 'results:possible_graduands_form' %}">Possible Graduands</a>
                                 </li>
                             </ul>
                         </li>
@@ -78,6 +84,7 @@
             </div>
         </nav>
         <div class="bg-white">
+            <div class="row">{% include 'message_display.html' %}</div>
             <div class="row">
                 <div class="col col-pull">
                     <div>        

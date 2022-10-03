@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-{% include 'message_display.html' %}
 <div class="text-danger"><strong>{{ form.non_field_errors }}</strong></div>
 <form action="" method="post">
     {% csrf_token %}

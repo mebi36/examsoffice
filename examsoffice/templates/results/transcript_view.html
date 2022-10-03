@@ -7,7 +7,7 @@
 			<li>{{ session.grouper }}
 			<ul>
 				{% for result in session.list %}
-				<li><a href="{% url 'results:result_edit' result.id %}">{{ result.course_id__course_title | upper }}: {{ result.letter_grade }}</a></li>
+				<li><a href="{% url 'results:edit' result.id %}">{{ result.course_id__course_title | upper }}: {{ result.letter_grade }}</a></li>
 				{% endfor %}
 			</ul>
 			</li>

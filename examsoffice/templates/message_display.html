@@ -1,9 +1,11 @@
-<div class="card-text">
+<div>
     {% if messages %}
+    <div class="text-center bg-secondary bg-opacity-10 p-1 my-3 shadow-sm border">
         {% for message in messages %}
         <p {% if message.extra_tags %} class="{{ message.extra_tags }}"{% endif %}>
             {{ message }}
         </p>
         {% endfor %}
+    </div>
     {% endif%}
 </div>

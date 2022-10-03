@@ -2,7 +2,7 @@
 {% load to_underscore %}
 {% load static %}
     <div class="button-group">
-        <a class="btn btn-success" href="{% url 'results:student_search' %}">Find Another Student</a>
+        <a class="btn btn-success" href="{% url 'students:search' %}">Find Another Student</a>
         {% if object_list%}
             <a class="btn btn-success" href="{% url 'results:add' object_list.0.student_reg_no|to_underscore %}">
             Add A Result For Student</a>
@@ -22,7 +22,7 @@
             <li>{{ session.grouper }}
             <ul>
                 {% for result in session.list %}
-                <li><a href="{% url 'results:result_edit' result.id %}">
+                <li><a href="{% url 'results:edit' result.id %}">
                     {{ result.course_id__course_code }}: 
                     {{ result.course_id__course_title | upper }}: 
                     {{ result.letter_grade }}</a></li>

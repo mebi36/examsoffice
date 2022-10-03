@@ -1,16 +1,14 @@
-{% extends 'students/base.html' %}
+{% extends 'results/base.html' %}
 {% load static %}
 {% block title %}Search {% endblock %}
 {% block content %}
 <div class="col-md-6 mt-5 mx-auto">
     <div class="mx-auto bg-secondary bg-opacity-10 p-5 m-5">
         <h2 class="mb-4 text-center text-success">Enter Student Registration Number</h2>
-        {% include 'message_display.html' %}
-        <form action='.' method="post">
+        <form method="post">
             {% csrf_token %}
             <div class="form-group">
-                <input type="text" class="form-control" name="reg_no" 
-                    placeholder="Registration Number . . ." required="required">
+                {{ form.as_p }}
             </div>
             {% include 'next_url_form_field.html' %}
                 <button type="submit" class="btn btn-lg btn-success mt-3">
