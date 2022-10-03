@@ -1,3 +1,5 @@
+from typing import Dict, List, Optional, Set, Union
+
 from results.models import Student
 
 
@@ -13,12 +15,12 @@ class GraduationClass:
         self.expected_yr_of_grad = expected_yr_of_grad
 
     @property
-    def members(self):
+    def members(self) -> List[Student]:
         return list(
             Student.objects.filter(expected_yr_of_grad=self.expected_yr_of_grad)
         )
 
-    def best_student(self):
+    def best_student(self) -> Optional[List[Student]]:
         """
         This method returns student(s) with the highest CGPA in the class.
         Will return None if class has no members or class members have no
@@ -42,7 +44,7 @@ class GraduationClass:
             if cgpa == class_highest_cgpa
         ]
 
-    def ranking(self):
+    def ranking(self) -> List[Dict[Student, float]]:
         """
         This method returns a list of class members ordered by their
         current CGPA's.
@@ -57,7 +59,7 @@ class GraduationClass:
             )
         ]
 
-    def members_with_no_results(self):
+    def members_with_no_results(self) -> Set[Student]:
         """Method return class members with no result on db."""
         return {
             student
@@ -65,11 +67,11 @@ class GraduationClass:
             if cgpa is None
         }
 
-    def members_cgpas(self):
+    def members_cgpas(self) -> Dict[Student, float]:
         class_members = self.members
         return {student: student.current_cgpa() for student in class_members}
 
-    def members_with_valid_cgpas(self):
+    def members_with_valid_cgpas(self) -> Dict[Student, float]:
         class_members_cgpa = self.members_cgpas()
         return {
             student: cgpa
@@ -77,7 +79,7 @@ class GraduationClass:
             if cgpa is not None
         }
 
-    def is_empty(self):
+    def is_empty(self) -> bool:
         return True if len(self.members) == 0 else False
 
     @property
@@ -86,12 +88,11 @@ class GraduationClass:
         raise NotImplementedError()
 
     level_of_study.setter
-
     def level_of_study(self, level: int):
         """sets the class's current level of study"""
         raise NotImplementedError()
 
-    def average_cgpa(self):
+    def average_cgpa(self) -> Optional[float]:
         """
         This method calculates the classes average CGPA.
         Returns:
@@ -106,7 +107,7 @@ class GraduationClass:
 
         return round(sum(members_and_cgpa.values()) / len(members_and_cgpa), 3)
 
-    def average_cgpa_per_session(self, session: str):
+    def average_cgpa_per_session(self, session: str) -> float:
         """
         This method should take a session and return the average CGPA of
         the class for that academic session, if any results were found
@@ -114,7 +115,7 @@ class GraduationClass:
         """
         raise NotImplementedError()
 
-    def student_position(self, student_reg_no: str):
+    def student_position(self, student_reg_no: str) -> Union[ValueError, int, None]:
         """
         This method should return a students position in the class when
         students are ranked by CGPAs.
@@ -142,7 +143,7 @@ class GraduationClass:
         else:
             return None
 
-    def get_class_profile_url(self):
+    def get_class_profile_url(self) -> str:
         """
         Returns URL for access the profile page of the class
         """
