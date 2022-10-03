@@ -1,0 +1,1 @@
+"""Generic objects used throughout the project."""
