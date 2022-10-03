@@ -48,18 +48,18 @@ class EditResultTest(LoggedInTestCase):
 
 class FindStudentTest(LoggedInTestCase):
     def test_search_rendering(self):
-        response = self.client.get(reverse("results:student_search"))
+        response = self.client.get(reverse("students:search"))
         self.assertEqual(response.status_code, 200)
 
     def test_actual_search_w_valid_reg_no(self):
         response = self.client.post(
-            reverse("results:student_search"), {"reg_no": "2010/170254"}
+            reverse("students:search"), {"reg_no": "2010/170254"}
         )
         self.assertEqual(response.status_code, 302)
 
     def test_actual_search_w_invalid_reg_no(self):
         response = self.client.post(
-            reverse("results:student_search"), {"reg_no": "201022/44170254"}
+            reverse("students:search"), {"reg_no": "201022/44170254"}
         )
         self.assertEqual(response.status_code, 200)
 
@@ -70,11 +70,11 @@ class FindStudentTest(LoggedInTestCase):
 #         Student.objects.create(student_reg_no='2010/170254')
 
 #     def test_student_records_w_valid_arg(self):
-#         response = self.client.get(reverse('results:student_records',
+#         response = self.client.get(reverse('student-records',
 #                                 kwargs={'reg_no': '2010_170254'}))
 #         self.assertEqual(response.status_code, 200)
 
 #     def test_student_records_w_invalid_arg(self):
-#         response = self.client.get(reverse('results:student_records',
+#         response = self.client.get(reverse('student-records',
 #                                 kwargs={'reg_no': '2010/170254'}))
 #         self.assertEqual(response.status_code, 500)

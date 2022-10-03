@@ -1,13 +1,11 @@
-import re
 import csv
 from datetime import date
-import pandas as pd
-import numpy as np
-from pandas.core.frame import DataFrame
-from openpyxl.writer.excel import save_virtual_workbook
+from typing import Any, Callable, ClassVar, Dict, List, Optional, Union
 
-from django.http import HttpResponse
-from django.urls import reverse
+from django.http import HttpResponse, HttpRequest
+from django.db.models.query import QuerySet
+from django.forms import Form
+from django.core.exceptions import ValidationError
 from django.http.response import HttpResponseBadRequest, HttpResponseRedirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -15,9 +13,25 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import never_cache
 from django.db.models import OuterRef, Subquery, Value, Count
 from django.db.models.functions import Concat
-from django.core.paginator import Paginator
+from django.urls import reverse
+from django.utils.decorators import method_decorator
+from django.views import generic
+from openpyxl.writer.excel import save_virtual_workbook
+from openpyxl.worksheet.worksheet import Worksheet
+import pandas as pd
+from pandas.core.frame import DataFrame
+import numpy as np
 
 from results import models as ex
+from results.forms import (
+    CourseResultDeletionForm,
+    GraduationSetResultSpreadsheetForm,
+    GraduationSetSearchForm,
+    ResultCollationBySessionAndLevelOfStudyForm,
+    ResultFileUploadForm,
+    ResultFileUploadFormatOptionForm,
+    ResultForm,
+)
 from results.models import Result
 from results.utils import (
     possible_graduands_wb,
@@ -28,655 +42,419 @@ from results.utils import (
 )
 
 
-@login_required
-def edit_result(request, pk):
-    """View for editing result objects."""
-    _queryset = (
-        ex.Result.objects.all()
-        .select_related("course", "semester")
-        .values(
-            "id",
-            "course_id__course_title",
-            "course_id__course_semester",
-            "course_id__course_code",
-            "course_id__credit_load",
-            "semester_id__desc",
-            "letter_grade",
-            "semester_id__id",
-            "student_reg_no",
+@method_decorator(login_required, name="dispatch")
+class ResultObjectUpdateView(generic.UpdateView):
+    """View to edit a result object."""
+
+    model = Result
+    template_name = "results/edit_result.html"
+    form_class = ResultForm
+
+
+@method_decorator(login_required, name="dispatch")
+class ResultObjectDetailView(generic.DetailView):
+    """View to display details of a result object."""
+
+    model = Result
+    template_name: str = "results/result_detail.html"
+
+
+@method_decorator(login_required, name="dispatch")
+class ResultCreateView(generic.CreateView):
+    "A view for creating a new result object"
+    form_class = ResultForm
+    template_name: str = "results/add_result.html"
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        if "reg_no" in self.kwargs:
+            student_reg_no: str = self.kwargs["reg_no"].replace("_", "/")
+            context["form"] = ResultForm(initial={"student_reg_no": student_reg_no})
+        return context
+
+    def get_success_url(self) -> str:
+        if "reg_no" in self.kwargs:
+            return reverse(
+                "results:student-records",
+                kwargs={"reg_no": self.kwargs["reg_no"]},
+            )
+        return super().get_success_url()
+
+
+@method_decorator(login_required, name="dispatch")
+class ResultDeleteView(generic.DeleteView):
+    """Delete a result object."""
+
+    template_name = "results/delete.html"
+    model = Result
+
+    def get_success_url(self) -> str:
+        if next_url := self.request.GET.get("next"):
+            return next_url
+
+        result = Result.objects.get(pk=self.kwargs["pk"])
+        student = ex.Student.objects.filter(student_reg_no=result.student_reg_no)
+
+        if student.exists():
+            return student.first().get_records_url()
+        else:
+            return reverse("results:list_results")
+
+
+@method_decorator(login_required, name="dispatch")
+class StudentAcademicRecordsListView(generic.ListView):
+    """Display results for student with a given registration number."""
+
+    template_name: str = "results/student_records.html"
+
+    def get_queryset(self) -> QuerySet:
+        student_reg_no = self.kwargs["reg_no"].replace("_", "/")
+        return Result.objects.filter(student_reg_no=student_reg_no).select_related(
+            "course", "semester"
         )
-    )
-    if request.method == "POST":
-        result_details = get_object_or_404(ex.Result, id=pk)
-        if (
-            request.POST["grade"].upper() in Result.VALID_GRADES
-            and request.POST["grade"].upper() != result_details.letter_grade
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["student"] = get_object_or_404(
+            ex.Student, student_reg_no=self.kwargs["reg_no"].replace("_", "/")
+        )
+        return context
+
+
+@method_decorator(login_required, name="dispatch")
+class ResultListView(generic.ListView):
+    """View for listing result objects.
+
+    Will list a subset of recent results by default. Will
+    accept query params to list a more specific set of results.
+    """
+
+    template_name: str = "results/result_obj_list.html"
+
+    def get_queryset(self) -> QuerySet:
+        qs = Result.objects.all().select_related("semester", "course").order_by("-id")
+
+        if (course := self.request.GET.get("course")) and (
+            session := self.request.GET.get("semester")
         ):
-            result_details.letter_grade = request.POST["grade"].upper()
-            result_details.save()
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Update successful",
-                extra_tags="text-success",
-            )
+            qs = qs.filter(course__course_code=course, semester__desc=session)
+            return qs
 
-    queryset = _queryset
-    result_details = get_object_or_404(queryset, id=pk)
-    context = {"result": result_details}
-
-    return render(request, "results/edit_result.html", context)
+        return qs[:100]
 
 
 @login_required
-def find_student(request):
-    """A view that renders a form for users to search for a
-    student's academic record with his/her registration number
-
-    view could also be modified to process searching
-    for a student's record given just his/her name"""
-
-    template_name = "results/reg_no_search.html"
-    if request.method == "POST":
-        reg_no = request.POST["reg_no"]
-        if ex.Student.is_valid_reg_no(reg_no):
-            student, _ = ex.Student.objects.get_or_create(student_reg_no=reg_no)
-            return HttpResponseRedirect(student.get_records_url())
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                "Invalid Registration Number",
-                extra_tags="text-danger",
-            )
-    return render(request, template_name, {})
-
-
-@login_required
-def student_search_processor(request, reg_no):
-    template_name = "results/student_records.html"
-    reg_no = request.POST["reg_no"]
-    _queryset = (
-        ex.Result.objects.all()
-        .select_related("course", "semester")
-        .values(
-            "id",
-            "course_id__course_title",
-            "course_id__course_semester",
-            "course_id__course_code",
-            "course_id__credit_load",
-            "semester_id__desc",
-            "letter_grade",
-            "semester_id__id",
-            "student_reg_no",
-        )
-    )
-    if ex.Student.is_valid_reg_no(reg_no):
-        object_list = _queryset.filter(student_reg_no=reg_no)
-        student_info, _ = ex.Student.objects.get_or_create(
-            student_reg_no=reg_no
-        )
-        context = {"object_list": object_list, "student": student_info}
-
-        return render(request, template_name, context)
-
-
-@login_required
-def student_records(request, reg_no):
-    template_name = "results/student_records.html"
-    reg_no = reg_no.replace("_", "/")
-
-    if ex.Student.is_valid_reg_no(reg_no):
-        queryset = (
-            ex.Result.objects.all()
-            .filter(student_reg_no=reg_no)
-            .select_related("course", "semester")
-        )
-
-        if len(queryset) < 1:
-            messages.add_message(
-                request,
-                messages.INFO,
-                "No academic records were found for the "
-                "registration number entered.",
-                extra_tags="text-danger",
-            )
-
-        student_info, _ = ex.Student.objects.get_or_create(
-            student_reg_no=reg_no
-        )
-
-        context = {
-            "object_list": queryset,
-            "student": student_info,
-        }
-    else:
-        messages.add_message(
-            request,
-            messages.ERROR,
-            "Invalid Student Registration Number",
-            extra_tags="text-danger",
-        )
-        context = {}
-
-    return render(request, template_name, context)
-
-
-@login_required
-def add_result(request, reg_no):
-    """A view that renders a form for users to add a result for a particular
-    student"""
-    reg_no = reg_no.replace("_", "/")
-    course_qs = ex.Course.objects.all()
-    semester_qs = ex.SemesterSession.objects.all().order_by("-session")
-    context = {
-        "reg_no": reg_no,
-        "courses": course_qs,
-        "semesters": semester_qs,
-        "valid_grades": Result.VALID_GRADES,
-    }
-
-    return render(request, "results/add_result.html", context)
-
-
-@login_required
-def result_add_processor(request):
-    student = ex.Student.objects.get(request.POST["reg_no"])
-    if (
-        request.POST["semester"] != None
-        and request.POST["course"] != ""
-        and request.POST["grade"].upper() in Result.VALID_GRADES
-    ):
-        course = ex.Course.objects.get(id=int(request.POST["course"]))
-        semester = ex.SemesterSession.objects.get(
-            id=int(request.POST["semester"])
-        )
-        if course.course_semester == semester.semester:
-            result_details = ex.Result.objects.create(
-                student_reg_no=request.POST["reg_no"],
-                course=course,
-                semester=semester,
-                letter_grade=request.POST["grade"],
-            )
-            result_details.save()
-
-            return HttpResponseRedirect(student.get_records_url())
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                "Course/Semester Mismatch!",
-                extra_tags="text-danger",
-            )
-    else:
-        messages.add_message(
-            request, messages.ERROR, "Uknown Error, Please Try again"
-        )
-    return HttpResponseRedirect(student.get_record_creation_url())
-
-
-@login_required
-def recent_results(request):
-    if request.GET.get("course") and request.GET.get("semester"):
-        queryset = (
-            ex.Result.objects.all()
-            .select_related("semester", "course")
-            .order_by("-id")
-            .values(
-                "id",
-                "student_reg_no",
-                "course_id__course_title",
-                "course_id__course_code",
-                "course_id__course_semester",
-                "semester_id__desc",
-                "semester_id__semester",
-                "letter_grade",
-            )
-            .filter(
-                course__course_code=request.GET.get("course"),
-                semester__desc=request.GET.get("semester"),
-            )
-        )
-    else:
-        queryset = (
-            ex.Result.objects.all()
-            .select_related("semester", "course")
-            .order_by("-id")
-            .values(
-                "id",
-                "student_reg_no",
-                "course_id__course_title",
-                "course_id__course_code",
-                "course_id__course_semester",
-                "semester_id__desc",
-                "semester_id__semester",
-                "letter_grade",
-            )[:20]
-        )
-    context = {"object_list": queryset}
-    if request.htmx:
-        template = "results/partials/rogue_results.html"
-    else:
-        template = "results/rogue_results.html"
-
-    return render(request, template, context)
-
-
-@login_required
-def delete_result(request, pk):
-    result_details = get_object_or_404(ex.Result, id=pk)
-    if result_details:
-        ex.Result.objects.get(id=pk).delete()
-
-    return HttpResponseRedirect(reverse("results:recent_results"))
-
-
-@login_required
-def delete_student_result(request, pk):
-    result_details = get_object_or_404(ex.Result, id=pk)
-    if result_details:
-        student = ex.Student.objects.get(
-            student_reg_no=result_details.student_reg_no
-        )
-        ex.Result.objects.get(id=pk).delete()
-
-    return HttpResponseRedirect(student.get_records_url())
-
-
-@login_required
-def recent_results_bulk(request):
+def recent_results_bulk(request: HttpRequest) -> HttpResponse:
     """This view will find results for the  last N unique courses
     uploaded to the db."""
-    qs = (
-        ex.Result.objects.all()
-        .order_by("-id")
-        .select_related("course", "semester")
+    qs: QuerySet = (
+        ex.Result.objects.all().order_by("-id").select_related("course", "semester")
     )
-    course_count = 0
+    course_count: int = 0
     for idx, entry in enumerate(qs):
         if idx != 0 and qs[idx].course != qs[idx - 1].course:
             course_count += 1
         if course_count == 26:
             break
-    min_id = qs[idx].id
-    final_qs = (
+    min_id: Any = qs[idx].id
+    final_qs: QuerySet = (
         ex.Result.objects.all()
         .filter(id__gt=min_id)
         .order_by("-id")
         .values("course__course_title", "course__course_code", "semester__desc")
     )
-    df = pd.DataFrame(final_qs)
+    df: DataFrame = pd.DataFrame(final_qs)
     grouped = df.groupby(["course__course_code", "semester__desc"], sort=False)
-    new_df = grouped.agg(np.size)
+    new_df: DataFrame = grouped.agg(np.size)
     grouped_dict = new_df.to_dict("dict")["course__course_title"]
-    template = "results/recent_results_bulk.html"
+    template: str = "results/recent_results_bulk.html"
     return render(request, template, {"qs": grouped_dict})
 
 
-@login_required
-def all_results_agg(request):
-    """This view will aggregate all results currently
-    uploaded to the db."""
-    context = {}
-    sessions = ex.Session.objects.all().order_by("-session")
-    levels = (
-        ex.LevelOfStudy.objects.all().filter(level__lte=5).order_by("level")
-    )
-    session = request.GET.get("session")
-    level = request.GET.get("level")
-    context["levels"] = levels
-    context["sessions"] = sessions
-    if session and level:
-        print("getting it")
-        qs = (
-            ex.Result.objects.all()
-            .values(
-                "course__course_title", "course__course_code", "semester__desc"
-            )
-            .filter(semester__session=session, course__course_level=level)
-        )
-    elif session and not level:
-        qs = (
-            ex.Result.objects.all()
-            .values(
-                "course__course_title", "course__course_code", "semester__desc"
-            )
-            .filter(semester__session=session)
-        )
-    elif level and not session:
-        qs = (
-            ex.Result.objects.all()
-            .values(
-                "course__course_title", "course__course_code", "semester__desc"
-            )
-            .filter(course__course_level=level)
-        )
-    else:
-        qs = ex.Result.objects.all().values(
-            "course__course_title", "course__course_code", "semester__desc"
-        )
-    df = pd.DataFrame(qs)
-    grouped = df.groupby(["course__course_code", "semester__desc"])
-    new_df = grouped.agg(np.size)
-    grouped_dict = new_df.to_dict("dict")["course__course_title"]
-    grouped_list = [[k, v] for (k, v) in grouped_dict.items()]
+@method_decorator(login_required, name="dispatch")
+class AggregatedResultsListView(generic.ListView):
+    """Display available results aggregated by course and semester."""
 
-    if not session and not level:
-        paginator = Paginator(grouped_list, 20)
-        page_number = request.GET.get("page")
-        page_obj = paginator.get_page(page_number)
-        context["qs"] = page_obj
-    else:
-        context["qs"] = grouped_list
-    template = "results/all.html"
+    template_name: str = "results/aggregated_result_list.html"
+    paginate_by: int = 20
 
-    return render(request, template, context)
+    def get_queryset(self) -> List[List[str]]:
+        session = self.request.GET.get("session")
+        level = self.request.GET.get("level")
+
+        qs = Result.objects.all()
+
+        if session:
+            qs = qs.filter(semester__session=session)
+        if level:
+            qs = qs.filter(course__course_level=level)
+
+        qs = qs.values("course__course_title", "course__course_code", "semester__desc")
+
+        df = pd.DataFrame(qs)
+        grouped_df = df.groupby(["course__course_code", "semester__desc"])
+        df_with_count = grouped_df.agg(np.size)
+        grouped_dict = df_with_count.to_dict("dict")["course__course_title"]
+        grouped_list = [[k, v] for (k, v) in grouped_dict.items()]
+        return grouped_list
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["levels"] = ex.LevelOfStudy.objects.all().filter(level__lte=5)
+        context["sessions"] = ex.Session.objects.all().order_by("-session")
+        return context
 
 
 # Views for bulk result operations like:
 # class result uploads
 # deletion of entire results for a particular session
 # =====================================================================
-@login_required
-def result_upload_options(request):
-    RESULT_UPLOAD_OPTIONS = (
-        "Upload results without scores",
-        "Upload results with scores",
-    )
-    template_name = "results/result_upload_format.html"
-    context = {"upload_options": RESULT_UPLOAD_OPTIONS}
-    if request.method == "POST":
+@method_decorator(login_required, name="dispatch")
+class ResultFileFormatFormView(generic.FormView):
+    """Present user with choices of valid result file formats system accepts."""
+
+    RESULT_FILE_COL_WITH_SCORES: ClassVar[List[str]] = [
+        "Student Registration Number",
+        "CA Score",
+        "Exam Score",
+        "Grade",
+    ]
+    RESULT_FILE_COL_NO_SCORES: ClassVar[List[str]] = [
+        "Student Registration Number",
+        "Grade",
+    ]
+    template_name: str = "results/result_upload_format.html"
+    form_class = ResultFileUploadFormatOptionForm
+
+    def form_valid(self, form: Form) -> HttpResponse:
         response = HttpResponse(
             content_type="text/csv",
-            headers={
-                "Content-Disposition": 'attachment; filename="resultformat.csv"'
-            },
+            headers={"Content-Disposition": 'attachment; filename="resultformat.csv"'},
         )
         writer = csv.writer(response)
-        if request.POST["upload_option"] == "Upload results without scores":
-            writer.writerow(["Student Registration Number", "Grade"])
-        elif request.POST["upload_option"] == "Upload results with scores":
-            writer.writerow(
-                [
-                    "Student Registration Number",
-                    "CA Score",
-                    "Exam Score",
-                    "Grade",
-                ]
-            )
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                "Something went wrong. Please try again",
-                extra_tags="text-danger",
-            )
-            return HttpResponseRedirect(reverse("results:upload"))
+        if form.cleaned_data["upload_option"] == "Upload results without scores":
+            writer.writerow(self.RESULT_FILE_COL_NO_SCORES)
+        elif form.cleaned_data["upload_option"] == "Upload results with scores":
+            writer.writerow(self.RESULT_FILE_COL_WITH_SCORES)
         return response
 
-    return render(request, template_name, context)
 
+@method_decorator(login_required, name="dispatch")
+class ResultUploadFormView(generic.FormView):
+    """Accepts result csv files."""
 
-@login_required
-@never_cache
-def upload_result_file(request):
     template_name = "results/upload_result_file.html"
-    course_qs = ex.Course.objects.all()
-    semester_qs = ex.SemesterSession.objects.all().order_by("-session")
-    context = {"courses": course_qs, "semesters": semester_qs}
-    if request.method == "POST" and request.FILES:
-        # begin by checking if uploaded file is a csv file
+    form_class = ResultFileUploadForm
+
+    def form_valid(self, form: Form) -> HttpResponse:
         try:
-            df = pd.read_csv(
-                request.FILES["result_file"], skipinitialspace=True
-            )
-            # you can define a chunksize parameter in the read_csv method
-            # to handle large file sizes [chunksize=1000]
+            df = pd.read_csv(self.request.FILES["result_file"], skipinitialspace=True)
         except:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                "Invalid File. File must be a non-empty CSV file.",
+            messages.error(self.request, "File must be a non-empty CSV file.")
+            return super().form_invalid(form)
+
+        # strip whitespaces from dataframe
+        df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
+        # make a copy of dataframe
+        original_df = df.copy()
+
+        # remove rows with empty entry for any required column
+        df.dropna(axis=0, inplace=True)
+        if len(df) == 0:
+            messages.error(
+                self.request,
+                "File may be missing either column headers or result entries",
                 extra_tags="text-danger",
             )
-            return HttpResponseRedirect(reverse("results:upload_result_file"))
-        else:
-            invalid_result_index_list = []
-            # strip whitespaces from dataframe
-            df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
-            # append result entries w empty reg no/grade to invalid result index list
-            invalid_result_index_list = df[
-                df.isna().any(axis=1)
-            ].index.values.tolist()
+            return super().form_invalid(form)
 
-            original_df = (
-                df.copy()
-            )  # make a copy of dataframe before modification
+        invalid_results_df = pd.DataFrame()
+        df_columns = list(df.columns)
+        if df_columns == ResultFileFormatFormView.RESULT_FILE_COL_NO_SCORES:
+            df.rename(
+                columns={
+                    "Student Registration Number": "reg_no",
+                    "Grade": "grade",
+                },
+                inplace=True,
+            )
 
-            # remove rows with empty entry for any required column
-            df.dropna(axis=0, inplace=True)
-            if len(df) > 0:
-                if len(df.columns) == 2 and (
-                    list(df.columns)[0] == "Student Registration Number"
-                    and list(df.columns)[1] == "Grade"
+            course = form.cleaned_data["course"]
+            semester = form.cleaned_data["semester"]
+
+            for index, row in df.iterrows():
+                if not row[
+                    "grade"
+                ].upper() in Result.VALID_GRADES or not ex.Student.is_valid_reg_no(
+                    row["reg_no"]
                 ):
-                    df.rename(
-                        columns={
-                            "Student Registration Number": "reg_no",
-                            "Grade": "grade",
-                        },
-                        inplace=True,
+                    offending_row = row.append(
+                        pd.Series({"error": "INVALID REG. NO. OR GRADE"})
                     )
-                    for index, row in df.iterrows():
-                        if row["grade"].upper() in Result.VALID_GRADES:
-                            if ex.Student.is_valid_reg_no(row["reg_no"]):
-                                course = ex.Course.objects.get(
-                                    id=int(request.POST["course"])
-                                )
-                                semester = ex.SemesterSession.objects.get(
-                                    id=int(request.POST["semester"])
-                                )
-                                ex.Result.objects.update_or_create(
-                                    student_reg_no=row["reg_no"],
-                                    course=course,
-                                    semester=semester,
-                                    defaults={
-                                        "letter_grade": row["grade"].upper()
-                                    },
-                                )
-
-                            else:
-                                invalid_result_index_list = (
-                                    invalid_result_index_list
-                                    + original_df.index[
-                                        original_df[
-                                            "Student Registration Number"
-                                        ]
-                                        == row["reg_no"]
-                                    ].tolist()
-                                )
-                        else:
-                            invalid_result_index_list.append(
-                                original_df.index[
-                                    original_df["Grade"] == row["grade"]
-                                ].tolist()
-                            )
-
-                elif len(df.columns) == 4 and (
-                    list(df.columns)[0] == "Student Registration Number"
-                    and list(df.columns)[1] == "CA Score"
-                    and list(df.columns)[2] == "Exam Score"
-                    and list(df.columns)[3] == "Grade"
-                ):
-                    df.rename(
-                        columns={
-                            "Student Registration Number": "reg_no",
-                            "CA Score": "ca_score",
-                            "Exam Score": "exam_score",
-                            "Grade": "grade",
-                        },
-                        inplace=True,
+                    invalid_results_df = invalid_results_df.append(
+                        offending_row, ignore_index=True
                     )
-                    for index, row in df.iterrows():
-                        if isinstance(row["ca_score"], (int, float)):
-                            if isinstance(row["exam_score"], (int, float)):
-                                if row["grade"].upper() in Result.VALID_GRADES:
-                                    if ex.Student.is_valid_reg_no(
-                                        row["reg_no"]
-                                    ):
-                                        course = ex.Course.objects.get(
-                                            id=int(request.POST["course"])
-                                        )
-                                        semester = (
-                                            ex.SemesterSession.objects.get(
-                                                semester_number=int(
-                                                    request.POST["semester"]
-                                                )
-                                            )
-                                        )
-                                        ex.Result.objects.update_or_create(
-                                            student_reg_no=row["reg_no"],
-                                            course=course,
-                                            semester=semester,
-                                            defaults={
-                                                "letter_grade": row[
-                                                    "grade"
-                                                ].upper(),
-                                                "ca_score": row["ca_score"],
-                                                "exam_score": row["exam_score"],
-                                            },
-                                        )
-                                else:
-                                    invalid_result_index_list.append(
-                                        original_df.index[
-                                            original_df["Grade"] == row["grade"]
-                                        ].tolist()
-                                    )
-                            else:
-                                invalid_result_index_list = (
-                                    invalid_result_index_list
-                                    + original_df.index[
-                                        original_df["Exam Score"]
-                                        == row["exam_score"]
-                                    ].tolist()
-                                )
-                        else:
-                            invalid_result_index_list = (
-                                invalid_result_index_list
-                                + original_df.index[
-                                    original_df["CA Score"] == row["ca_score"]
-                                ].tolist()
+                    continue
+
+                if form.cleaned_data["skip_existing_rows"]:
+                    try:
+                        ex.Result.objects.create(
+                            student_reg_no=row["reg_no"],
+                            course=course,
+                            semester=semester,
+                            letter_grade=row["grade"].upper(),
+                        )
+                    except ValidationError:
+                        messages.add_message(
+                            self.request,
+                            messages.ERROR,
+                            "%s already has a result for this course and sesison"
+                            % row["reg_no"],
+                        )
+                        offending_row = row.append(
+                            pd.Series(
+                                {
+                                    "error": "STUDENT ALREADY HAS A RESULT FOR SELECTED COURSE AND SESSION."
+                                }
                             )
+                        )
+                        invalid_results_df = invalid_results_df.append(
+                            offending_row, ignore_index=True
+                        )
                 else:
-                    messages.add_message(
-                        request,
-                        messages.ERROR,
-                        "File does not comply with provided format. "
-                        "Please download and use a valid format.",
-                        extra_tags="text-danger",
-                    )
-                    return HttpResponseRedirect(
-                        reverse("results:upload_result_file")
+                    ex.Result.objects.update_or_create(
+                        student_reg_no=row["reg_no"],
+                        course=course,
+                        semester=semester,
+                        defaults={"letter_grade": row["grade"].upper()},
                     )
 
-            else:
-                messages.add_message(
-                    request,
-                    messages.ERROR,
-                    "Error. File may be missing "
-                    "either column headers or result entries",
-                    extra_tags="text-danger",
-                )
-                return HttpResponseRedirect(
-                    reverse("results:upload_result_file")
-                )
-
-            if len(invalid_result_index_list) == 0:
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    "Result upload successful",
-                    extra_tags="text-success",
-                )
-            else:
-                invalid_rows = []
-                for row in invalid_result_index_list:
-                    if row not in invalid_rows:
-                        invalid_rows.append(row + 2)
-                messages.add_message(
-                    request,
-                    messages.ERROR,
-                    f"The following rows in the file contains invalid entries: "
-                    f"{sorted(invalid_rows)}",
-                    extra_tags="text-danger",
-                )
-            return HttpResponseRedirect(reverse("results:upload_result_file"))
-
-    return render(request, template_name, context)
-
-
-@login_required
-def delete_by_session(request):
-    template_name = "results/delete_by_session.html"
-    course_qs = ex.Course.objects.all()
-    semester_qs = ex.SemesterSession.objects.all().order_by("-semester")
-    context = {"courses": course_qs, "semesters": semester_qs}
-
-    if request.method == "POST":
-        course = ex.Course.objects.get(id=int(request.POST["course"]))
-        semester = ex.SemesterSession.objects.get(
-            id=int(request.POST["semester"])
-        )
-        if course.course_semester == semester.id:
-            queryset = ex.Result.objects.all().filter(
-                course=course, semester=semester
+        elif df_columns == ResultFileFormatFormView.RESULT_FILE_COL_WITH_SCORES:
+            df.rename(
+                columns={
+                    "Student Registration Number": "reg_no",
+                    "CA Score": "ca_score",
+                    "Exam Score": "exam_score",
+                    "Grade": "grade",
+                },
+                inplace=True,
             )
-            number_of_results = len(queryset)
-            if number_of_results > 0:
-                ex.Result.objects.filter(
-                    course=course, semester=semester
-                ).delete()
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    f"{number_of_results} result(s) were deleted",
-                    extra_tags="text-success",
-                )
-            else:
-                messages.add_message(
-                    request,
-                    messages.WARNING,
-                    "No results were found for course for the selected session",
-                    extra_tags="text-warning",
-                )
+            for index, row in df.iterrows():
+                if (
+                    not isinstance(row["ca_score"], (int, float))
+                    or not isinstance(row["exam_score"], (int, float))
+                    or row["grade"].upper() not in Result.VALID_GRADES
+                    or not ex.Student.is_valid_reg_no(row["reg_no"])
+                ):
+                    offending_row = row.append(
+                        pd.Series({"error": "INVALID REG. NO, GRADE, OR SCORE"})
+                    )
+                    invalid_results_df = invalid_results_df.append(row)
+                    continue
+
+                if form.cleaned_data["skip_existing_rows"]:
+                    try:
+                        ex.Result.objects.create(
+                            student_reg_no=row["reg_no"],
+                            course=course,
+                            semester=semester,
+                            ca_score=row["ca_score"],
+                            exam_score=row["exam_score"],
+                            letter_grade=row["letter_grade"],
+                        )
+                    except ValidationError:
+                        offending_row = row.append(
+                            pd.Series(
+                                {
+                                    "error": "STUDENT ALREADY HAS A RESULT FOR SELECTED COURSE AND SESSION."
+                                }
+                            )
+                        )
+                        invalid_results_df = invalid_results_df.append(
+                            offending_row, ignore_index=True
+                        )
+                else:
+                    ex.Result.objects.update_or_create(
+                        student_reg_no=row["reg_no"],
+                        course=course,
+                        semester=semester,
+                        defaults={
+                            "letter_grade": row["grade"].upper(),
+                            "ca_score": row["ca_score"],
+                            "exam_score": row["exam_score"],
+                        },
+                    )
         else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                "Course is not allocated to selected semester",
+            messages.error(
+                self.request,
+                "File does not comply with any of the provided result file samples.",
                 extra_tags="text-danger",
             )
-    return render(request, template_name, context)
+            return super().form_invalid(form)
+
+        if len(invalid_results_df) > 0:
+            messages.add_message(
+                self.request, messages.INFO, "Upload compete with some errors"
+            )
+            response = HttpResponse(
+                self.request,
+                content_type="text/csv",
+                headers={
+                    "Content-Disposition": 'attachment; filename="invalid_result_file_rows.csv"'
+                },
+            )
+            invalid_results_df.to_csv(response)
+            return response
+        else:
+            return HttpResponseRedirect(reverse("results:upload_result_file"))
 
 
-@login_required
-def student_transcript_generator(request, reg_no):
-    template_name = "results/transcript.html"
-    reg_no = reg_no.replace("_", "/")
-    required_sessions = (
-        request.POST["required_sessions"] if request.method == "POST" else None
-    )
-    transcipt_data = {}
+@method_decorator(login_required, name="dispatch")
+class CourseResultDeleteFormView(generic.FormView):
+    """View to delete course results for a given session/semester."""
 
-    def qs_to_result_df(qs, col_names):
-        df = DataFrame(list(qs))
-        df.rename(
-            columns={k: v for (k, v) in enumerate(col_names)}, inplace=True
-        )
+    template_name: str = "results/delete_by_session.html"
+    form_class = CourseResultDeletionForm
 
-        return df
+    def form_valid(self, form: Form) -> HttpResponseRedirect:
+        course = form.cleaned_data["course"]
+        semester = form.cleaned_data["semester"]
+        queryset = ex.Result.objects.all().filter(course=course, semester=semester)
+        obj_count = len(queryset)
 
-    if ex.Student.is_valid_reg_no(reg_no):
+        if obj_count > 0:
+            queryset.delete()
+            messages.success(
+                self.request,
+                "%d result(s) were deleted" % obj_count,
+                extra_tags="text-success",
+            )
+        elif obj_count == 0:
+            messages.error(
+                self.request,
+                "No results were found for course in selected session.",
+                extra_tags="text-danger",
+            )
+        return HttpResponseRedirect(reverse("results:delete_by_session"))
+
+
+@method_decorator(login_required, name="dispatch")
+class StudentTranscriptGeneratorView(generic.View):
+    """Generate an xls file of a student's academic records."""
+
+    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        reg_no = self.kwargs["reg_no"].replace("_", "/")
+
+        required_sessions: Optional[List[str]] = None
+        if request.GET.get("required_sessions"):
+            required_sessions = request.GET.get("required_sessions").split(",")
+
+        # dict for holding data for student transcript
+        transcript_data: Dict[str, Any] = {}
+
+        if not ex.Student.is_valid_reg_no(reg_no):
+            return HttpResponseBadRequest("Invalid Student registration number")
+
         required_fields = [
             "course_id__course_code",
             "course_id__course_title",
@@ -687,128 +465,98 @@ def student_transcript_generator(request, reg_no):
             "course_id__credit_load",
         ]
 
-        student = get_object_or_404(ex.Student, student_reg_no=reg_no)
-        student_results = (
+        student: Union[ex.Student, HttpResponse] = get_object_or_404(
+            ex.Student, student_reg_no=reg_no
+        )
+        student_results: QuerySet = (
             ex.Result.objects.filter(student_reg_no=reg_no)
             .prefetch_related("course", "semester")
             .values_list(*required_fields)
         )
 
         student_bio = [student.full_name, reg_no, student.get_level_of_study()]
-        transcipt_data["student_bio"] = student_bio
+        transcript_data["student_bio"] = student_bio
 
-        if student_results != None:
-            result_sessions = list(
-                student_results.values_list(
-                    "semester_id__session", flat=True
-                ).distinct()
+        if not student_results.exists():
+            messages.error(request, "Student has no results.", extra_tags="text-danger")
+            return HttpResponseRedirect(student.get_absolute_url())
+
+        result_sessions = list(
+            student_results.values_list("semester__session", flat=True).distinct()
+        )
+
+        if required_sessions:
+            selected_sessions = [x for x in required_sessions if x in result_sessions]
+
+        # if user provided invalid academic sessions/sessions where
+        # student has no result, return a transcript of all student
+        # results anyway.
+        if required_sessions is None or selected_sessions is None:
+            selected_sessions = result_sessions
+
+        transcript_body: Dict[str, Dict[str, DataFrame]] = {}
+
+        for session in selected_sessions:
+            results_for_session = {}
+            session_res = student_results.filter(semester__session=session)
+            first_sem_res = session_res.filter(semester__semester=1).order_by(
+                "course__course_level"
             )
-            selected_sessions = (
-                required_sessions if required_sessions else result_sessions
+            second_sem_res = session_res.filter(semester__semester=2).order_by(
+                "course__course_level"
             )
-            selected_sessions = sorted(result_sessions)
-            transcipt_body = {}
-            for session in selected_sessions:
-                session_entry = {}
-                session_res = student_results.filter(
-                    semester_id__session=session
+
+            if len(first_sem_res) > 0:
+                first_sem_df = DataFrame(list(first_sem_res))
+                first_sem_df.rename(
+                    columns={k: v for (k, v) in enumerate(required_fields)},
+                    inplace=True,
                 )
-                first_sem_res = session_res.filter(
-                    semester_id__semester=1
-                ).order_by("course_id__course_level")
-                second_sem_res = session_res.filter(
-                    semester_id__semester=2
-                ).order_by("course_id__course_level")
-                if len(first_sem_res) > 0:
-                    first_sem_df = DataFrame(list(first_sem_res))
-                    first_sem_df.rename(
-                        columns={k: v for (k, v) in enumerate(required_fields)},
-                        inplace=True,
-                    )
-                    first_sem_df["weight"] = first_sem_df[
-                        "course_id__credit_load"
-                    ] * [
-                        5
-                        if x == "A"
-                        else 4
-                        if x == "B"
-                        else 3
-                        if x == "C"
-                        else 2
-                        if x == "D"
-                        else 1
-                        if x == "E"
-                        else 0
-                        for x in first_sem_df["letter_grade"]
-                    ]
-                    session_entry["first"] = first_sem_df
 
-                if len(second_sem_res) > 0:
-                    second_sem_df = DataFrame(list(second_sem_res))
-                    second_sem_df.rename(
-                        columns={k: v for (k, v) in enumerate(required_fields)},
-                        inplace=True,
-                    )
-                    second_sem_df["weight"] = second_sem_df[
-                        "course_id__credit_load"
-                    ] * [
-                        5
-                        if x == "A"
-                        else 4
-                        if x == "B"
-                        else 3
-                        if x == "C"
-                        else 2
-                        if x == "D"
-                        else 1
-                        if x == "E"
-                        else 0
-                        for x in second_sem_df["letter_grade"]
-                    ]
-                    session_entry["second"] = second_sem_df
-                transcipt_body[session] = session_entry
-            transcipt_data["transcript_body"] = transcipt_body
-            wb = student_transcript(transcipt_data)
+                first_sem_df["weight"] = first_sem_df["course_id__credit_load"] * [
+                    ex.Result.GRADE_WEIGHTS[x] for x in first_sem_df["letter_grade"]
+                ]
+                results_for_session["first"] = first_sem_df
+            if len(second_sem_res) > 0:
+                second_sem_df = DataFrame(list(second_sem_res))
+                second_sem_df.rename(
+                    columns={k: v for (k, v) in enumerate(required_fields)},
+                    inplace=True,
+                )
+                second_sem_df["weight"] = second_sem_df["course_id__credit_load"] * [
+                    ex.Result.GRADE_WEIGHTS[x] for x in second_sem_df["letter_grade"]
+                ]
+                results_for_session["second"] = second_sem_df
+            transcript_body[session] = results_for_session
+        transcript_data["transcript_body"] = transcript_body
+        print("This is the transcript body: ", transcript_data["transcript_body"])
+        wb = student_transcript(transcript_data)
 
-            file_name = f'Academic Transcript of {student.full_name.replace(",","")}.xlsx'
-            response = HttpResponse(
-                content=save_virtual_workbook(wb),
-                content_type="application/ms-excel",
-            )
-            response[
-                "Content-Disposition"
-            ] = f"attachment; filename={file_name}"
-            return response
+        file_name = f'Academic Transcript of {student.full_name.replace(",","")}.xlsx'
+        response = HttpResponse(
+            content=save_virtual_workbook(wb),
+            content_type="application/ms-excel",
+        )
+        response["Content-Disposition"] = f"attachment; filename={file_name}"
 
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                "No results were found for the student",
-                extra_tags="text-danger",
-            )
-            return HttpResponseRedirect(reverse("results:transcripts"))
-
-    return render(request, template_name, {})
+        return response
 
 
 @login_required
 def generic_class_info_handler(
-    request,
-    expected_yr_of_grad,
-    file_name,
-    spread_sheet_method=class_failure_spreadsheet,
-):
+    request: HttpRequest,
+    expected_yr_of_grad: str,
+    file_name: str,
+    spread_sheet_method: Callable[..., Worksheet] = class_failure_spreadsheet,
+) -> HttpResponse:
 
-    class_query = (
+    class_query: QuerySet = (
         ex.Student.objects.all()
         .select_related("mode_of_admission")
         .filter(expected_yr_of_grad=expected_yr_of_grad)
-        .values_list(
-            "student_reg_no", "mode_of_admission_id__mode_of_admission"
-        )
+        .values_list("student_reg_no", "mode_of_admission_id__mode_of_admission")
     )
-    if len(class_query) == 0:
+    if not class_query.exists():
         messages.add_message(
             request,
             messages.ERROR,
@@ -816,15 +564,15 @@ def generic_class_info_handler(
             f"{expected_yr_of_grad} as their year of graduation",
             extra_tags="text-danger",
         )
-        return HttpResponseRedirect(reverse("results:spreadsheets"))
+        return HttpResponseRedirect(reverse("index"))
 
-    class_reg_no = list(class_query.values_list("student_reg_no", flat=True))
-    class_list = []
+    class_reg_no: List[str] = list(class_query.values_list("student_reg_no", flat=True))
+    class_list: List[List[str]] = []
     for el in class_query:
         name = ex.Student.objects.get(student_reg_no=el[0]).full_name
         class_list.append([el[0], name, el[1]])
 
-    result_qs = (
+    result_qs: QuerySet = (
         ex.Result.objects.all()
         .select_related("semester", "course")
         .filter(student_reg_no__in=class_reg_no)
@@ -862,14 +610,18 @@ def generic_class_info_handler(
 
 
 @login_required
-def class_outstanding_courses(request, expected_yr_of_grad):
-    file_name = f"Class of {expected_yr_of_grad} Extra Load Summary.xlsx"
+def class_outstanding_courses(
+    request: HttpRequest, expected_yr_of_grad: str
+) -> HttpResponse:
+    file_name: str = f"Class of {expected_yr_of_grad} Extra Load Summary.xlsx"
     return generic_class_info_handler(request, expected_yr_of_grad, file_name)
 
 
 @login_required
-def class_speadsheet_generator(request, expected_yr_of_grad):
-    file_name = f"Class of {expected_yr_of_grad} Results.xlsx"
+def class_speadsheet_generator(
+    request: HttpRequest, expected_yr_of_grad: str
+) -> HttpResponse:
+    file_name: str = f"Class of {expected_yr_of_grad} Results.xlsx"
     return generic_class_info_handler(
         request,
         expected_yr_of_grad,
@@ -878,7 +630,7 @@ def class_speadsheet_generator(request, expected_yr_of_grad):
     )
 
 
-def result_collation(request, session, level):
+def result_collation(request: HttpRequest, session: str, level: str) -> HttpResponse:
     """This view will take two args: level of study and session.
     Using these, it will produce a file response (excel worksheet) of all
     available results for the given session and level of study"""
@@ -888,11 +640,8 @@ def result_collation(request, session, level):
         level_of_study = int(level)
     except ValueError:
         return HttpResponseBadRequest("Invalid Arg(s) provided")
-    # session_obj = ex.Session
-    student_info = ex.Student.objects.filter(
-        student_reg_no=OuterRef("student_reg_no")
-    )
-    qs = (
+    student_info = ex.Student.objects.filter(student_reg_no=OuterRef("student_reg_no"))
+    qs: QuerySet = (
         ex.Result.objects.all()
         .select_related("course", "semester")
         .filter(semester__session=session, course__course_level=level_of_study)
@@ -907,8 +656,8 @@ def result_collation(request, session, level):
         )
         .order_by("course__course_semester")
     )
-    result_dict = {}
-    if len(qs) > 0:
+    result_dict: Dict[int, Dict[str, Any]] = {}
+    if qs.exists():
         for idx, el in enumerate(qs):
             result_dict[(idx)] = {
                 "reg_no": el.student_reg_no,
@@ -937,71 +686,68 @@ def result_collation(request, session, level):
         return HttpResponseRedirect(reverse("results:collation"))
 
 
-@login_required
-def result_collation_form(request):
-    template = "results/result_collation_form.html"
-    context = {}
-    if request.method == "GET":
-        sessions = ex.Session.objects.all().order_by("-session")
-        levels_of_study = [x for x in range(1, 6)]
-        context = {"sessions": sessions, "levels_of_study": levels_of_study}
+@method_decorator(login_required, name="dispatch")
+class ResultCollationByLevelOfStudyAnsSessionFormView(generic.FormView):
+    """Collated results for a specified session and level of study"""
 
-    else:
-        if request.POST["session"] and request.POST["level"]:
-            session = request.POST["session"].replace("/", "_")
-            level = request.POST["level"]
-            next_url = reverse(
-                "results:result_collation",
-                kwargs={"session": session, "level": level},
-            )
+    template_name: str = "results/result_collation_form.html"
+    form_class: Form = ResultCollationBySessionAndLevelOfStudyForm
 
-            return HttpResponseRedirect(
-                reverse("index:download_info") + "?next=%s" % next_url
-            )
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                "Please verify information provided is valid",
-                extra_tags="text-danger",
-            )
-    return render(request, template, context)
-
-
-@login_required
-def result_spreadsheet_form(request):
-    template = "results/spreadsheet_form.html"
-    context = {}
-
-    if request.method == "GET":
-        expected_yrs_of_grad = sorted(
-            [x for x in range(2017, (date.today().year + 5))], reverse=True
+    def form_valid(self, form: Form) -> HttpResponse:
+        session: str = form.cleaned_data["session"].session.replace("/", "_")
+        level_of_study: str = form.cleaned_data["level_of_study"]
+        next_url: str = reverse(
+            "results:result_collation",
+            kwargs={"session": session, "level": level_of_study},
         )
-        context = {"expected_yrs_of_grad": expected_yrs_of_grad}
-        return render(request, template, context)
-    else:
-        if request.POST["expected_yr_of_grad"]:
-            print("got here")
-            try:
-                expected_yr_of_grad = int(request.POST["expected_yr_of_grad"])
-            except ValueError:
-                return HttpResponseBadRequest(
-                    "Invalid Session. Select a valid year."
-                )
-            else:
-                next_url = reverse(
-                    "results:generate_class_spreadsheet",
-                    kwargs={"expected_yr_of_grad": expected_yr_of_grad},
-                )
-                return HttpResponseRedirect(
-                    reverse("index:download_info") + "?next=%s" % next_url
-                )
+        return HttpResponseRedirect(
+            reverse("index:download_info") + "?next=%s" % next_url
+        )
+
+
+@method_decorator(login_required, name="dispatch")
+class GraduationSetResultSpreadsheetFormView(generic.FormView):
+    """Generate spreadsheet of results for selected graduation set."""
+
+    template_name: str = "results/graduationset_spreadsheet_form.html"
+    form_class: Form = GraduationSetResultSpreadsheetForm
+
+    def form_valid(self, form: Form) -> HttpResponse:
+        next_url: str = reverse(
+            "results:generate_class_spreadsheet",
+            kwargs={"expected_yr_of_grad": form.cleaned_data["expected_yr_of_grad"]},
+        )
+        # TODO: could be better to processs handling of longer
+        # pre-download file processing with vue to prevent impatient
+        # user from continuously hitting server.
+        return HttpResponseRedirect(
+            reverse("index:download_info") + "?next=%s" % next_url
+        )
+
+
+@method_decorator(login_required, name="dispatch")
+class GraduationSetOutstandingCoursesFormView(generic.FormView):
+    """Generate spreadsheet of outstanding courses for selected grad set."""
+
+    template_name: str = (
+        "results/graduationset_spreadsheet_outstanding_courses_form.html"
+    )
+    form_class: Form = GraduationSetResultSpreadsheetForm
+
+    def form_valid(self, form: Form) -> HttpResponse:
+        next_url: str = reverse(
+            "results:class_outstanding_courses",
+            kwargs={"expected_yr_of_grad": form.cleaned_data["expected_yr_of_grad"]},
+        )
+        return HttpResponseRedirect(
+            reverse("index:download_info") + "?next=%s" % next_url
+        )
 
 
 @login_required
-def class_outstanding_courses_form(request):
-    template = "results/spreadsheet_form.html"
-    context = {}
+def class_outstanding_courses_form(request: HttpRequest) -> HttpResponse:
+    template: str = "results/spreadsheet_form.html"
+    context: Dict[str, Any] = {}
 
     if request.method == "GET":
         expected_yrs_of_grad = sorted(
@@ -1014,9 +760,7 @@ def class_outstanding_courses_form(request):
             try:
                 expected_yr_of_grad = int(request.POST["expected_yr_of_grad"])
             except ValueError:
-                return HttpResponseBadRequest(
-                    "Invalid Session. Select a valid year."
-                )
+                return HttpResponseBadRequest("Invalid Session. Select a valid year.")
             else:
                 next_url = reverse(
                     "results:class_outstanding_courses",
@@ -1029,40 +773,9 @@ def class_outstanding_courses_form(request):
 
 
 @login_required
-def student_transcript_form(request):
-    """
-    View responsible for searching for processing transcript request for a valid student
-    registration number"""
-    template = "results/reg_no_search.html"
-
-    if request.method == "POST":
-        reg_no = request.POST["reg_no"] or None
-
-        if ex.Student.is_valid_reg_no(reg_no):
-            if  not ex.Student.objects.filter(student_reg_no=reg_no).exists():
-                messages.error(request, "No student found with registration number: %s" % reg_no, extra_tags="text-danger")
-                return render(request, template, {})
-
-            next_url = reverse(
-                "results:generate_transcript",
-                kwargs={"reg_no": reg_no.replace("/", "_")},
-            )
-            return HttpResponseRedirect(
-                reverse(
-                    "students:profile",
-                    kwargs={"reg_no": reg_no.replace("/", "_")},
-                )
-                + "?next=%s" % next_url
-            )
-        else:
-            messages.error(request, "Invalid Student Registration Number", extra_tags="text-danger")
-    return render(request, template, {})
-
-
-@login_required
-def transcript_download_info(request, reg_no):
-    template = "results/transcript_download_info.html"
-    context = {}
+def transcript_download_info(request: HttpRequest, reg_no: str) -> HttpResponse:
+    template: str = "results/transcript_download_info.html"
+    context: Dict[str, Any] = {}
     if request.method == "GET":
         try:
             context.update(next=request.GET["next"])
@@ -1080,14 +793,19 @@ def transcript_download_info(request, reg_no):
             "Invalid Student Registration Number",
             extra_tags="text-danger",
         )
-        HttpResponseRedirect(reverse("results:transcripts"))
+        HttpResponseRedirect(reverse("students:search"))
     return render(request, template, context)
 
 
 @login_required
-def possible_graduands(request, expected_yr_of_grad):
-    wb = possible_graduands_wb(expected_yr_of_grad)
-    # return HttpResponse("Hello again")
+def possible_graduands(request: HttpRequest, expected_yr_of_grad: str) -> HttpResponse:
+
+    try:
+        wb = possible_graduands_wb(expected_yr_of_grad)
+    except ValueError as e:
+        messages.error(request, e, extra_tags="text-danger")
+        return HttpResponseRedirect(reverse("results:possible_graduands_form"))
+
     file_name = f"{expected_yr_of_grad} List of Possible graduands.xlsx"
     response = HttpResponse(
         content=save_virtual_workbook(wb), content_type="application/ms-excel"
@@ -1096,37 +814,18 @@ def possible_graduands(request, expected_yr_of_grad):
     return response
 
 
-@login_required
-def possible_graduands_form(request):
-    if request.method == "GET":
-        return render(request, "results/possible_graduands_form.html", {})
-    else:
-        try:
-            expected_yr_of_grad = request.POST["expected_yr_of_grad"]
-        except:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                "No expected year of graduation found",
-                extra_tags="text-danger",
+@method_decorator(login_required, name="dispatch")
+class PossibleGraduandsFormView(generic.FormView):
+    """Generate a report of possible graduands for a given session."""
+
+    form_class: Form = GraduationSetSearchForm
+    template_name: str = "results/possible_graduands_form.html"
+
+    def form_valid(self, form: Form) -> HttpResponse:
+        expected_yr_of_grad = form.cleaned_data["expected_yr_of_grad"]
+        return HttpResponseRedirect(
+            reverse(
+                "results:possible_graduands",
+                kwargs={"expected_yr_of_grad": expected_yr_of_grad},
             )
-            return HttpResponseRedirect(
-                reverse("results:possible_graduands_form")
-            )
-        else:
-            if re.search("^[0-9]{4}$", expected_yr_of_grad) != None:
-                return HttpResponseRedirect(
-                    reverse(
-                        "results:possible_graduands",
-                        kwargs={"expected_yr_of_grad": expected_yr_of_grad},
-                    )
-                )
-            else:
-                messages.add_message(
-                    request,
-                    messages.ERROR,
-                    "Invalid year entered. Must be of the format 'XXXX'",
-                )
-                return HttpResponseRedirect(
-                    reverse("results:possible_graduands_form")
-                )
+        )
