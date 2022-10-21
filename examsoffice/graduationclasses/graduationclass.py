@@ -17,7 +17,7 @@ class GraduationClass:
     @property
     def members(self) -> List[Student]:
         return list(
-            Student.objects.filter(expected_yr_of_grad=self.expected_yr_of_grad)
+            Student.objects.filter(expected_yr_of_grad=self.expected_yr_of_grad).order_by('last_name')
         )
 
     def best_student(self) -> Optional[List[Student]]:

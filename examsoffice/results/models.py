@@ -474,21 +474,11 @@ class Student(models.Model):
 
     def outstanding_courses(self) -> List[Course]:
         """Find a student's outstanding courses."""
-        failed_courses: List[str] = Result.objects.filter(
-            student_reg_no=self.student_reg_no, letter_grade__iexact="F"
-        ).values_list("course__id", flat=True)
-        cleared_courses: List[str] = (
-            Result.objects.filter(student_reg_no=self.student_reg_no)
-            .exclude(letter_grade__iexact="F")
-            .values_list("course__id", flat=True)
-        )
-        outstanding_courses: List[Course] = [
-            Course.objects.filter(id=course).first()
-            for course in failed_courses
-            if course not in cleared_courses
-        ]
+        failed_courses = Result.objects.filter(student_reg_no=self.student_reg_no, letter_grade__iexact="F")
+        passed_courses = Result.objects.filter(student_reg_no=self.student_reg_no).exclude(letter_grade__iexact="F")
 
-        return outstanding_courses
+        outstanding_courses = list(failed_courses.exclude(pk__in=passed_courses).values_list("course_id", flat=True))
+        return [Course.objects.filter(id=course).first() for course in outstanding_courses]
 
     def grades_breakdown(self) -> Optional[Dict[str, int]]:
         """Method will return a dict of student's grades breakdown.

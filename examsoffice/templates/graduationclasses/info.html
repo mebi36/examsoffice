@@ -1,0 +1,132 @@
+{% extends 'students/base.html' %}
+{% block title %}Class Info{% endblock %}
+{% block content %}
+
+<p>{{ graduation_class.expected_yr_of_grad| json_script:"grad_yr" }}</p>
+<div class="col-md-10 mx-auto">
+    <div class="d-flex justify-content-end">
+        <a href="{% url 'results:generate_class_spreadsheet' graduation_class.expected_yr_of_grad %}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-arrow-down" viewBox="0 0 16 16">
+                <path d="M8.5 6.5a.5.5 0 0 0-1 0v3.793L6.354 9.146a.5.5 0 1 0-.708.708l2 2a.5.5 0 0 0 .708 0l2-2a.5.5 0 0 0-.708-.708L8.5 10.293V6.5z"/>
+                <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+            </svg>
+            <span class="ms-1">Result Spreadsheet</span>
+        </a>
+    </div>
+</div>
+<div class="col-md-10 mx-auto">
+    {% if graduation_class %} 
+    <div class="bg-secondary bg-opacity-10 p-5">
+        <h1 class="text-center text-success mb-5">Class of {{ graduation_class.expected_yr_of_grad }}</h1>
+        <div class="table">
+            <div class="row d-flex mb-5" id="performance_app">
+                <div class="col-md-4 text-center d-flex align-items-stretch">
+                    <div class="shadow-sm col-12 bg-white p-3">
+                        <div class="card-title fw-bold text-success">Class Size</div>
+                        <hr>
+                        <div class="card-body"><span class="display-2">{{ graduation_class.members|length }}</span></div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 text-center d-flex align-items-stretch">
+                    <div class="shadow-sm col-12 bg-white p-3">
+                        <div class="card-title fw-bold text-success">Class Average CGPA</div>
+                        <hr>
+                        <div class="placeholder-glow" v-if="loadingData">
+                            <span class="display-2 placeholder col-12 bg-secondary bg-opacity-50"></span>
+                        </div>
+                        <div class="card-body" v-else-if="gradClassData">
+                            <span class="display-2">[[ gradClassData.class_average_cgpa ]]</span><span>/5</span>
+                        </div>
+                        <div class="card-body text-muted" v-else>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
+                            </svg>
+                            <span class="ms-2">Failed to fetch information</span>
+                        </div>
+                        
+                    </div>
+                </div>
+
+                <div class="col-md-4 text-center d-flex align-items-stretch">
+                    <div class="shadow-sm col-12 bg-white p-3">
+                        <div class="card-title fw-bold text-success">Highest CGPA</div>
+                        <hr>
+                        <div class="placeholder-glow" v-if="loadingData">
+                            <span class="display-2 placeholder col-12 bg-secondary bg-opacity-50"></span>
+                        </div>
+                        <div class="card-body" v-else-if="gradClassData">
+                            <span class="display-2">[[ gradClassData.top_student[0].cgpa ]]</span><span></span>
+                        </div>
+                        <div class="card-body text-muted" v-else>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
+                            </svg>
+                            <span class="ms-2">Failed to fetch information</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="row mt-3 py-5 border-top border-bottom">
+            <h4 class="text-center text-success mb-3">Class Members</h4>
+            <div class="overflow-auto bg-white p-3" style="height:300px;">
+                {% if graduation_class.members %}
+                <ol>
+                {% for member in graduation_class.members %}
+                    <li><a href="{{member.get_absolute_url}}">{{ member.last_name|title }} {{ member.first_name|title }} - {{ member.student_reg_no|title }}</a></li>
+                {% endfor %}
+                </ol>
+                {% else %}
+                <p class="text-muted">No students found with given graduation year.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+{% block frontend_mount %}
+<script>
+    let app = Vue.createApp({
+        delimiters: ["[[", "]]"],
+        data() { 
+            return{
+                gradYear: null,
+                gradClassData: null,
+                loadingData: false
+            }
+        },
+        methods: {
+            async get_class_data(){
+                this.loadingData = true
+                await axios
+                .get(`/graduation-classes/info/${this.gradYear}/json/`)
+                .then(response => {
+                    this.gradClassData = response.data
+                    console.log(this.gradClassData)
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+                this.loadingData = false
+            },
+            get_grad_yr(){
+                this.gradYear = JSON.parse(document.getElementById('grad_yr').innerText)
+            },
+        },
+        mounted() {
+            this.get_grad_yr()
+
+            if (this.gradYear){
+                this.get_class_data()
+            }
+
+        }
+    })
+    let vm = app.mount('#performance_app')
+</script>
+{% endblock %}
