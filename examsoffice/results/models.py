@@ -414,9 +414,6 @@ class Student(models.Model):
     current_level_of_study = models.IntegerField(
         db_column="CurrentLevelOfStudy", blank=True, null=True
     )
-    cgpa = models.CharField(
-        db_column="CGPA", max_length=255, blank=True, null=True
-    )
     # student_photo = models.ImageField(db_column='studentPhoto', blank=True, null=True)
     jamb_number = models.CharField(
         db_column="JambNumber", max_length=20, blank=True, null=True
@@ -495,6 +492,7 @@ class Student(models.Model):
         sessions: Set[str] = set(
             results.values_list("semester__session__session", flat=True)
         )
+        sessions = sorted(sessions)
         cgpas_dict: Dict[str, float] = {}
         for session in sessions:
             grade_point = 0
