@@ -8,17 +8,32 @@ app_name = "results"
 
 urlpatterns = [
     path("edit/<int:pk>/", views.ResultObjectUpdateView.as_view(), name="edit"),
-    path("detail/<int:pk>/", views.ResultObjectDetailView.as_view(), name="detail"),
-    path("student/<str:reg_no>/", views.StudentAcademicRecordsListView.as_view(), name="student-records"),
+    path(
+        "detail/<int:pk>/",
+        views.ResultObjectDetailView.as_view(),
+        name="detail",
+    ),
+    path(
+        "student/<str:reg_no>/",
+        views.StudentAcademicRecordsListView.as_view(),
+        name="student-records",
+    ),
     path("add/<str:reg_no>/", views.ResultCreateView.as_view(), name="add"),
-
     path("all/", views.AggregatedResultsListView.as_view(), name="all"),
     path("recent uploads/", views.recent_results_bulk, name="recent_uploads"),
     path("list/", views.ResultListView.as_view(), name="list"),
     path("delete/<int:pk>/", views.ResultDeleteView.as_view(), name="delete"),
     path("upload/", views.ResultFileFormatFormView.as_view(), name="upload"),
-    path("upload file/", views.ResultUploadFormView.as_view(), name="upload_result_file"),
-    path("delete by session/", views.CourseResultDeleteFormView.as_view(), name="delete_by_session"),
+    path(
+        "upload file/",
+        views.ResultUploadFormView.as_view(),
+        name="upload_result_file",
+    ),
+    path(
+        "delete by session/",
+        views.CourseResultDeleteFormView.as_view(),
+        name="delete_by_session",
+    ),
     path(
         "transcript download/<str:reg_no>/",
         views.transcript_download_info,
@@ -39,7 +54,11 @@ urlpatterns = [
         views.class_outstanding_courses,
         name="class_outstanding_courses",
     ),
-    path("collation/", views.ResultCollationByLevelOfStudyAnsSessionFormView.as_view(), name="collation"),
+    path(
+        "collation/",
+        views.ResultCollationByLevelOfStudyAnsSessionFormView.as_view(),
+        name="collation",
+    ),
     path(
         "result_collation/session=<str:session>/level=<str:level>/",
         views.result_collation,

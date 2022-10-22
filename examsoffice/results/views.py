@@ -68,7 +68,9 @@ class ResultCreateView(generic.CreateView):
         context = super().get_context_data(**kwargs)
         if "reg_no" in self.kwargs:
             student_reg_no: str = self.kwargs["reg_no"].replace("_", "/")
-            context["form"] = ResultForm(initial={"student_reg_no": student_reg_no})
+            context["form"] = ResultForm(
+                initial={"student_reg_no": student_reg_no}
+            )
         return context
 
     def get_success_url(self) -> str:
@@ -92,7 +94,9 @@ class ResultDeleteView(generic.DeleteView):
             return next_url
 
         result = Result.objects.get(pk=self.kwargs["pk"])
-        student = ex.Student.objects.filter(student_reg_no=result.student_reg_no)
+        student = ex.Student.objects.filter(
+            student_reg_no=result.student_reg_no
+        )
 
         if student.exists():
             return student.first().get_records_url()
@@ -108,9 +112,9 @@ class StudentAcademicRecordsListView(generic.ListView):
 
     def get_queryset(self) -> QuerySet:
         student_reg_no = self.kwargs["reg_no"].replace("_", "/")
-        return Result.objects.filter(student_reg_no=student_reg_no).select_related(
-            "course", "semester"
-        )
+        return Result.objects.filter(
+            student_reg_no=student_reg_no
+        ).select_related("course", "semester")
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -131,7 +135,11 @@ class ResultListView(generic.ListView):
     template_name: str = "results/result_obj_list.html"
 
     def get_queryset(self) -> QuerySet:
-        qs = Result.objects.all().select_related("semester", "course").order_by("-id")
+        qs = (
+            Result.objects.all()
+            .select_related("semester", "course")
+            .order_by("-id")
+        )
 
         if (course := self.request.GET.get("course")) and (
             session := self.request.GET.get("semester")
@@ -147,7 +155,9 @@ def recent_results_bulk(request: HttpRequest) -> HttpResponse:
     """This view will find results for the  last N unique courses
     uploaded to the db."""
     qs: QuerySet = (
-        ex.Result.objects.all().order_by("-id").select_related("course", "semester")
+        ex.Result.objects.all()
+        .order_by("-id")
+        .select_related("course", "semester")
     )
     course_count: int = 0
     for idx, entry in enumerate(qs):
@@ -188,7 +198,9 @@ class AggregatedResultsListView(generic.ListView):
         if level:
             qs = qs.filter(course__course_level=level)
 
-        qs = qs.values("course__course_title", "course__course_code", "semester__desc")
+        qs = qs.values(
+            "course__course_title", "course__course_code", "semester__desc"
+        )
 
         df = pd.DataFrame(qs)
         grouped_df = df.groupby(["course__course_code", "semester__desc"])
@@ -228,10 +240,15 @@ class ResultFileFormatFormView(generic.FormView):
     def form_valid(self, form: Form) -> HttpResponse:
         response = HttpResponse(
             content_type="text/csv",
-            headers={"Content-Disposition": 'attachment; filename="resultformat.csv"'},
+            headers={
+                "Content-Disposition": 'attachment; filename="resultformat.csv"'
+            },
         )
         writer = csv.writer(response)
-        if form.cleaned_data["upload_option"] == "Upload results without scores":
+        if (
+            form.cleaned_data["upload_option"]
+            == "Upload results without scores"
+        ):
             writer.writerow(self.RESULT_FILE_COL_NO_SCORES)
         elif form.cleaned_data["upload_option"] == "Upload results with scores":
             writer.writerow(self.RESULT_FILE_COL_WITH_SCORES)
@@ -247,7 +264,9 @@ class ResultUploadFormView(generic.FormView):
 
     def form_valid(self, form: Form) -> HttpResponse:
         try:
-            df = pd.read_csv(self.request.FILES["result_file"], skipinitialspace=True)
+            df = pd.read_csv(
+                self.request.FILES["result_file"], skipinitialspace=True
+            )
         except:
             messages.error(self.request, "File must be a non-empty CSV file.")
             return super().form_invalid(form)
@@ -418,7 +437,9 @@ class CourseResultDeleteFormView(generic.FormView):
     def form_valid(self, form: Form) -> HttpResponseRedirect:
         course = form.cleaned_data["course"]
         semester = form.cleaned_data["semester"]
-        queryset = ex.Result.objects.all().filter(course=course, semester=semester)
+        queryset = ex.Result.objects.all().filter(
+            course=course, semester=semester
+        )
         obj_count = len(queryset)
 
         if obj_count > 0:
@@ -441,7 +462,9 @@ class CourseResultDeleteFormView(generic.FormView):
 class StudentTranscriptGeneratorView(generic.View):
     """Generate an xls file of a student's academic records."""
 
-    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+    def get(
+        self, request: HttpRequest, *args: Any, **kwargs: Any
+    ) -> HttpResponse:
         reg_no = self.kwargs["reg_no"].replace("_", "/")
 
         required_sessions: Optional[List[str]] = None
@@ -477,15 +500,21 @@ class StudentTranscriptGeneratorView(generic.View):
         transcript_data["student_bio"] = student_bio
 
         if not student_results.exists():
-            messages.error(request, "Student has no results.", extra_tags="text-danger")
+            messages.error(
+                request, "Student has no results.", extra_tags="text-danger"
+            )
             return HttpResponseRedirect(student.get_absolute_url())
 
         result_sessions = list(
-            student_results.values_list("semester__session", flat=True).distinct()
+            student_results.values_list(
+                "semester__session", flat=True
+            ).distinct()
         )
 
         if required_sessions:
-            selected_sessions = [x for x in required_sessions if x in result_sessions]
+            selected_sessions = [
+                x for x in required_sessions if x in result_sessions
+            ]
 
         # if user provided invalid academic sessions/sessions where
         # student has no result, return a transcript of all student
@@ -512,8 +541,11 @@ class StudentTranscriptGeneratorView(generic.View):
                     inplace=True,
                 )
 
-                first_sem_df["weight"] = first_sem_df["course_id__credit_load"] * [
-                    ex.Result.GRADE_WEIGHTS[x] for x in first_sem_df["letter_grade"]
+                first_sem_df["weight"] = first_sem_df[
+                    "course_id__credit_load"
+                ] * [
+                    ex.Result.GRADE_WEIGHTS[x]
+                    for x in first_sem_df["letter_grade"]
                 ]
                 results_for_session["first"] = first_sem_df
             if len(second_sem_res) > 0:
@@ -522,16 +554,23 @@ class StudentTranscriptGeneratorView(generic.View):
                     columns={k: v for (k, v) in enumerate(required_fields)},
                     inplace=True,
                 )
-                second_sem_df["weight"] = second_sem_df["course_id__credit_load"] * [
-                    ex.Result.GRADE_WEIGHTS[x] for x in second_sem_df["letter_grade"]
+                second_sem_df["weight"] = second_sem_df[
+                    "course_id__credit_load"
+                ] * [
+                    ex.Result.GRADE_WEIGHTS[x]
+                    for x in second_sem_df["letter_grade"]
                 ]
                 results_for_session["second"] = second_sem_df
             transcript_body[session] = results_for_session
         transcript_data["transcript_body"] = transcript_body
-        print("This is the transcript body: ", transcript_data["transcript_body"])
+        print(
+            "This is the transcript body: ", transcript_data["transcript_body"]
+        )
         wb = student_transcript(transcript_data)
 
-        file_name = f'Academic Transcript of {student.full_name.replace(",","")}.xlsx'
+        file_name = (
+            f'Academic Transcript of {student.full_name.replace(",","")}.xlsx'
+        )
         response = HttpResponse(
             content=save_virtual_workbook(wb),
             content_type="application/ms-excel",
@@ -553,7 +592,9 @@ def generic_class_info_handler(
         ex.Student.objects.all()
         .select_related("mode_of_admission")
         .filter(expected_yr_of_grad=expected_yr_of_grad)
-        .values_list("student_reg_no", "mode_of_admission_id__mode_of_admission")
+        .values_list(
+            "student_reg_no", "mode_of_admission_id__mode_of_admission"
+        )
     )
     if not class_query.exists():
         messages.add_message(
@@ -565,7 +606,9 @@ def generic_class_info_handler(
         )
         return HttpResponseRedirect(reverse("index"))
 
-    class_reg_no: List[str] = list(class_query.values_list("student_reg_no", flat=True))
+    class_reg_no: List[str] = list(
+        class_query.values_list("student_reg_no", flat=True)
+    )
     class_list: List[List[str]] = []
     for el in class_query:
         name = ex.Student.objects.get(student_reg_no=el[0]).full_name
@@ -629,7 +672,9 @@ def class_speadsheet_generator(
     )
 
 
-def result_collation(request: HttpRequest, session: str, level: str) -> HttpResponse:
+def result_collation(
+    request: HttpRequest, session: str, level: str
+) -> HttpResponse:
     """This view will take two args: level of study and session.
     Using these, it will produce a file response (excel worksheet) of all
     available results for the given session and level of study"""
@@ -639,7 +684,9 @@ def result_collation(request: HttpRequest, session: str, level: str) -> HttpResp
         level_of_study = int(level)
     except ValueError:
         return HttpResponseBadRequest("Invalid Arg(s) provided")
-    student_info = ex.Student.objects.filter(student_reg_no=OuterRef("student_reg_no"))
+    student_info = ex.Student.objects.filter(
+        student_reg_no=OuterRef("student_reg_no")
+    )
     qs: QuerySet = (
         ex.Result.objects.all()
         .select_related("course", "semester")
@@ -730,13 +777,20 @@ def transcript_download_info(request: HttpRequest, reg_no: str) -> HttpResponse:
 
 
 @login_required
-def possible_graduands(request: HttpRequest, expected_yr_of_grad: str) -> HttpResponse:
+def possible_graduands(
+    request: HttpRequest, expected_yr_of_grad: str
+) -> HttpResponse:
 
     try:
         wb = possible_graduands_wb(expected_yr_of_grad)
     except ValueError as e:
         messages.error(request, e, extra_tags="text-danger")
-        return HttpResponseRedirect(reverse("graduation_classes:info", kwargs={"expected_yr_of_grad":expected_yr_of_grad}))
+        return HttpResponseRedirect(
+            reverse(
+                "graduation_classes:info",
+                kwargs={"expected_yr_of_grad": expected_yr_of_grad},
+            )
+        )
 
     file_name = f"{expected_yr_of_grad} List of Possible graduands.xlsx"
     response = HttpResponse(

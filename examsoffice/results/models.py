@@ -28,7 +28,9 @@ class LecturerRole(models.Model):
     """Model for Roles a Lecturer could have in a course."""
 
     id = models.BigAutoField(db_column="RoleID", primary_key=True)
-    role = models.CharField(db_column="Role", max_length=255, blank=True, null=True)
+    role = models.CharField(
+        db_column="Role", max_length=255, blank=True, null=True
+    )
 
     class Meta:
         db_table = "tbl2LecturerRoles"
@@ -45,7 +47,9 @@ class Lecturer(models.Model):
         blank=True,
         null=True,
     )
-    title = models.CharField(db_column="Title", max_length=255, blank=True, null=True)
+    title = models.CharField(
+        db_column="Title", max_length=255, blank=True, null=True
+    )
     first_name = models.CharField(
         db_column="FirstName", max_length=255, blank=True, null=True
     )
@@ -55,7 +59,9 @@ class Lecturer(models.Model):
     other_names = models.CharField(
         db_column="OtherNames", max_length=255, blank=True, null=True
     )
-    email = models.CharField(db_column="Email", max_length=255, blank=True, null=True)
+    email = models.CharField(
+        db_column="Email", max_length=255, blank=True, null=True
+    )
     department = models.CharField(
         db_column="Department", max_length=255, blank=True, null=True
     )
@@ -207,7 +213,9 @@ class Sex(models.Model):
     """Model for sex of person models."""
 
     id = models.BigAutoField(db_column="ID", primary_key=True)
-    sex = models.CharField(db_column="Sex", max_length=255, blank=True, null=True)
+    sex = models.CharField(
+        db_column="Sex", max_length=255, blank=True, null=True
+    )
 
     class Meta:
         db_table = "tbl2Sexes"
@@ -230,7 +238,9 @@ class SemesterSession(models.Model):
     semester = models.ForeignKey(
         db_column="Semester_ID", to="Semester", on_delete=PROTECT
     )
-    desc = models.CharField(db_column="Desc", max_length=243, blank=True, null=True)
+    desc = models.CharField(
+        db_column="Desc", max_length=243, blank=True, null=True
+    )
 
     class Meta:
         db_table = "tbl2SemesterCount"
@@ -252,7 +262,9 @@ class Course(models.Model):
     course_level = models.ForeignKey(
         db_column="CourseLevel", to="LevelOfStudy", on_delete=PROTECT
     )
-    credit_load = models.IntegerField(db_column="CreditLoad", blank=True, null=True)
+    credit_load = models.IntegerField(
+        db_column="CreditLoad", blank=True, null=True
+    )
     elective = models.BooleanField(db_column="Elective", default=False)
 
     class Meta:
@@ -277,11 +289,15 @@ class ProgramRequirement(models.Model):
     mode_of_admission = models.ForeignKey(
         db_column="ModeOfAdmission", to="ModeOfAdmission", on_delete=PROTECT
     )
-    course = models.ForeignKey(db_column="CourseID", to="Course", on_delete=PROTECT)
+    course = models.ForeignKey(
+        db_column="CourseID", to="Course", on_delete=PROTECT
+    )
     level_of_study = models.ForeignKey(
         db_column="LevelOfStudy", to="LevelOfStudy", on_delete=PROTECT
     )
-    session = models.ForeignKey(db_column="SessionID", to="Session", on_delete=PROTECT)
+    session = models.ForeignKey(
+        db_column="SessionID", to="Session", on_delete=PROTECT
+    )
 
     class Meta:
         db_table = "tbl1ProgramRequirements"
@@ -319,7 +335,9 @@ class Student(models.Model):
         null=True,
         default="--",
     )
-    email = models.CharField(db_column="Email", max_length=255, blank=True, null=True)
+    email = models.CharField(
+        db_column="Email", max_length=255, blank=True, null=True
+    )
     phone_number = models.CharField(
         db_column="PhoneNumber", max_length=255, blank=True, null=True
     )
@@ -372,15 +390,21 @@ class Student(models.Model):
         blank=True,
         null=True,
     )
-    graduated = models.BooleanField(db_column="Graduated", blank=True, null=True)
+    graduated = models.BooleanField(
+        db_column="Graduated", blank=True, null=True
+    )
     address_line1 = models.CharField(
         db_column="AddressLine1", max_length=255, blank=True, null=True
     )
     address_line2 = models.CharField(
         db_column="AddressLine2", max_length=255, blank=True, null=True
     )
-    city = models.CharField(db_column="City", max_length=255, blank=True, null=True)
-    state = models.CharField(db_column="State", max_length=255, blank=True, null=True)
+    city = models.CharField(
+        db_column="City", max_length=255, blank=True, null=True
+    )
+    state = models.CharField(
+        db_column="State", max_length=255, blank=True, null=True
+    )
     country = models.CharField(
         db_column="Country", max_length=255, blank=True, null=True
     )
@@ -388,7 +412,9 @@ class Student(models.Model):
     current_level_of_study = models.IntegerField(
         db_column="CurrentLevelOfStudy", blank=True, null=True
     )
-    cgpa = models.CharField(db_column="CGPA", max_length=255, blank=True, null=True)
+    cgpa = models.CharField(
+        db_column="CGPA", max_length=255, blank=True, null=True
+    )
     # student_photo = models.ImageField(db_column='studentPhoto', blank=True, null=True)
     jamb_number = models.CharField(
         db_column="JambNumber", max_length=20, blank=True, null=True
@@ -404,7 +430,9 @@ class Student(models.Model):
         return self.student_reg_no.replace("/", "_")
 
     def get_absolute_url(self) -> str:
-        return reverse("students:profile", kwargs={"reg_no": self.get_reg_no_for_url()})
+        return reverse(
+            "students:profile", kwargs={"reg_no": self.get_reg_no_for_url()}
+        )
 
     def get_records_url(self) -> str:
         return reverse(
@@ -413,10 +441,14 @@ class Student(models.Model):
         )
 
     def get_record_creation_url(self) -> str:
-        return reverse("results:add", kwargs={"reg_no": self.get_reg_no_for_url()})
+        return reverse(
+            "results:add", kwargs={"reg_no": self.get_reg_no_for_url()}
+        )
 
     def get_progress_history_url(self) -> str:
-        return reverse("students:progress_history", args=[self.get_reg_no_for_url()])
+        return reverse(
+            "students:progress_history", args=[self.get_reg_no_for_url()]
+        )
 
     def current_cgpa(self) -> Optional[float]:
         """Calculate a student's current CGPA.
@@ -426,7 +458,9 @@ class Student(models.Model):
         results in the database.
         None if no results were found for the student.
         """
-        results: QuerySet = Result.objects.filter(student_reg_no=self.student_reg_no)
+        results: QuerySet = Result.objects.filter(
+            student_reg_no=self.student_reg_no
+        )
 
         if not results.exists():
             return None
@@ -449,7 +483,9 @@ class Student(models.Model):
             A dict of the form {session:cgpa}.
             None if no results were found for the student.
         """
-        results: QuerySet = Result.objects.filter(student_reg_no=self.student_reg_no)
+        results: QuerySet = Result.objects.filter(
+            student_reg_no=self.student_reg_no
+        )
 
         if not results.exists():
             return None
@@ -474,23 +510,43 @@ class Student(models.Model):
 
     def outstanding_courses(self) -> List[Course]:
         """Find a student's outstanding courses."""
-        failed_courses = Result.objects.filter(student_reg_no=self.student_reg_no, letter_grade__iexact="F")
-        passed_courses = Result.objects.filter(student_reg_no=self.student_reg_no).exclude(letter_grade__iexact="F")
+        failed_courses = Result.objects.filter(
+            student_reg_no=self.student_reg_no, letter_grade__iexact="F"
+        )
+        passed_courses = Result.objects.filter(
+            student_reg_no=self.student_reg_no
+        ).exclude(letter_grade__iexact="F")
 
-        outstanding_courses = list(failed_courses.exclude(pk__in=passed_courses).values_list("course_id", flat=True))
-        return [Course.objects.filter(id=course).first() for course in outstanding_courses]
+        outstanding_courses = list(
+            failed_courses.exclude(pk__in=passed_courses).values_list(
+                "course_id", flat=True
+            )
+        )
+        return [
+            Course.objects.filter(id=course).first()
+            for course in outstanding_courses
+        ]
 
     def grades_breakdown(self) -> Optional[Dict[str, int]]:
         """Method will return a dict of student's grades breakdown.
 
         It will return None if student has no results in the db.
         """
-        results: QuerySet = Result.objects.filter(student_reg_no=self.student_reg_no)
+        results: QuerySet = Result.objects.filter(
+            student_reg_no=self.student_reg_no
+        )
 
         if not results.exists():
             return None
 
-        grades_dict: Dict[str, int] = {"A": 0, "B": 0, "C": 0, "D": 0, "E": 0, "F": 0}
+        grades_dict: Dict[str, int] = {
+            "A": 0,
+            "B": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "F": 0,
+        }
         for result in results:
             grades_dict[result.letter_grade.upper()] += 1
 
@@ -562,15 +618,21 @@ class Result(models.Model):
     }
 
     id = models.BigAutoField(db_column="ID", primary_key=True)
-    course = models.ForeignKey(db_column="Course_ID", to=Course, on_delete=PROTECT)
+    course = models.ForeignKey(
+        db_column="Course_ID", to=Course, on_delete=PROTECT
+    )
     semester = models.ForeignKey(
         SemesterSession, on_delete=models.PROTECT, db_column="SemesterNumber"
     )
     student_reg_no = models.CharField(db_column="StudentRegNo", max_length=25)
-    student_level = models.IntegerField(db_column="StudentLevel", blank=True, null=True)
+    student_level = models.IntegerField(
+        db_column="StudentLevel", blank=True, null=True
+    )
     ca_score = models.FloatField(db_column="CAScore", blank=True, null=True)
     exam_score = models.FloatField(db_column="ExamScore", blank=True, null=True)
-    total_score = models.FloatField(db_column="TotalScore", blank=True, null=True)
+    total_score = models.FloatField(
+        db_column="TotalScore", blank=True, null=True
+    )
     letter_grade = models.CharField(db_column="LetterGrade", max_length=5)
     upload_date = models.DateTimeField(
         db_column="UploadDate", blank=True, null=True, auto_now=True
@@ -605,7 +667,9 @@ class StudentSponsor(models.Model):
     student = models.ForeignKey(
         Student, db_column="Student_ID", on_delete=models.CASCADE
     )
-    title = models.CharField(db_column="Title", max_length=255, blank=True, null=True)
+    title = models.CharField(
+        db_column="Title", max_length=255, blank=True, null=True
+    )
     firstname = models.CharField(
         db_column="FirstName", max_length=255, blank=True, null=True
     )
@@ -615,11 +679,15 @@ class StudentSponsor(models.Model):
     othernames = models.CharField(
         db_column="OtherNames", max_length=255, blank=True, null=True
     )
-    email = models.CharField(db_column="Email", max_length=255, blank=True, null=True)
+    email = models.CharField(
+        db_column="Email", max_length=255, blank=True, null=True
+    )
     phonenumber = models.CharField(
         db_column="PhoneNumber", max_length=255, blank=True, null=True
     )
-    relationship = models.IntegerField(db_column="Relationship", blank=True, null=True)
+    relationship = models.IntegerField(
+        db_column="Relationship", blank=True, null=True
+    )
     occupation = models.CharField(
         db_column="Occupation", max_length=255, blank=True, null=True
     )
@@ -629,8 +697,12 @@ class StudentSponsor(models.Model):
     addressline2 = models.CharField(
         db_column="AddressLine2", max_length=255, blank=True, null=True
     )
-    city = models.CharField(db_column="City", max_length=255, blank=True, null=True)
-    state = models.CharField(db_column="State", max_length=255, blank=True, null=True)
+    city = models.CharField(
+        db_column="City", max_length=255, blank=True, null=True
+    )
+    state = models.CharField(
+        db_column="State", max_length=255, blank=True, null=True
+    )
     country = models.CharField(
         db_column="Country", max_length=255, blank=True, null=True
     )
@@ -650,7 +722,9 @@ class StudentProgressHistory(models.Model):
     """
 
     id = models.BigAutoField(db_column="histID", primary_key=True)
-    session = models.ForeignKey(db_column="SessionID", to="Session", on_delete=PROTECT)
+    session = models.ForeignKey(
+        db_column="SessionID", to="Session", on_delete=PROTECT
+    )
     student_reg_no = models.ForeignKey(
         db_column="StudentRegNo",
         max_length=255,
@@ -700,7 +774,9 @@ class Department(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["name"], name="unique_department_name"),
+            models.UniqueConstraint(
+                fields=["name"], name="unique_department_name"
+            ),
             models.UniqueConstraint(
                 fields=["alias"], name="unique_department_short_name"
             ),

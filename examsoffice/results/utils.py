@@ -38,14 +38,18 @@ def _list_to_cell(list_var: List[str]) -> str:
     return final_str
 
 
-def _merge_row_wise(worksheet: Worksheet, row: int, col_start: int, col_end: int) -> None:
+def _merge_row_wise(
+    worksheet: Worksheet, row: int, col_start: int, col_end: int
+) -> None:
     cell_start = get_column_letter(col_start) + str(row)
     cell_stop = get_column_letter(col_end) + str(row)
     _range = f"{cell_start}:{cell_stop}"
     worksheet.merge_cells(_range)
 
 
-def _merge_col_wise(worksheet: Worksheet, col: int, row_start: int, row_end: int) -> None:
+def _merge_col_wise(
+    worksheet: Worksheet, col: int, row_start: int, row_end: int
+) -> None:
     cell_start = get_column_letter(col) + str(row_start)
     cell_stop = get_column_letter(col) + str(row_end)
     _range = f"{cell_start}:{cell_stop}"
@@ -103,7 +107,11 @@ def failed_courses_breakdown(df: DataFrame) -> Dict[str, Any]:
 
 
 def student_transcript(transcript_data: Dict[str, Any]) -> Workbook:
-    file_path: List[str] = ["static", "excel_templates", "transcript_template.xlsx"]
+    file_path: List[str] = [
+        "static",
+        "excel_templates",
+        "transcript_template.xlsx",
+    ]
     wb: Workbook = load_workbook(os.path.join(*file_path))
     ws: Worksheet = wb.active
 
@@ -133,7 +141,9 @@ def student_transcript(transcript_data: Dict[str, Any]) -> Workbook:
 
     row = 13
     col = 1
-    result_dict: Dict[str, Dict[str, DataFrame]] = transcript_data["transcript_body"]
+    result_dict: Dict[str, Dict[str, DataFrame]] = transcript_data[
+        "transcript_body"
+    ]
 
     credit_sum = 0
     weight_sum = 0
@@ -286,7 +296,9 @@ def student_transcript(transcript_data: Dict[str, Any]) -> Workbook:
     return wb
 
 
-def class_result_spreadsheet(result_qs: QuerySet, class_list: List[str], expected_yr_of_grad: str) -> Workbook:
+def class_result_spreadsheet(
+    result_qs: QuerySet, class_list: List[str], expected_yr_of_grad: str
+) -> Workbook:
     wb = Workbook()
     ws = wb.active
 
@@ -301,7 +313,9 @@ def class_result_spreadsheet(result_qs: QuerySet, class_list: List[str], expecte
                 bottom=Side(style="thick"),
             )
 
-    def _failed_crses_block(course_list: List[str], total_cred: int, first_sem: bool = False) -> None:
+    def _failed_crses_block(
+        course_list: List[str], total_cred: int, first_sem: bool = False
+    ) -> None:
 
         head_fill = "First" if first_sem else "Second"
         f1_head = f"""Courses with no passing grade ({head_fill})"""
@@ -496,7 +510,9 @@ def class_result_spreadsheet(result_qs: QuerySet, class_list: List[str], expecte
     return wb
 
 
-def class_failure_spreadsheet(result_qs: QuerySet, class_list: List[str], expected_yr_of_grad: str) -> Worksheet:
+def class_failure_spreadsheet(
+    result_qs: QuerySet, class_list: List[str], expected_yr_of_grad: str
+) -> Worksheet:
     wb: Workbook = Workbook()
     ws: Worksheet = wb.active
 

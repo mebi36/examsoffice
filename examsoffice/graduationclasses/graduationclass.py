@@ -17,7 +17,9 @@ class GraduationClass:
     @property
     def members(self) -> List[Student]:
         return list(
-            Student.objects.filter(expected_yr_of_grad=self.expected_yr_of_grad).order_by('last_name')
+            Student.objects.filter(
+                expected_yr_of_grad=self.expected_yr_of_grad
+            ).order_by("last_name")
         )
 
     def best_student(self) -> Optional[List[Student]]:
@@ -88,6 +90,7 @@ class GraduationClass:
         raise NotImplementedError()
 
     level_of_study.setter
+
     def level_of_study(self, level: int):
         """sets the class's current level of study"""
         raise NotImplementedError()
@@ -115,7 +118,9 @@ class GraduationClass:
         """
         raise NotImplementedError()
 
-    def student_position(self, student_reg_no: str) -> Union[ValueError, int, None]:
+    def student_position(
+        self, student_reg_no: str
+    ) -> Union[ValueError, int, None]:
         """
         This method should return a students position in the class when
         students are ranked by CGPAs.

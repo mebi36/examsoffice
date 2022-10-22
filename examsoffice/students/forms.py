@@ -8,32 +8,41 @@ from results.models import Student, StudentProgressHistory
 
 class StudentProfileSearchForm(forms.Form):
     """Form for finding a student obj by registration number."""
-    student_reg_no = forms.CharField(label="Registration Number", max_length=12, required=True)
+
+    student_reg_no = forms.CharField(
+        label="Registration Number", max_length=12, required=True
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         add_bootstrap_formatting(self)
-    
+
     def clean_student_reg_no(self):
-        student_reg_no = self.cleaned_data['student_reg_no']
+        student_reg_no = self.cleaned_data["student_reg_no"]
 
         if not Student.is_valid_reg_no(student_reg_no):
             raise ValidationError("Invalid student registration number")
 
         if not Student.objects.filter(student_reg_no=student_reg_no).exists():
-            raise ValidationError("No registered student found with the provided registration number")
+            raise ValidationError(
+                "No registered student found with the provided registration number"
+            )
 
         return student_reg_no
 
 
 class GenericStudentProfileSearchForm(forms.Form):
     """Form for finding a student obj by registration number."""
-    search = forms.CharField(label="Enter Student registration number or last name", max_length=255, required=True)
+
+    search = forms.CharField(
+        label="Enter Student registration number or last name",
+        max_length=255,
+        required=True,
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         add_bootstrap_formatting(self)
-    
 
 
 class StudentBioForm(forms.ModelForm):

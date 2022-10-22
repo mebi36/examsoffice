@@ -19,7 +19,7 @@ from .forms import (
     GenericStudentProfileSearchForm,
     ProgressHistoryFormSet,
     StudentBioForm,
-    StudentProfileSearchForm
+    StudentProfileSearchForm,
 )
 from .serializers import StudentSerializer
 from results.serializers import ResultSerializer
@@ -72,28 +72,35 @@ def students_menu(request):
 @method_decorator(login_required, name="dispatch")
 class StudentProfileSearchView(FormView):
     """View to find access student's profile by registration number.
-    
+
     TODO: implement student search by name.
     """
+
     template_name = "students/reg_no_search.html"
     form_class = GenericStudentProfileSearchForm
 
     def form_valid(self, form):
         search = form.cleaned_data["search"]
         # self.success_url = reverse("students:profile", kwargs={"reg_no": student_reg_no.replace("/", "_")})
-        self.success_url = reverse("students:search-results", kwargs={"search": search})
-        
+        self.success_url = reverse(
+            "students:search-results", kwargs={"search": search}
+        )
+
         return super().form_valid(form)
 
 
 @method_decorator(login_required, name="dispatch")
 class StudentProfileSearchResultListView(generic.ListView):
     """List students returned from profile search."""
-    template_name="students/profile_search_results.html"
+
+    template_name = "students/profile_search_results.html"
 
     def get_queryset(self) -> QuerySet[Any]:
         search = self.kwargs["search"].split(" ")[0]
-        return Student.objects.filter(Q(last_name__iexact=search) | Q(student_reg_no=search))
+        return Student.objects.filter(
+            Q(last_name__iexact=search) | Q(student_reg_no=search)
+        )
+
 
 @never_cache
 @login_required
@@ -507,8 +514,8 @@ def upload_bio_file(request):
 @login_required
 def profile(request, reg_no):
     """
-    This view will display a information about a student, 
-    ranging from performance, bio-data, cgpa, results analytics 
+    This view will display a information about a student,
+    ranging from performance, bio-data, cgpa, results analytics
     (grades and performance in entire class).
     """
     reg_no = reg_no.replace("_", "/")
@@ -518,13 +525,15 @@ def profile(request, reg_no):
     if not student.exists():
         messages.error(
             request,
-            "No student with that registration number was found", 
-            extra_tags="text-danger"
+            "No student with that registration number was found",
+            extra_tags="text-danger",
         )
         return render(request, template, {})
-    
+
     context = {}
     context["student_obj"] = student.first()
     context["student"] = StudentSerializer(student.first(), many=False).data
-    context["results"] = ResultSerializer(Result.objects.filter(student_reg_no=reg_no), many=True).data
+    context["results"] = ResultSerializer(
+        Result.objects.filter(student_reg_no=reg_no), many=True
+    ).data
     return render(request, template, context)
