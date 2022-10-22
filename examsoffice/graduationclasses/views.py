@@ -1,7 +1,15 @@
 from typing import Any, Dict
-from django.shortcuts import render
-from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseNotFound
+
+from django.forms import Form
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
+from django.http.response import HttpResponseRedirect
 from django.views import generic
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.urls import reverse
+
+from graduationclasses.forms import GraduationClassInfoSearchForm
+
 from .graduationclass import GraduationClass
 from results.models import Student
 
@@ -47,6 +55,7 @@ def graduation_class_info_json_view(request, grad_year: str):
     return JsonResponse(context, safe=False)
 
 
+@method_decorator(login_required, name="dispatch")
 class GraduationClassInformationView(generic.TemplateView):
     """View for displaying a graduation class. 
     
@@ -59,3 +68,19 @@ class GraduationClassInformationView(generic.TemplateView):
         context["graduation_class"] = GraduationClass(self.kwargs["year"])
         return context
 
+
+@method_decorator(login_required, name="dispatch")
+class GraduationClassSearchFormView(generic.FormView):
+    """Generate spreadsheet of outstanding courses for selected grad set."""
+
+    template_name: str = (
+        "graduationclasses/search.html"
+    )
+    form_class: Form = GraduationClassInfoSearchForm
+
+    def form_valid(self, form: Form) -> HttpResponse:
+        url: str = reverse(
+            "graduationclasses:info",
+            kwargs={"year": form.cleaned_data["expected_yr_of_grad"]},
+        )
+        return HttpResponseRedirect(url)

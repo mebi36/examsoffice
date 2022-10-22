@@ -1,5 +1,4 @@
 from django.urls.conf import path
-from django.urls.resolvers import URLPattern
 from .views import (
     create_bio_data,
     edit_bio_data,
@@ -8,7 +7,8 @@ from .views import (
     bio_update_format,
     upload_bio_file,
     profile,
-    StudentProfileSearchView
+    StudentProfileSearchView,
+    StudentProfileSearchResultListView
 )
 
 app_name = "students"
@@ -20,6 +20,7 @@ urlpatterns = [
     # path('bio2/<int:pk>', StudentUpdateView.as_view(), name='edit_bio'),
     path("create bio/<str:reg_no>/", create_bio_data, name="create_bio"),
     path("search/", StudentProfileSearchView.as_view(), name="search"),
+    path("search-results/<path:search>/", StudentProfileSearchResultListView.as_view(), name="search-results"),
     path(
         "progress history/<str:reg_no>",
         update_progress_history,

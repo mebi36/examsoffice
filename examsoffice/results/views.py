@@ -1,5 +1,4 @@
 import csv
-from datetime import date
 from typing import Any, Callable, ClassVar, Dict, List, Optional, Union
 
 from django.http import HttpResponse, HttpRequest
@@ -11,7 +10,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import never_cache
-from django.db.models import OuterRef, Subquery, Value, Count
+from django.db.models import OuterRef, Subquery, Value
 from django.db.models.functions import Concat
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -705,73 +704,6 @@ class ResultCollationByLevelOfStudyAnsSessionFormView(generic.FormView):
         )
 
 
-@method_decorator(login_required, name="dispatch")
-class GraduationSetResultSpreadsheetFormView(generic.FormView):
-    """Generate spreadsheet of results for selected graduation set."""
-
-    template_name: str = "results/graduationset_spreadsheet_form.html"
-    form_class: Form = GraduationSetResultSpreadsheetForm
-
-    def form_valid(self, form: Form) -> HttpResponse:
-        next_url: str = reverse(
-            "results:generate_class_spreadsheet",
-            kwargs={"expected_yr_of_grad": form.cleaned_data["expected_yr_of_grad"]},
-        )
-        # TODO: could be better to processs handling of longer
-        # pre-download file processing with vue to prevent impatient
-        # user from continuously hitting server.
-        return HttpResponseRedirect(
-            reverse("index:download_info") + "?next=%s" % next_url
-        )
-
-
-@method_decorator(login_required, name="dispatch")
-class GraduationSetOutstandingCoursesFormView(generic.FormView):
-    """Generate spreadsheet of outstanding courses for selected grad set."""
-
-    template_name: str = (
-        "results/graduationset_spreadsheet_outstanding_courses_form.html"
-    )
-    form_class: Form = GraduationSetResultSpreadsheetForm
-
-    def form_valid(self, form: Form) -> HttpResponse:
-        next_url: str = reverse(
-            "results:class_outstanding_courses",
-            kwargs={"expected_yr_of_grad": form.cleaned_data["expected_yr_of_grad"]},
-        )
-        return HttpResponseRedirect(
-            reverse("index:download_info") + "?next=%s" % next_url
-        )
-
-
-@login_required
-def class_outstanding_courses_form(request: HttpRequest) -> HttpResponse:
-    template: str = "results/spreadsheet_form.html"
-    context: Dict[str, Any] = {}
-
-    if request.method == "GET":
-        expected_yrs_of_grad = sorted(
-            [x for x in range(2017, (date.today().year + 5))], reverse=True
-        )
-        context = {"expected_yrs_of_grad": expected_yrs_of_grad}
-
-    elif request.method == "POST":
-        if request.POST["expected_yr_of_grad"]:
-            try:
-                expected_yr_of_grad = int(request.POST["expected_yr_of_grad"])
-            except ValueError:
-                return HttpResponseBadRequest("Invalid Session. Select a valid year.")
-            else:
-                next_url = reverse(
-                    "results:class_outstanding_courses",
-                    kwargs={"expected_yr_of_grad": expected_yr_of_grad},
-                )
-                return HttpResponseRedirect(
-                    reverse("index:download_info") + "?next=%s" % next_url
-                )
-    return render(request, template, context)
-
-
 @login_required
 def transcript_download_info(request: HttpRequest, reg_no: str) -> HttpResponse:
     template: str = "results/transcript_download_info.html"
@@ -804,7 +736,7 @@ def possible_graduands(request: HttpRequest, expected_yr_of_grad: str) -> HttpRe
         wb = possible_graduands_wb(expected_yr_of_grad)
     except ValueError as e:
         messages.error(request, e, extra_tags="text-danger")
-        return HttpResponseRedirect(reverse("results:possible_graduands_form"))
+        return HttpResponseRedirect(reverse("graduation_classes:info", kwargs={"expected_yr_of_grad":expected_yr_of_grad}))
 
     file_name = f"{expected_yr_of_grad} List of Possible graduands.xlsx"
     response = HttpResponse(
@@ -812,20 +744,3 @@ def possible_graduands(request: HttpRequest, expected_yr_of_grad: str) -> HttpRe
     )
     response["Content-Disposition"] = f"attachment; filename={file_name}"
     return response
-
-
-@method_decorator(login_required, name="dispatch")
-class PossibleGraduandsFormView(generic.FormView):
-    """Generate a report of possible graduands for a given session."""
-
-    form_class: Form = GraduationSetSearchForm
-    template_name: str = "results/possible_graduands_form.html"
-
-    def form_valid(self, form: Form) -> HttpResponse:
-        expected_yr_of_grad = form.cleaned_data["expected_yr_of_grad"]
-        return HttpResponseRedirect(
-            reverse(
-                "results:possible_graduands",
-                kwargs={"expected_yr_of_grad": expected_yr_of_grad},
-            )
-        )

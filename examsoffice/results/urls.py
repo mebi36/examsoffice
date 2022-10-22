@@ -29,16 +29,10 @@ urlpatterns = [
         views.StudentTranscriptGeneratorView.as_view(),
         name="generate_transcript",
     ),
-    path("spreadsheets/", views.GraduationSetResultSpreadsheetFormView.as_view(), name="spreadsheets"),
     path(
         "spreadsheet/<str:expected_yr_of_grad>/",
         views.class_speadsheet_generator,
         name="generate_class_spreadsheet",
-    ),
-    path(
-        "outstanding courses/class/",
-        views.GraduationSetOutstandingCoursesFormView.as_view(),
-        name="class_outstanding_courses",
     ),
     path(
         "outstanding courses/class/<str:expected_yr_of_grad>/",
@@ -50,11 +44,6 @@ urlpatterns = [
         "result_collation/session=<str:session>/level=<str:level>/",
         views.result_collation,
         name="result_collation",
-    ),
-    path(
-        "possible-graduands/",
-        views.PossibleGraduandsFormView.as_view(),
-        name="possible_graduands_form",
     ),
     path(
         "possible-graduands/<str:expected_yr_of_grad>",

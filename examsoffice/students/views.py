@@ -1,7 +1,9 @@
 import csv
+from typing import Any
 from django.db import IntegrityError
 import pandas as pd
 from datetime import datetime, timezone
+from django.db.models import QuerySet, Q
 from django.http import HttpResponse
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
@@ -9,10 +11,12 @@ from django.contrib import messages
 from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.views.generic.edit import FormView
+from django.views import generic
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
 from .forms import (
+    GenericStudentProfileSearchForm,
     ProgressHistoryFormSet,
     StudentBioForm,
     StudentProfileSearchForm
@@ -72,14 +76,24 @@ class StudentProfileSearchView(FormView):
     TODO: implement student search by name.
     """
     template_name = "students/reg_no_search.html"
-    form_class = StudentProfileSearchForm
+    form_class = GenericStudentProfileSearchForm
 
     def form_valid(self, form):
-        student_reg_no = form.cleaned_data["student_reg_no"]
-        self.success_url = reverse("students:profile", kwargs={"reg_no": student_reg_no.replace("/", "_")})
+        search = form.cleaned_data["search"]
+        # self.success_url = reverse("students:profile", kwargs={"reg_no": student_reg_no.replace("/", "_")})
+        self.success_url = reverse("students:search-results", kwargs={"search": search})
         
         return super().form_valid(form)
 
+
+@method_decorator(login_required, name="dispatch")
+class StudentProfileSearchResultListView(generic.ListView):
+    """List students returned from profile search."""
+    template_name="students/profile_search_results.html"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        search = self.kwargs["search"].split(" ")[0]
+        return Student.objects.filter(Q(last_name__iexact=search) | Q(student_reg_no=search))
 
 @never_cache
 @login_required

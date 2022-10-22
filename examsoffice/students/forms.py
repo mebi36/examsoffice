@@ -25,6 +25,17 @@ class StudentProfileSearchForm(forms.Form):
 
         return student_reg_no
 
+
+class GenericStudentProfileSearchForm(forms.Form):
+    """Form for finding a student obj by registration number."""
+    search = forms.CharField(label="Enter Student registration number or last name", max_length=255, required=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        add_bootstrap_formatting(self)
+    
+
+
 class StudentBioForm(forms.ModelForm):
     student_reg_no = forms.CharField(
         max_length=12, required=True, disabled=True

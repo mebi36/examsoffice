@@ -9,8 +9,6 @@
         <script src="{% static 'htmx.js' %}"></script>
         <title>{% block title %}{% endblock %} | Exams Office</title>
     </head>
-
-
     <body>
         <nav class="navbar navbar-expand-lg navbar-light bg-white p-1 border-bottom">
             <div class="container-fluid px-3">
@@ -37,16 +35,7 @@
                                     <a class="nav-link" href="{% url 'results:collation' %}">Result Collation</a>
                                 </li>
                                 <li>
-                                    <a class="nav-link" href="{% url 'results:spreadsheets' %}">Result Spreadsheets</a>
-                                </li>
-                                <li>
                                     <a class="nav-link" href="{% url 'results:collation' %}">Collated Results</a>
-                                </li>
-                                <li>
-                                    <a class="nav-link" href="{% url 'results:class_outstanding_courses' %}">Class Outstanding Courses</a>
-                                </li>
-                                <li>
-                                    <a class="nav-link" href="{% url 'results:possible_graduands_form' %}">Possible Graduands</a>
                                 </li>
                             </ul>
                         </li>
@@ -61,6 +50,23 @@
                                 </li>
                                 <li>
                                     <a class="nav-link" href="#">Student Academic Progress History</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Classes</a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li>
+                                    <a class="nav-link" href="{% url 'graduationclasses:search' %}">Class Info</a>
+                                </li>
+                                <li>
+                                    <a class="nav-link" href="{% url 'graduationclasses:search' %}">Result Spreadsheets</a>
+                                </li>
+                                <li>
+                                    <a class="nav-link" href="{% url 'graduationclasses:search' %}">Class Outstanding Courses</a>
+                                </li>
+                                <li>
+                                    <a class="nav-link" href="{% url 'graduationclasses:search' %}">Possible Graduands</a>
                                 </li>
                             </ul>
                         </li>
