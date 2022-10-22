@@ -1,0 +1,23 @@
+{% extends 'results/base.html' %}
+{% load static %}
+{% block title %}Graduation Class Search{% endblock %}
+{% block content %}
+<div class="col-md-6 mt-5 mx-auto">
+    <div class="mx-auto bg-secondary bg-opacity-10 p-5">
+        <div class="card-title">
+            <h2 class="text-center mb-3 text-success">{% block form_title %}Graduation Class Search{% endblock %}</h2>
+        </div>
+        <div class="card-body">
+            <form method="post">
+            {% csrf_token %}
+                {{ form.as_p }}
+                <button class="btn btn-success mt-3" type="submit">
+                    <div class="d-flex align-items-center">
+                        <span>Submit</span>
+                    </div>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'students/base.html' %}
+{% load static %}
+{% block title %}Student Profile Serch Results{% endblock %}
+{% block content %}
+<div class="col-md-10 mx-auto bg-secondary bg-opacity-10 p-5 mt-5">
+    <h1 class="text-center text-success">Search Results</h1>
+    {% if object_list %}
+    <div class="overflow-auto bg-white p-3 m-md-5" style="height:300px;">
+        <ul>
+            {% for student in object_list %}
+            <li class="mb-1"><a href="{{ student.get_absolute_url }}">{{ student.student_reg_no }} - {{ student.last_name|title }}, {{ student.first_name|title }} {% if student.current_level_of_study %}({% widthratio student.current_level_of_study 1 100 %} level){% endif %}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% else %}
+    <p class="text-muted">0 students found.</p>
+    {% endif %}
+</div>
+{% endblock %}
