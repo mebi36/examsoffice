@@ -87,23 +87,6 @@ class CourseResultDeletionForm(CourseResultForm):
         add_bootstrap_formatting(self)
 
 
-class GraduationSetResultSpreadsheetForm(forms.Form):
-    """Select a graduation class for result spreadsheet generation."""
-
-    gradudation_set_choices = sorted(
-        [(year, year) for year in range(2017, (date.today().year + 5))],
-        reverse=True,
-    )
-    expected_yr_of_grad = forms.ChoiceField(
-        choices=gradudation_set_choices,
-        label="Class Expected Year of Graduation",
-    )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        add_bootstrap_formatting(self)
-
-
 class ResultCollationBySessionAndLevelOfStudyForm(forms.Form):
     """Select level of study and academic session for result collation sheet."""
 
@@ -113,20 +96,6 @@ class ResultCollationBySessionAndLevelOfStudyForm(forms.Form):
     session = forms.ModelChoiceField(
         queryset=Session.objects.all().order_by("-session"),
         label="Academic Session",
-    )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        add_bootstrap_formatting(self)
-
-
-class GraduationSetSearchForm(forms.Form):
-    """Form for searching for a graduation set."""
-
-    expected_yr_of_grad = forms.IntegerField(
-        min_value=2017,
-        max_value=date.today().year + 10,
-        label="Expected Year of Graduation",
     )
 
     def __init__(self, *args, **kwargs):

@@ -8,8 +8,8 @@ from django.core.exceptions import ValidationError
 from django.http.response import HttpResponseBadRequest, HttpResponseRedirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.shortcuts import render, get_object_or_404
-from django.views.decorators.cache import never_cache
 from django.db.models import OuterRef, Subquery, Value
 from django.db.models.functions import Concat
 from django.urls import reverse
@@ -24,8 +24,6 @@ import numpy as np
 from results import models as ex
 from results.forms import (
     CourseResultDeletionForm,
-    GraduationSetResultSpreadsheetForm,
-    GraduationSetSearchForm,
     ResultCollationBySessionAndLevelOfStudyForm,
     ResultFileUploadForm,
     ResultFileUploadFormatOptionForm,
@@ -42,9 +40,9 @@ from results.utils import (
 
 
 @method_decorator(login_required, name="dispatch")
-class ResultObjectUpdateView(generic.UpdateView):
+class ResultObjectUpdateView(PermissionRequiredMixin, generic.UpdateView):
     """View to edit a result object."""
-
+    permission_required = 'results.change_result'
     model = Result
     template_name = "results/edit_result.html"
     form_class = ResultForm

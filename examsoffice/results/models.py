@@ -22,7 +22,7 @@ from django.db import models
 from django.db.models.query import QuerySet
 from django.db.models.deletion import CASCADE, PROTECT
 from django.urls.base import reverse
-
+from django.contrib.auth.models import User
 
 class LecturerRole(models.Model):
     """Model for Roles a Lecturer could have in a course."""
@@ -40,6 +40,7 @@ class Lecturer(models.Model):
     """Model for Lecturers."""
 
     id = models.BigAutoField(db_column="LecturerID", primary_key=True)
+    user = models.OneToOneField(User, blank=True, null=True, on_delete=models.DO_NOTHING)
     staff_number = models.CharField(
         db_column="StaffNumber",
         unique=True,
@@ -311,6 +312,7 @@ class Student(models.Model):
     """Model for students."""
 
     id = models.BigAutoField(db_column="ID", primary_key=True)
+    user = models.OneToOneField(User, blank=True, null=True, on_delete=models.DO_NOTHING)
     student_reg_no = models.CharField(
         db_column="StudentRegNo", unique=True, max_length=255
     )
