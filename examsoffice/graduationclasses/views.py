@@ -67,7 +67,6 @@ def graduation_class_info_json_view(request, grad_year: str):
         }
         for student in grad_class.best_student()
     ]
-
     return JsonResponse(context, safe=False)
 
 
