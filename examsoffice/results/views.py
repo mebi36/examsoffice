@@ -42,7 +42,8 @@ from results.utils import (
 @method_decorator(login_required, name="dispatch")
 class ResultObjectUpdateView(PermissionRequiredMixin, generic.UpdateView):
     """View to edit a result object."""
-    permission_required = 'results.change_result'
+
+    permission_required = "results.change_result"
     model = Result
     template_name = "results/edit_result.html"
     form_class = ResultForm

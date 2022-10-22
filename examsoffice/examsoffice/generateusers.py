@@ -16,11 +16,13 @@ def register_user(staff_number, password=None, **kwargs):
 
     if staff:
         staff = staff.first()
-        user_obj = User.objects.create_user(username=staff.staff_number, is_staff=True, **kwargs)
+        user_obj = User.objects.create_user(
+            username=staff.staff_number, is_staff=True, **kwargs
+        )
         user_obj.set_password(password or staff_number.lower())
         user_obj.save()
         staff.user = user_obj
         staff.save()
         print("%s registered" % staff.full_name)
     else:
-        print("No staff found with provided staff number (%s)"%staff_number)
+        print("No staff found with provided staff number (%s)" % staff_number)

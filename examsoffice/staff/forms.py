@@ -6,6 +6,7 @@ from results.models import Lecturer
 
 class StaffBioForm(ModelForm):
     staff_number = CharField(max_length=255, required=True, disabled=True)
+
     class Meta:
         model = Lecturer
         fields = [

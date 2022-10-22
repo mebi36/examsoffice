@@ -11,9 +11,11 @@ from students.forms import StudentBioForm
 from staff.forms import StaffBioForm
 from .forms import AppUserForm
 
+
 @method_decorator(login_required, name="dispatch")
 class ProfileView(generic.TemplateView):
     """Profile view for user."""
+
     template_name = "appuser/profile.html"
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
@@ -23,7 +25,7 @@ class ProfileView(generic.TemplateView):
         elif hasattr(self.request.user, "lecturer"):
             app_user = self.request.user.lecturer
 
-        context =  super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["app_user"] = app_user
 
         return context
@@ -31,6 +33,7 @@ class ProfileView(generic.TemplateView):
 
 class ProfileUpdateFormView(generic.UpdateView):
     """Profile update view for user."""
+
     template_name = "appuser/profile_update.html"
 
     def get_success_url(self) -> str:
@@ -43,7 +46,7 @@ class ProfileUpdateFormView(generic.UpdateView):
             return StaffBioForm
         else:
             return AppUserForm
-    
+
     def get_queryset(self):
         if hasattr(self.request.user, "student"):
             return Student.objects.all()
