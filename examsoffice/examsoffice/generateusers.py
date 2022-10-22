@@ -11,12 +11,12 @@ def generate_users():
         staff.save()
 
 
-def register_user(staff_number, password=None):
+def register_user(staff_number, password=None, **kwargs):
     staff = Lecturer.objects.filter(staff_number=staff_number)
 
     if staff:
         staff = staff.first()
-        user_obj = User.objects.create_user(username=staff.staff_number, is_staff=True)
+        user_obj = User.objects.create_user(username=staff.staff_number, is_staff=True, **kwargs)
         user_obj.set_password(password or staff_number.lower())
         user_obj.save()
         staff.user = user_obj
