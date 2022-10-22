@@ -1,38 +1,41 @@
 {% extends 'base.html' %}
-{% block content %}
+
 {% load to_underscore %}
 {% load static %}
-    <div class="button-group">
-        <a class="btn btn-success" href="{% url 'students:search' %}">Find Another Student</a>
+{% block content %}
+<div class="col-md-10 bg-secondary bg-opacity-10 p-5 mt-5 mx-auto">
+    <div class="button-group d-flex justify-content-end mb-3">
+        <a class="btn btn-success me-2" href="{% url 'students:search' %}">Find Another Student</a>
         {% if object_list%}
             <a class="btn btn-success" href="{% url 'results:add' object_list.0.student_reg_no|to_underscore %}">
             Add A Result For Student</a>
         {% endif%}
     </div> 
-    <div class="jumbotron card">
-    {% if object_list%}
-    {% if student %}
-    <h5 class="card-title">Academic Records for {{ student.student_reg_no }}</h5>
-    <h6 class="card-text">Student Name: {{ student.last_name|title }}, {{ student.first_name|title }}</h6>
-    <h6 class="card-text">Mode of Admission: {{ student.mode_of_admission.mode_of_admission }}</h6>
-    {% endif %}
-    </div>
-    {% regroup object_list by semester.desc as session_list %}
-    <ul>
-        {% for session in session_list %}
-        <li>{{ session.grouper }}
+    <div class="bg-white p-5">
+        {% if object_list%}
+        {% if student %}
+        <h3 class="text-center">Academic Records of {{ student.last_name|title }}, {{ student.first_name|title }} ({{ student.student_reg_no }})</h3>
+        <h6 class="text-center">Mode of Admission: {{ student.mode_of_admission.mode_of_admission|default:"N/A" }}</h6>
+        {% endif %}
+        <hr>
+        {% regroup object_list by semester.desc as session_list %}
         <ul>
-            {% for result in session.list %}
-            <li><a href="{{ result.get_edit_url }}">
-                {{ result.course.course_code }}: 
-                {{ result.course.course_title | upper }}: 
-                {{ result.letter_grade }}</a>
+            {% for session in session_list %}
+            <li><strong>{{ session.grouper }}</strong>
+                <ul>
+                    {% for result in session.list %}
+                    <li><a href="{{ result.get_edit_url }}">
+                        {{ result.course.course_code }}: 
+                        {{ result.course.course_title | upper }}: 
+                        {{ result.letter_grade }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
             </li>
+            <br>
             {% endfor %}
         </ul>
-        </li>
-        <br>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% endblock %}
+        {% endif %}
+    </div>
+</div> 
+{% endblock %}
