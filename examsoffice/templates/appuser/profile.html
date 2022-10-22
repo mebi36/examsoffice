@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}{{ app_user.full_name|default:"User" }}'s Profile{% endblock %}
+{% block content %}
+<div class="col-md-10 mx-auto mt-5">
+    <div class="d-flex justify-content-end">
+        {% if app_user.student_reg_no %}
+        <a href="{% url 'appuser:edit-profile' app_user.pk %}" class="btn rounded-pill btn-success p-2 me-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+            </svg>
+            
+            <span class="ms-1">Edit Bio</span>
+        </a>
+        {% elif app_user.staff_number %}
+        <a href="{% url 'appuser:edit-profile' app_user.pk %}" class="btn rounded-pill btn-success p-2 me-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+            </svg>
+            <span class="ms-1">Edit Bio</span>
+        </a>
+        {% endif %}
+    </div>
+</div>
+<div class="col-md-10 mx-auto bg-secondary bg-opacity-10 p-5 mt-2">
+    <h1 class="text-center border-bottom pb-2 mb-3 text-success">
+        Profile of <span>{% if app_user.first_name %}{{ app_user.first_name }} {{ app_user.last_name }}{% else %}{{ request.user.username }}{% endif %}</span></h1>
+    <div class="table">
+        <div class="row">
+            <div class="col">ID: 
+                <strong>
+                    {% if app_user.student_reg_no %}
+                    {{ app_user.student_reg_no }}
+                    {% else %}
+                    {{ app_user.staff_number }}
+                    {% endif %}
+                </strong>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">First Name: <strong>{{ app_user.first_name|default:"N/A" }}</strong></div>
+            <div class="col">Last Name: <strong>{{ app_user.last_name|default:"N/A" }}</strong></div>
+        </div>
+        <div class="row">
+            <div class="col">Other Names: <strong>{{ app_user.other_names|default:"N/A" }}</strong></div>
+            <div class="col">Email: <strong>{{ app_user.email|default:"N/A" }}</strong></div>
+        </div>
+        {{ app_user.groups }}
+    </div>
+</div>
+{% endblock %}
