@@ -34,6 +34,7 @@ urlpatterns = [
     path("graduation-classes/", include("graduationclasses.urls")),
     path("", views.index_view, name="index"),
     path("index/", include("index.urls")),
+    path("users/", include("appuser.urls")),
     path("accounts/", include("django.contrib.auth.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

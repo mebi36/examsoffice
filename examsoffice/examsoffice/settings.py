@@ -94,19 +94,6 @@ WSGI_APPLICATION = "examsoffice.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
-
-# provide preferred database settings
-# DATABASES = {
-#     'default': {
-#     'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#     'NAME': 'student_test',
-#     'HOST': 'localhost',
-#     'PORT': '5432',
-#     'USER': 'postgres',
-#     'PASSWORD': 'blessedmeb1i',
-#     }
-# }
 DATABASES = cred_dict["credentials"]["DATABASES"]
 
 # Password validation
