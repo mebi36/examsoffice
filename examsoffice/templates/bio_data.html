@@ -5,7 +5,7 @@
 {% block content %}
 <div class="col-md-6 mt-5 mx-auto">
     <div class="bg-secondary bg-opacity-10 p-5">
-        <h2 class="text-success text-center mb-5">Student Bio Data</h2>
+        <h2 class="text-success text-center mb-5">Update Bio Data</h2>
         <form action="{{ action_link }}" method="post" class="ml-3" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form.as_p }}
