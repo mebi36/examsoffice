@@ -1,9 +1,11 @@
-from django.forms import ModelForm
+from django.forms import ModelForm, CharField
 
+from examsoffice.utils.forms import add_bootstrap_formatting
 from results.models import Lecturer
 
 
 class StaffBioForm(ModelForm):
+    staff_number = CharField(max_length=255, required=True, disabled=True)
     class Meta:
         model = Lecturer
         fields = [
@@ -16,6 +18,10 @@ class StaffBioForm(ModelForm):
             "head_of_dept",
         ]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        add_bootstrap_formatting(self)
+
     def clean_staff_number(self):
         staff_num = self.cleaned_data["staff_number"].upper()
         if not Lecturer.is_valid_staff_no(staff_num):
@@ -24,7 +30,6 @@ class StaffBioForm(ModelForm):
                 """Invalid Staff ID. Ensure your entry begins 
                     with 'SS.' followed by the actual number""",
             )
-
         return staff_num
 
     def clean_head_of_dept(self):
