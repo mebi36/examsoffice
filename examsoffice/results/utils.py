@@ -362,9 +362,7 @@ def class_result_spreadsheet(
     row = 2
 
     for student in class_list:
-        student_qs = result_qs.filter(student_reg_no=student[0]).order_by(
-            "semester__semester"
-        )
+        student_qs = result_qs.filter(student_reg_no=student[0])
         # confirm that the student's results are available
         if len(student_qs) == 0:
             continue
@@ -386,6 +384,7 @@ def class_result_spreadsheet(
             name = student[1]
             mode_of_admission = student[2] or "N/A"
             semesters = df["semester"].unique().tolist()
+            semesters = sorted(semesters)
 
             # writing and formatting student biodata to the excel sheet
             sn_cell = ws.cell(column=1, row=row, value=serial_number)
