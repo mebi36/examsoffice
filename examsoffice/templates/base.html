@@ -29,9 +29,6 @@
                             <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Results</a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                 <li>
-                                    <a class="nav-link" href="{% url 'students:search' %}">Student Transcripts</a>
-                                </li>
-                                <li>
                                     <a class="nav-link" href="{% url 'results:collation' %}">Collated Results</a>
                                 </li>
                             </ul>
@@ -39,6 +36,9 @@
                         <li class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Students</a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li>
+                                    <a class="nav-link" href="{% url 'students:search' %}">Student Transcripts</a>
+                                </li>
                                 <li>
                                     <a class="nav-link" href="{% url 'students:search' %}">Students Bio Data</a>
                                 </li>
