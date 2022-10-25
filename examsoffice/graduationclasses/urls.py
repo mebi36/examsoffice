@@ -3,6 +3,7 @@ from django.urls.conf import path
 from .views import (
     GraduationClassInformationView,
     GraduationClassSearchFormView,
+    graduation_class_cgpa_breakdown_json_view,
     graduation_class_info_json_view,
     graduation_class_student_json_view,
 )
@@ -14,6 +15,11 @@ urlpatterns = [
         "student/<str:student_reg_no>/",
         graduation_class_student_json_view,
         name="student_grad_class",
+    ),
+    path(
+        "cgpa-breakdown/<str:grad_year>/",
+        graduation_class_cgpa_breakdown_json_view,
+        name="cgpa-breakdown",
     ),
     path(
         "info/<str:year>/",

@@ -84,7 +84,13 @@
                         </div>
                     </div>
                 </div>
-
+            </div>
+            <div class="row mb-5">
+                <div class="shadow-sm col-12 bg-white p-3 text-center">
+                    <div class="card-title fw-bold text-success">Class CGPA Breakdown</div>
+                    <hr>
+                    <div id="cgpa_breakdown_mount" style="height:350px;"></div>
+                </div>
             </div>
         </div>
         <div class="row mt-3 py-5 border-top border-bottom">
@@ -144,5 +150,58 @@
         }
     })
     let vm = app.mount('#performance_app')
+</script>
+<script>
+    var grad_year = JSON.parse(document.getElementById('grad_yr').innerText);
+    var chartDiv = document.getElementById('cgpa_breakdown_mount');
+    var chartMount = echarts.init(chartDiv);
+    var chartOption; 
+    var grad_data = {0:0, 0:0, 0:0, 0:0, 0:0};
+
+    var ranges = Object.keys(grad_data);
+    var numberOfStudents = Object.values(grad_data);
+    
+    chartMount.setOption({
+        tooltip: {
+            trigger: 'item'
+        },
+        xAxis: {
+            type: 'category',
+            data: ranges
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+                name: 'Number of Students',
+                colorBy: 'data',
+                data: numberOfStudents,
+                type: 'bar',
+                showBackground: true,
+                backgroundStyle: {
+                    color: 'rgba(180, 180, 180, 0.2)'
+                }
+            }
+        ],
+        color: ['#14A44D', '#91cc75', '#6080e0', '#ffc107', '#ee4c4c']
+    });
+
+    axios.get(`/graduation-classes/cgpa-breakdown/${grad_year}`).then(function(response){
+        console.log("this is breakdown: ", response.data)
+        var ranges = Object.keys(response.data.class_cgpa_breakdown)
+        var numberOfStudents = Object.values(response.data.class_cgpa_breakdown)
+        chartMount.setOption({
+            xAxis: {
+                data: ranges
+            },
+            series: [
+                {
+                    name: 'Number of Students',
+                    data: numberOfStudents
+                }
+            ]
+        })
+    })
 </script>
 {% endblock %}

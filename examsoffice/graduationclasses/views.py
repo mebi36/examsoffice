@@ -56,17 +56,24 @@ def graduation_class_info_json_view(request, grad_year: str):
     grad_class = GraduationClass(grad_year)
     context = {}
     context["class_average_cgpa"] = grad_class.average_cgpa()
-    # context["top_student"] = [student.values("student_reg_no", "first_name", "last_name") for student in grad_class.best_student()]
     context["top_student"] = [
         {
             "reg_no": student.student_reg_no,
             "first_name": student.first_name,
             "last_name": student.last_name,
-            "cgpa": student.cgpa,
+            "cgpa": student.current_cgpa,
             "url": student.get_absolute_url(),
         }
         for student in grad_class.best_student()
     ]
+    return JsonResponse(context, safe=False)
+
+
+def graduation_class_cgpa_breakdown_json_view(request, grad_year: str):
+    """Retrieve grad class cgpa breakdown."""
+    grad_class = GraduationClass(grad_year)
+    context = {}
+    context["class_cgpa_breakdown"] = grad_class.cgpa_breakdown()
     return JsonResponse(context, safe=False)
 
 

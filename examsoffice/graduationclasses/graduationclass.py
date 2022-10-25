@@ -22,6 +22,11 @@ class GraduationClass:
             ).order_by("last_name")
         )
 
+    @property
+    def level_of_study(self):
+        """returns the class current level of study."""
+        raise NotImplementedError()
+    
     def best_student(self) -> Optional[List[Student]]:
         """
         This method returns student(s) with the highest CGPA in the class.
@@ -71,7 +76,7 @@ class GraduationClass:
 
     def members_cgpas(self) -> Dict[Student, float]:
         class_members = self.members
-        return {student: student.current_cgpa() for student in class_members}
+        return {student: student.current_cgpa for student in class_members}
 
     def members_with_valid_cgpas(self) -> Dict[Student, float]:
         class_members_cgpa = self.members_cgpas()
@@ -81,15 +86,22 @@ class GraduationClass:
             if cgpa is not None
         }
 
+    def cgpa_breakdown(self) -> Dict[str, int]:
+        """returns range of cpgas/number of class members in range."""
+        cgpas = self.members_with_valid_cgpas().values()
+        return {
+            "4.5>": len([cgpa for cgpa in cgpas if cgpa >= 4.50]),
+            "3.5-4.49": len([cgpa for cgpa in cgpas if 3.5 <= cgpa < 4.5]),
+            "2.5-3.49": len([cgpa for cgpa in cgpas if 2.5 <= cgpa < 3.5]),
+            "1.5-2.49": len([cgpa for cgpa in cgpas if 1.5 <= cgpa < 2.5]),
+            "<1.5": len([cgpa for cgpa in cgpas if cgpa < 1.5])
+        }
+
+
+
     def is_empty(self) -> bool:
         return True if len(self.members) == 0 else False
 
-    @property
-    def level_of_study(self):
-        """returns the class current level of study."""
-        raise NotImplementedError()
-
-    level_of_study.setter
 
     def level_of_study(self, level: int):
         """sets the class's current level of study"""
