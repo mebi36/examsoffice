@@ -171,7 +171,8 @@ chartOption = {
                 color: 'rgba(180, 180, 180, 0.2)'
             }
         }
-    ]
+    ],
+    color: ['#6080e0']
 };
 chartOption && chartMount.setOption(chartOption);
 </script>
@@ -184,7 +185,7 @@ var option;
 
 var grades_keys = Object.keys(grades_breakdown) 
 var grades_count = Object.values(grades_breakdown)
-var pie_segment_colors = ['#14A44D', '#91cc75', '#5470c6', '#ffc107','#fd9552', '#ee4c4c']
+var pie_segment_colors = ['#14A44D', '#91cc75', '#6080e0', '#ffc107','#fd9552', '#ee4c4c']
 var res = []
 
 for (let i in grades_keys){
@@ -233,6 +234,7 @@ option = {
 };
 option && myChart.setOption(option);
 </script>
+
 <script>
     let app = Vue.createApp({
         delimiters: ["[[", "]]"],
