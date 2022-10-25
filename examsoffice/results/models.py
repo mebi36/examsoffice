@@ -454,6 +454,7 @@ class Student(models.Model):
             "students:progress_history", args=[self.get_reg_no_for_url()]
         )
 
+    @property
     def current_cgpa(self) -> Optional[float]:
         """Calculate a student's current CGPA.
 
