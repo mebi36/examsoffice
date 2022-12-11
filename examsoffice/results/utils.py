@@ -360,6 +360,9 @@ def class_result_spreadsheet(
     ws.freeze_panes = "E1"
     serial_number = 1
     row = 2
+    print("class list befor: ", class_list)
+    class_list.sort(key=lambda x: x[1])
+    print("class list after: ", class_list)
 
     for student in class_list:
         student_qs = result_qs.filter(student_reg_no=student[0])
@@ -615,7 +618,9 @@ def collated_results_spreadsheet(res_df: DataFrame) -> Worksheet:
     courses = res_df["course_code"].unique().tolist()
     students = res_df.groupby(["name", "reg_no"]).size().reset_index()
     students = students[["name", "reg_no"]].values.tolist()
+    print("This is students list: \n\n", students)
     collated_result = DataFrame(students, columns=["Name", "RegNo"])
+    print("This is the new df: \n\n", collated_result.head(20))
     for course in courses:
         x = ["X"] * len(students)
         j = course
