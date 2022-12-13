@@ -360,6 +360,7 @@ def class_result_spreadsheet(
     ws.freeze_panes = "E1"
     serial_number = 1
     row = 2
+    class_list.sort(key=lambda x: x[1])
 
     for student in class_list:
         student_qs = result_qs.filter(student_reg_no=student[0])
@@ -762,7 +763,6 @@ def possible_graduands_wb(expected_yr_of_grad: str) -> Worksheet:
             ) <= 24:
                 eligible_students.append(student)
 
-    # print(eligible_students)
     grad_df = bio_df[bio_df["student_reg_no"].isin(eligible_students)]
 
     # cleaning up some columns of the df
