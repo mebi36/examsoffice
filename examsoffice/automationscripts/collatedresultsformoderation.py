@@ -113,6 +113,24 @@ def generate_results_analytics(result_df):
             pdf.savefig()
             plt.close()
             
+            table = pd.DataFrame(plot_df['Number of Students'])
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            cell_text = []
+            for row in range(len(table)):
+                cell_text.append(table.iloc[row])
+            # cell_text.append(f'Total Number of students: {table.sum()}')
+            ax.table(
+                cellText=cell_text,
+                colLabels=table.columns,
+                rowLabels=table.index,
+                loc='center'
+            )
+            ax.set_title(f'Total Number of students: {table["Number of Students"].sum()}')
+            ax.axis('off')
+            
+            pdf.savefig(fig)
+            plt.close()
 
 
 if __name__ == '__main__':
