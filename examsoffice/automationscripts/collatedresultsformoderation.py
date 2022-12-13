@@ -135,4 +135,5 @@ def generate_results_analytics(result_df):
 
 if __name__ == '__main__':
     result_df = get_results()
+    collate_results(result_df)
     generate_results_analytics(result_df)
