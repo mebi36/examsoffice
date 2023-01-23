@@ -421,6 +421,7 @@ def class_result_spreadsheet(
             weight_sum = 0
             col = 5
 
+            semester = semesters.extend(["", ""])
             for semester in semesters:
                 semester_records = df.query("semester == @semester")
                 semester_records = semester_records.sort_values(
@@ -431,24 +432,62 @@ def class_result_spreadsheet(
                 ].copy()
                 semester_records = semester_records.transpose()
 
-                # calculating the semester CGPA&writing to the last column
+                # calculating the semester CGPA& and writing to the
+                # last column
                 credit_sem_sum = semester_records.sum(axis=1)[1]
                 weight_sem_sum = semester_records.sum(axis=1)[3]
                 weight_sum = weight_sum + weight_sem_sum
                 cred_sum = cred_sum + credit_sem_sum
 
+                # Running CGPA
+                col_tally = col
+                cgpa_num = f"{get_column_letter(col+20)}{row+3}"
+                cgpa_denom = f"{get_column_letter(col+20)}{row+1}"
+                while (col_tally - 20) > 0:
+                    cgpa_num += f"+{get_column_letter(col_tally-1)}{row+3}"
+                    cgpa_denom += f"+{get_column_letter(col_tally-1)}{row+1}"
+                    col_tally -= 20
+                    if col_tally < 10:
+                        break
                 ws.cell(
                     row=row,
                     column=(col + 20),
-                    value=round(weight_sum / cred_sum, 3),
+                    value=(
+                        f'=IF(ISBLANK({get_column_letter(col)}{row+2}),"",'
+                        f'ROUND((({cgpa_num})/({cgpa_denom})),3))'
+                    )
                 )
-                ws.cell(row=(row + 1), column=(col + 20), value=credit_sem_sum)
+                # Total Semester Grade Point cell
+                sem_grade_pt_formula = (
+                    f"=SUM({get_column_letter(col)}{row+1}"
+                    f":{get_column_letter(col+19)}{row+1})"
+                )
+                ws.cell(
+                    row=(row + 1),
+                    column=(col + 20),
+                    value=sem_grade_pt_formula
+                )
+                # Semester GPA cell
+                sem_cgpa_formula = (
+                    f'=IF(ISBLANK({get_column_letter(col)}{row+2}),"",ROUND('
+                    f'SUM({get_column_letter(col)}{row+3}:'
+                    f'{get_column_letter(col+19)}{row+3})/'
+                    f'SUM({get_column_letter(col)}{row+1}:'
+                    f'{get_column_letter(col+19)}{row+1}), 3))'
+                )
                 ws.cell(
                     row=(row + 2),
                     column=(col + 20),
-                    value=round(weight_sem_sum / credit_sem_sum, 3),
+                    value=sem_cgpa_formula
                 )
-                ws.cell(row=(row + 3), column=(col + 20), value=weight_sem_sum)
+                # Total semester credit load cell
+                sem_cred_formula = (
+                    f"=SUM({get_column_letter(col)}{row+3}:"
+                    f"{get_column_letter(col+19)}{row+3})"
+                )
+                ws.cell(
+                    row=(row + 3), column=(col + 20), value=sem_cred_formula
+                )
                 _format_summary_block(row, col)
 
                 # prepare result dataframe for writing to excel
@@ -487,6 +526,20 @@ def class_result_spreadsheet(
                             _.alignment = Alignment(
                                 text_rotation=180, vertical="top"
                             )
+                # Grade Point cells
+                for c in range(20):
+                    grd = get_column_letter(col+c) + str(row+2)  # letter grade cell
+                    un_ld = get_column_letter(col+c) + str(row+1)  # Unit load cell
+                    ws.cell(
+                        row=row+3,
+                        column=col+c,
+                        value=(
+                            f'=IF(ISBLANK({grd}),"",IF(({grd}="A"),"5",'
+                            f'IF(({grd}="B"),"4",IF(({grd}="C"),"3",'
+                            f'IF(({grd}="D"),"2",IF(({grd}="E"),"1",'
+                            f'IF(({grd}="F"),"0"," "))))))*{un_ld})'
+                        )
+                    )
 
                 col += 21
 
