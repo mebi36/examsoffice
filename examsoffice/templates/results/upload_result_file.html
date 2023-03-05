@@ -4,9 +4,7 @@
 
 {% block content %}
 <div class="wx-75 mx-auto">
-    <h6 class="text-warning">
-        **Please ensure the headers and file format of the result 
-        format provided is not modified in the file to be uploaded.</h6>
+    <a href="{% url 'courses:add' %}">Course not found in list?</a>
     <form action="." method="post" enctype="multipart/form-data">
         {% csrf_token %}
 

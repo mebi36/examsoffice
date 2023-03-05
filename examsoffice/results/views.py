@@ -18,6 +18,7 @@ from django.views import generic
 from openpyxl.writer.excel import save_virtual_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 import pandas as pd
+from pandas.api.types import is_string_dtype
 from pandas.core.frame import DataFrame
 import numpy as np
 
@@ -36,6 +37,7 @@ from results.utils import (
     class_result_spreadsheet,
     collated_results_spreadsheet,
     class_failure_spreadsheet,
+    class_of_degree_spreadsheet,
 )
 
 
@@ -256,162 +258,106 @@ class ResultFileFormatFormView(generic.FormView):
 
 @method_decorator(login_required, name="dispatch")
 class ResultUploadFormView(generic.FormView):
-    """Accepts result csv files."""
+    """Accepts result excel files."""
 
     template_name = "results/upload_result_file.html"
     form_class = ResultFileUploadForm
-
     def form_valid(self, form: Form) -> HttpResponse:
+        excel_file = self.request.FILES["result_file"]
         try:
-            df = pd.read_csv(
-                self.request.FILES["result_file"], skipinitialspace=True
-            )
-        except:
-            messages.error(self.request, "File must be a non-empty CSV file.")
+            df = pd.read_excel(excel_file, header=None)
+        except Exception as exc:
+            messages.error(self, request, "Problem reading excel file")
             return super().form_invalid(form)
 
-        # strip whitespaces from dataframe
-        df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
-        # make a copy of dataframe
-        original_df = df.copy()
+        results_row_df = pd.DataFrame()
+        reg_no_col = None
 
-        # remove rows with empty entry for any required column
-        df.dropna(axis=0, inplace=True)
-        if len(df) == 0:
-            messages.error(
-                self.request,
-                "File may be missing either column headers or result entries",
-                extra_tags="text-danger",
-            )
+        # find reg number column
+        for col in df.columns:
+            try:
+                df_gen = (
+                    df[df[col].str.contains(
+                        pat="^[0-9]{4}\/[0-9]{6}",
+                        regex=True,
+                        na=False
+                    )]
+                )
+            except Exception as exc:
+                continue
+                
+
+            if not df_gen.empty:
+                reg_no_col = col
+                results_row_df = df_gen
+                break
+        
+        valid_grade_vals = Result.VALID_GRADES + ["FF"]
+        expceted_grade_col = None
+
+        for col in range(reg_no_col+1, max(list(results_row_df.columns))+1):
+            try:
+                if not is_string_dtype(results_row_df[col]):
+                    continue
+            except Exception as exc:
+                messages.error(self.request, f"Problem processing file.")
+                return HttpResponseRedirect(reverse("results:upload_result_file"))
+
+            results_row_df[col] = results_row_df[col].apply(lambda x: str(x).strip().upper())
+            results_row_df["grade_checker"] = results_row_df[col].apply(lambda x: x in valid_grade_vals)
+            if results_row_df["grade_checker"].sum() >= len(results_row_df) * .75:
+                expceted_grade_col = col
+                results_row_df.rename(
+                    columns={expceted_grade_col: "letter_grade", reg_no_col: "reg_no"},
+                    inplace=True
+                )
+                results_row_df["letter_grade"] = results_row_df["letter_grade"].replace("FF", "F")
+                results_row_df = results_row_df[results_row_df["grade_checker"]]
+                results_row_df = results_row_df[["reg_no", "letter_grade"]]
+                break
+        
+        if "letter_grade" not in results_row_df:
+            messages.error(self.request, "Grades not detected in uploaded file")
             return super().form_invalid(form)
-
+        course = form.cleaned_data["course"]
+        semester = form.cleaned_data["semester"]
         invalid_results_df = pd.DataFrame()
-        df_columns = list(df.columns)
-        if df_columns == ResultFileFormatFormView.RESULT_FILE_COL_NO_SCORES:
-            df.rename(
-                columns={
-                    "Student Registration Number": "reg_no",
-                    "Grade": "grade",
-                },
-                inplace=True,
-            )
-
-            course = form.cleaned_data["course"]
-            semester = form.cleaned_data["semester"]
-
-            for index, row in df.iterrows():
-                if not row[
-                    "grade"
-                ].upper() in Result.VALID_GRADES or not ex.Student.is_valid_reg_no(
-                    row["reg_no"]
-                ):
+        for index, row in results_row_df.iterrows():
+            if form.cleaned_data["skip_existing_rows"]:
+                try:
+                    ex.Result.objects.create(
+                        student_reg_no=row["reg_no"],
+                        course=course,
+                        semester=semester,
+                        letter_grade=row["letter_grade"].upper()
+                    )
+                except ValidationError:
+                    messages.add_message(
+                        self.request,
+                        messages.ERROR,
+                        "%s already has a result for this course and session"
+                        % row["reg_no"],
+                    )
                     offending_row = row.append(
-                        pd.Series({"error": "INVALID REG. NO. OR GRADE"})
+                        pd.Series(
+                            {
+                                "error": "STUDENT ALREADY HAS A RESULT FOR SELECTED COURSE AND SESSION."
+                            }
+                        )
                     )
                     invalid_results_df = invalid_results_df.append(
                         offending_row, ignore_index=True
                     )
-                    continue
-
-                if form.cleaned_data["skip_existing_rows"]:
-                    try:
-                        ex.Result.objects.create(
-                            student_reg_no=row["reg_no"],
-                            course=course,
-                            semester=semester,
-                            letter_grade=row["grade"].upper(),
-                        )
-                    except ValidationError:
-                        messages.add_message(
-                            self.request,
-                            messages.ERROR,
-                            "%s already has a result for this course and sesison"
-                            % row["reg_no"],
-                        )
-                        offending_row = row.append(
-                            pd.Series(
-                                {
-                                    "error": "STUDENT ALREADY HAS A RESULT FOR SELECTED COURSE AND SESSION."
-                                }
-                            )
-                        )
-                        invalid_results_df = invalid_results_df.append(
-                            offending_row, ignore_index=True
-                        )
-                else:
-                    ex.Result.objects.update_or_create(
-                        student_reg_no=row["reg_no"],
-                        course=course,
-                        semester=semester,
-                        defaults={"letter_grade": row["grade"].upper()},
-                    )
-
-        elif df_columns == ResultFileFormatFormView.RESULT_FILE_COL_WITH_SCORES:
-            df.rename(
-                columns={
-                    "Student Registration Number": "reg_no",
-                    "CA Score": "ca_score",
-                    "Exam Score": "exam_score",
-                    "Grade": "grade",
-                },
-                inplace=True,
-            )
-            for index, row in df.iterrows():
-                if (
-                    not isinstance(row["ca_score"], (int, float))
-                    or not isinstance(row["exam_score"], (int, float))
-                    or row["grade"].upper() not in Result.VALID_GRADES
-                    or not ex.Student.is_valid_reg_no(row["reg_no"])
-                ):
-                    offending_row = row.append(
-                        pd.Series({"error": "INVALID REG. NO, GRADE, OR SCORE"})
-                    )
-                    invalid_results_df = invalid_results_df.append(row)
-                    continue
-
-                if form.cleaned_data["skip_existing_rows"]:
-                    try:
-                        ex.Result.objects.create(
-                            student_reg_no=row["reg_no"],
-                            course=course,
-                            semester=semester,
-                            ca_score=row["ca_score"],
-                            exam_score=row["exam_score"],
-                            letter_grade=row["letter_grade"],
-                        )
-                    except ValidationError:
-                        offending_row = row.append(
-                            pd.Series(
-                                {
-                                    "error": "STUDENT ALREADY HAS A RESULT FOR SELECTED COURSE AND SESSION."
-                                }
-                            )
-                        )
-                        invalid_results_df = invalid_results_df.append(
-                            offending_row, ignore_index=True
-                        )
-                else:
-                    ex.Result.objects.update_or_create(
-                        student_reg_no=row["reg_no"],
-                        course=course,
-                        semester=semester,
-                        defaults={
-                            "letter_grade": row["grade"].upper(),
-                            "ca_score": row["ca_score"],
-                            "exam_score": row["exam_score"],
-                        },
-                    )
-        else:
-            messages.error(
-                self.request,
-                "File does not comply with any of the provided result file samples.",
-                extra_tags="text-danger",
-            )
-            return super().form_invalid(form)
-
+            else:
+                ex.Result.objects.update_or_create(
+                    student_reg_no=row["reg_no"],
+                    course=course,
+                    semester=semester,
+                    defaults={"letter_grade": row["letter_grade"].upper()},
+                )
         if len(invalid_results_df) > 0:
             messages.add_message(
-                self.request, messages.INFO, "Upload compete with some errors"
+                self.request, messages.INFO, "Upload complete with some errors"
             )
             response = HttpResponse(
                 self.request,
@@ -423,6 +369,7 @@ class ResultUploadFormView(generic.FormView):
             invalid_results_df.to_csv(response)
             return response
         else:
+            messages.info(self.request, "Upload complete")
             return HttpResponseRedirect(reverse("results:upload_result_file"))
 
 
@@ -656,6 +603,19 @@ def class_outstanding_courses(
 ) -> HttpResponse:
     file_name: str = f"Class of {expected_yr_of_grad} Extra Load Summary.xlsx"
     return generic_class_info_handler(request, expected_yr_of_grad, file_name)
+
+
+@login_required
+def possible_grads_with_class_of_degree(
+    request: HttpRequest, expected_yr_of_grad: str
+) -> HttpResponse:
+    file_name: str = f"Class of {expected_yr_of_grad} class of degree.xlsx"
+    return generic_class_info_handler(
+        request,
+        expected_yr_of_grad,
+        file_name,
+        spread_sheet_method=class_of_degree_spreadsheet,
+    )
 
 
 @login_required

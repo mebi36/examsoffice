@@ -8,6 +8,9 @@
 <p>{{results | json_script:"result_data"}}</p>
 
 <div class="col-md-10 mx-auto">
+    <div class="d-flex justify-content-start">
+        <a href="{% url 'students:search'  %}"><< Back to search</a>
+    </div>
     {% if student %}
     <div class="d-flex justify-content-end">
         <a href="{% url 'students:edit_bio' student_obj.student_reg_no|to_underscore %}">

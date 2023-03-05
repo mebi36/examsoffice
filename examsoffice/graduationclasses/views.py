@@ -106,3 +106,6 @@ class GraduationClassSearchFormView(generic.FormView):
             kwargs={"year": form.cleaned_data["expected_yr_of_grad"]},
         )
         return HttpResponseRedirect(url)
+
+
+# TODO add view to change level of study of entire graduationclass

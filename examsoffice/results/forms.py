@@ -74,7 +74,7 @@ class ResultFileUploadForm(CourseResultForm):
             if form_field == "skip_existing_rows":
                 continue
             if form_field == "result_file":
-                self.fields[form_field].widget.attrs["accept"] = ".csv"
+                self.fields[form_field].widget.attrs["accept"] = ".xlsx,.xls"
 
             self.fields[form_field].widget.attrs["class"] = "form-control"
 

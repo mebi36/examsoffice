@@ -55,6 +55,11 @@ urlpatterns = [
         name="class_outstanding_courses",
     ),
     path(
+        "class of degree/class/<str:expected_yr_of_grad>/",
+        views.possible_grads_with_class_of_degree,
+        name="possible_class_of_degree"
+    ),
+    path(
         "collation/",
         views.ResultCollationByLevelOfStudyAnsSessionFormView.as_view(),
         name="collation",

@@ -662,6 +662,107 @@ def class_failure_spreadsheet(
     return wb
 
 
+def class_of_degree_spreadsheet(
+    result_qs: QuerySet, class_list: List[str], expected_yr_of_grad: str
+) -> Worksheet:
+    classes_of_degree = {
+        4.5: "1st Class",
+        3.5: "2nd Class (Upper)",
+        2.5: "2nd Class (Lower)",
+        1.5: "3rd Class",
+        0: "Pass"
+    }
+    wb: Workbook = Workbook()
+    ws: Worksheet = wb.active
+
+    ws.title = f"Class of {expected_yr_of_grad} Potential Class of Degree"
+    headers = [
+        "SN",
+        "Reg Number",
+        "Name",
+        "Potential Class of Degree"
+    ]
+    ws.append(headers)
+    ws.freeze_panes = "A2"
+    serial_number = 1
+    column_dimensions = {1: 4, 2: 18, 3: 26, 4: 12}
+
+    for key, value in column_dimensions.items():
+        ws.column_dimensions[get_column_letter(key)].width = value
+        cell = ws.cell(row=1, column=key)
+        cell.border = NORMAL_BORDER
+        cell.alignment = Alignment(horizontal="center", vertical="top")
+        cell.font = Font(bold=True)
+    
+    row = 2
+    # class_list = class_list.order_by("last_name")
+    class_list = sorted(class_list, key=lambda x: x[1])
+    for student in class_list:
+        student_qs = result_qs.filter(student_reg_no=student[0]).order_by(
+            "semester"
+        )
+        # confirm that the student's results are available
+        if len(student_qs) == 0:
+            continue
+
+        else:
+            # convert student's result qs to dataframe
+            df = DataFrame.from_records(student_qs)
+            df = df.rename(
+                columns={
+                    0: "course_title",
+                    1: "course_code",
+                    2: "credit_load",
+                    3: "course_level",
+                    4: "semester",
+                    5: "grade",
+                }
+            )
+            df = Student.get_weight_col(df)
+            reg_no = student[0]
+            name = student[1]
+            weight_sum = df["weight"].sum()
+            credit_sum = df["credit_load"].sum()
+            cgpa = round(weight_sum / credit_sum, 3)
+
+            for key, val in classes_of_degree.items():
+                if cgpa >= key:
+                    class_of_deg = val
+                    break
+        
+            # get failed failed courses
+            failed_courses = failed_courses_breakdown(df)["failed_courses"]
+
+            if len(failed_courses) != 0:
+                continue
+            
+            entry_alignment = Alignment(vertical="top", horizontal="center")
+            ws.row_dimensions[row].height = 90
+            ws.cell(row=row, column=1, value=serial_number)
+            ws.cell(row=row, column=2, value=reg_no)
+            ws.cell(row=row, column=3, value=name)
+            ws.cell(row=row, column=4, value=class_of_deg)
+
+            for col_idx in range(1, 5):
+                cell = ws.cell(row=row, column=col_idx)
+                cell.alignment = entry_alignment
+                cell.border = NORMAL_BORDER
+            
+            row += 1
+            serial_number += 1
+    
+    ws.oddHeader.center.text = (
+        f'''&BDEPARTMENT OF ELECTRONIC ENGINEERING_'''
+        f'''POTENTIAL CLASS OF DEGREE ({expected_yr_of_grad})&B'''
+    )
+    ws.oddFooter.center.text = (
+        '''&08&IThis document is only a projection and will only become '''
+        '''official when the results of the students presented herewith'''
+        ''' have been ratified by the University's examination unit.&I'''
+    )
+    return wb
+
+
 def collated_results_spreadsheet(res_df: DataFrame) -> Worksheet:
     """This function will process the result df into a spreadsheet which
     will be returned to the caller"""
