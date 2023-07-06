@@ -3,16 +3,19 @@
 {% block title %}Upload Result File{% endblock %}
 
 {% block content %}
-<div class="wx-75 mx-auto">
-    <a href="{% url 'courses:add' %}">Course not found in list?</a>
-    <form action="." method="post" enctype="multipart/form-data">
-        {% csrf_token %}
+<div class="col-md-8 mt-5 mx-auto">
+    <div class="mx-auto bg-secondary bg-opacity-10 p-5 m-5">
+        <h2 class="mb-4 text-center text-success">Upload Result File</h2>
+        <a href="{% url 'courses:add' %}">Course not found in list?</a>
+        <form action="." method="post" enctype="multipart/form-data">
+            {% csrf_token %}
 
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-success">
-            <img src="{% static 'images/save.svg' %}" alt="save-icon" class="mr-2">
-            Upload File
-        </button>
-    </form>
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-success my-2">
+                <img src="{% static 'images/save.svg' %}" alt="save-icon" class="mr-2">
+                Upload File
+            </button>
+        </form>
+    </div>
 </div>
 {% endblock %}

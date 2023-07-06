@@ -1,21 +1,25 @@
 {% block content %}
 <div id="page-body">
     {% if object_list %}
-    <table>
-        {% for result in object_list %}
-            <tr>
-                <td>{{ result.student_reg_no }}</td>
-                <td>{{ result.course_id__course_title }}|upper</td>
-                <td>{{ result.course_id__course_semester }}|upper</td>
-                <td>{{ result.course_id__course_code}}|upper</td>
-                <td>{{ result.semester_id__desc }}|upper</td>
-                <td>{{ result.semester_id__semester_id }}|upper</td>
-                <td>{{ result.letter_grade }}|upper</td>
-                <td><a href="{% url 'results:delete' result.id %}"><input type="button" value="Delete This Record"></a></td>
-            </tr>
-        {% endfor %}
-        
-    </table>
+    <div class="col-md-10 mx-auto">
+        <div class="bg-secondary bg-opacity-10 p-5">
+            <table>
+                {% for result in object_list %}
+                    <tr>
+                        <td>{{ result.student_reg_no }}</td>
+                        <td>{{ result.course_id__course_title }}|upper</td>
+                        <td>{{ result.course_id__course_semester }}|upper</td>
+                        <td>{{ result.course_id__course_code}}|upper</td>
+                        <td>{{ result.semester_id__desc }}|upper</td>
+                        <td>{{ result.semester_id__semester_id }}|upper</td>
+                        <td>{{ result.letter_grade }}|upper</td>
+                        <td><a href="{% url 'results:delete' result.id %}"><input type="button" value="Delete This Record"></a></td>
+                    </tr>
+                {% endfor %}
+                
+            </table>
+        </div>
+    </div>    
     {% endif %}
 </div>
 {% endblock %}
