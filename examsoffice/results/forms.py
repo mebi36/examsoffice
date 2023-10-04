@@ -1,4 +1,5 @@
 from datetime import date
+from pathlib import Path
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -58,7 +59,7 @@ class ResultFileUploadForm(CourseResultForm):
     """Form for users to upload result files."""
 
     result_file = forms.FileField(
-        label="Select Result File (CSV)", allow_empty_file=False, required=True
+        label="Select Result File (XLSX)", allow_empty_file=False, required=True
     )
     skip_existing_rows = forms.BooleanField(
         label="Skip students that already have a result for selected course and semester",
@@ -98,6 +99,20 @@ class ResultCollationBySessionAndLevelOfStudyForm(forms.Form):
         label="Academic Session",
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        add_bootstrap_formatting(self)
+
+
+class UnmoderatedResultDirectorySelectionForm(forms.Form):
+    """Select directory containing unmoderated result files."""
+    result_directory = forms.FilePathField(
+        path=Path.home().drive,
+        allow_files=False,
+        allow_folders=True,
+        label="Directory containing results"
+    )
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         add_bootstrap_formatting(self)

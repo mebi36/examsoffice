@@ -14,7 +14,8 @@ from pathlib import Path
 import json
 
 # get security credentials from credentials.json
-cred_file_path = os.path.join("..", "credentials.json")
+cred_file_path = os.path.join(
+    Path(__file__).parent.parent.parent, "credentials.json")
 with open(cred_file_path, "r") as data:
     cred_json = data.read()
 cred_dict = json.loads(cred_json)

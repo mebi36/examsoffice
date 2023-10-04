@@ -1,4 +1,3 @@
-import csv
 from typing import Any, Callable, ClassVar, Dict, List, Optional, Union
 
 from django.http import HttpResponse, HttpRequest
@@ -15,6 +14,7 @@ from django.db.models.functions import Concat
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import generic
+from openpyxl import Workbook
 from openpyxl.writer.excel import save_virtual_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 import pandas as pd
@@ -29,6 +29,7 @@ from results.forms import (
     ResultFileUploadForm,
     ResultFileUploadFormatOptionForm,
     ResultForm,
+    UnmoderatedResultDirectorySelectionForm,
 )
 from results.models import Result
 from results.utils import (
@@ -240,19 +241,26 @@ class ResultFileFormatFormView(generic.FormView):
 
     def form_valid(self, form: Form) -> HttpResponse:
         response = HttpResponse(
-            content_type="text/csv",
+            content_type="application/ms-excel",
             headers={
-                "Content-Disposition": 'attachment; filename="resultformat.csv"'
+                "Content-Disposition": 'attachment; filename="resultformat.xlsx"'
             },
         )
-        writer = csv.writer(response)
-        if (
-            form.cleaned_data["upload_option"]
-            == "Upload results without scores"
-        ):
-            writer.writerow(self.RESULT_FILE_COL_NO_SCORES)
-        elif form.cleaned_data["upload_option"] == "Upload results with scores":
-            writer.writerow(self.RESULT_FILE_COL_WITH_SCORES)
+        wb = Workbook()
+        ws = wb.worksheets[0]
+        ws.title = "Format"
+        row_num = 0
+
+        columns = (
+            self.RESULT_FILE_COL_WITH_SCORES
+            if form.cleaned_data["upload_option"] == "Upload results with scores"
+            else self.RESULT_FILE_COL_NO_SCORES
+        )
+
+        for col_num in range(len(columns)):
+            c = ws.cell(row=row_num+1, column=col_num+1)
+            c.value = columns[col_num]
+        wb.save(response)
         return response
 
 
@@ -262,12 +270,13 @@ class ResultUploadFormView(generic.FormView):
 
     template_name = "results/upload_result_file.html"
     form_class = ResultFileUploadForm
+
     def form_valid(self, form: Form) -> HttpResponse:
         excel_file = self.request.FILES["result_file"]
         try:
             df = pd.read_excel(excel_file, header=None)
         except Exception as exc:
-            messages.error(self, request, "Problem reading excel file")
+            messages.error(self, self.request, "Problem reading excel file")
             return super().form_invalid(form)
 
         results_row_df = pd.DataFrame()
@@ -708,6 +717,15 @@ class ResultCollationByLevelOfStudyAnsSessionFormView(generic.FormView):
         return HttpResponseRedirect(
             reverse("index:download_info") + "?next=%s" % next_url
         )
+
+
+class UnmoderatedResultAnalysis(generic.FormView):
+    """Analyze results without persisting them in the production database."""
+    template_name: str = "results/unmoderated_results_form.html"
+    form_class: Form = UnmoderatedResultDirectorySelectionForm
+
+    def form_valid(self, form: Form) -> HttpResponse:
+        res_dir: str = form.cleaned_data["results_directory"]
 
 
 @login_required

@@ -74,4 +74,9 @@ urlpatterns = [
         views.possible_graduands,
         name="possible_graduands",
     ),
+    path(
+        "analyze-unmoderated",
+        views.UnmoderatedResultAnalysis.as_view(),
+        name="analyze_unmoderated"
+    )
 ]
