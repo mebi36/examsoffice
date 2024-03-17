@@ -1,20 +1,24 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<div class="text-danger"><strong>{{ form.non_field_errors }}</strong></div>
-<form action="" method="post">
-    {% csrf_token %}
-    {% if form %}
-    {{ form.as_table }}
-    {% endif %}
-    <h6 class="text-danger">
-        <br>
-        Please ensure the course details provided are officially ratified and accurate. 
-        This system does not allow modifications of these details once results have been uploaded for a given course.
-    </h6>
-    <button class="btn btn-success" type="submit">
-        <img src="{% static 'images/save.svg' %}" alt="save-icon" class="mr-2">
-        Save Changes
-    </button>
-</form>
+<div class="col-md-8 mt-5 mx-auto">
+    <div class="mx-auto bg-secondary bg-opacity-10 p-5 m-5">
+        <div class="text-danger"><strong>{{ form.non_field_errors }}</strong></div>
+        <form action="" method="post">
+            {% csrf_token %}
+            {% if form %}
+            {{ form.as_table }}
+            {% endif %}
+            <h6 class="text-danger">
+                <br>
+                Please ensure the course details provided are officially ratified and accurate. 
+                This system does not allow modifications of these details once results have been uploaded for a given course.
+            </h6>
+            <button class="btn btn-success" type="submit">
+                <img src="{% static 'images/save.svg' %}" alt="save-icon" class="mr-2">
+                Save Changes
+            </button>
+        </form>
+    </div>
+</div>
 {% endblock %}
