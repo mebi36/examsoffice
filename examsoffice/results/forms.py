@@ -41,7 +41,7 @@ class CourseResultForm(forms.Form):
         queryset=Course.objects.all(), label="Select Course", required=True
     )
     semester = forms.ModelChoiceField(
-        queryset=SemesterSession.objects.all(),
+        queryset=SemesterSession.objects.all().order_by("-desc"),
         label="Select Session/Semester",
         required=True,
     )

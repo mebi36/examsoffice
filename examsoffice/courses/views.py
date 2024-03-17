@@ -1,7 +1,8 @@
 from django.shortcuts import render
+from django.contrib import messages
+
 from results.models import Course
 from .forms import CourseForm
-from django.contrib import messages
 
 
 def view(request):

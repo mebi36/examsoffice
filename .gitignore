@@ -130,3 +130,10 @@ dmypy.json
 
 faf
 examsoffice_nuxt/node_modules/
+db_backup/
+examsoffice/automationscripts/files
+examsoffice/env
+examsoffice/env222
+examsoffice/performance_analytics.pdf
+examsoffice/output.csv
+examsoffice/MODERATED RESULT - FIRST VERSION.csv

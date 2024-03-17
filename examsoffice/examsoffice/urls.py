@@ -31,6 +31,7 @@ urlpatterns = [
     path("staff/", include("staff.urls")),
     path("programs/", include("programs.urls")),
     path("courses/", include("courses.urls")),
+    path("academic-sessions/", include("sessions.urls")),
     path("graduation-classes/", include("graduationclasses.urls")),
     path("", views.index_view, name="index"),
     path("index/", include("index.urls")),

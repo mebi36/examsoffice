@@ -1,0 +1,1 @@
+"C:\Program Files\PostgreSQL\13\bin\pg_dump" -U postgres studentDB > "C:\examsoffice\db_backup\studentdb_backup_01192023.sql"

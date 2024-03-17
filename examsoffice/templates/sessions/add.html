@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="col-md-5 mt-5 mx-auto">
+    <div class="mx-auto bg-secondary bg-opacity-10 p-5 m-5">
+        <h3 class="text-center text-success">Add Academic Session</h3>
+        <div class="text-danger"><strong>{{ form.non_field_errors }}</strong></div>
+        <form action="" method="post">
+            {% csrf_token %}
+            {% if form %}
+            {{ form.as_table }}
+            {% endif %}
+            <h6 class="text-danger">
+                <br>
+                Please ensure the correct session format is entered (XXXX/XXXX)
+            </h6>
+            <button class="btn btn-success" type="submit">
+                <img src="{% static 'images/save.svg' %}" alt="save-icon" class="mr-2">
+                Save Changes
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

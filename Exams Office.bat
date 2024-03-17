@@ -1,2 +1,2 @@
 @echo off
-cmd /k "cd env\Scripts & activate & cd .. & cd .. & start chrome --app=http://localhost:8000 & cd examsoffice & python manage.py runserver & pause
+cmd /k "C:\examsoffice\examsoffice\env222\Scripts\activate & start chrome --app=http://localhost:8000 & python C:\examsoffice\examsoffice\manage.py runserver & pause
