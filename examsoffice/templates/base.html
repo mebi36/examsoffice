@@ -100,6 +100,11 @@
                                 <li>
                                     <a href="{% url 'appuser:profile' %}" class="nav-link">Profile</a>
                                 </li>
+                                {% if not request.user.lecturer and not request.user.student %}
+                                    <li>
+                                        <a href="{% url 'appuser:db_backup' %}">Backup database</a>
+                                    </li>
+                                {% endif %}
                                 <li>
                                     <a href="/accounts/logout" class="nav-link">Logout</a>
                                 </li>
