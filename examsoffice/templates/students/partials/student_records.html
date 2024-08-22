@@ -4,10 +4,10 @@
 {% load static %}
     <div class="button-group">
         <a class="btn btn-success" href="{% url 'students:search' %}">Find Another Student</a>
-        {% if object_list%}
-            <a class="btn btn-success" href="{% url 'results:add' object_list.0.student_reg_no|to_underscore %}">
-            Add A Result For Student</a>
-            {% endif%}
+        <!-- {% if object_list%} -->
+        <a class="btn btn-success" href="{% url 'results:add' object_list.0.student_reg_no|to_underscore %}">
+        Add A Result For Student</a>
+            <!-- {% endif%} -->
     </div>    
     <div class="jumbotron card">
         {% if object_list%}

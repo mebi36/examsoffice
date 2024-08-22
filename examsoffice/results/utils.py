@@ -11,6 +11,7 @@ from openpyxl.worksheet.pagebreak import Break
 from openpyxl.worksheet.worksheet import Worksheet
 from pandas import DataFrame
 
+from examsoffice.settings import BASE_DIR
 from results.models import Lecturer, Student, Result
 
 
@@ -108,6 +109,7 @@ def failed_courses_breakdown(df: DataFrame) -> Dict[str, Any]:
 
 def student_transcript(transcript_data: Dict[str, Any]) -> Workbook:
     file_path: List[str] = [
+        BASE_DIR,
         "static",
         "excel_templates",
         "transcript_template.xlsx",

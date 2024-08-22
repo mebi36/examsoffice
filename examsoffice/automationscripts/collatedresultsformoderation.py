@@ -12,7 +12,7 @@ def get_results():
     with open(os.path.join(os.path.dirname(__file__), "ALL_RESULTS.csv")) as res_file:
         results = list(csv.DictReader(res_file))
     df = pd.DataFrame(results)
-    df.reg_no = df.reg_no.apply(lambda x: x.strip())
+    df.reg_no = df.reg_no.apply(lambda x: x.strip().replace(" ", ""))
     df.course = df.course.apply(lambda x: x.strip())
     return df
 
@@ -40,7 +40,7 @@ def collate_results(input_results_df):
                 + " "
                 + (name.first_name[0].upper() if (name.first_name is not None) else "")
                 + ". "
-                + (name.other_names[0].upper() if (name.other_names is not None) else "")
+                + (name.other_names[0].upper() if (name.other_names is not None and name.other_names != "") else "")
             )
             student_names.append(name_and_initials)
             continue

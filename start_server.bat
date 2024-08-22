@@ -1,0 +1,1 @@
+C:\examsoffice\examsoffice\env222\Scripts\python.exe C:\examsoffice\examsoffice\manage.py runserver

@@ -31,7 +31,7 @@ from results.forms import (
     ResultForm,
     UnmoderatedResultDirectorySelectionForm,
 )
-from results.models import Result
+from results.models import Result, Student
 from results.utils import (
     possible_graduands_wb,
     student_transcript,
@@ -114,9 +114,13 @@ class StudentAcademicRecordsListView(generic.ListView):
 
     def get_queryset(self) -> QuerySet:
         student_reg_no = self.kwargs["reg_no"].replace("_", "/")
-        return Result.objects.filter(
+        res = Result.objects.filter(
             student_reg_no=student_reg_no
         ).select_related("course", "semester")
+        if res.exists():
+            return res
+        else:
+            return Student.objects.filter(student_reg_no=student_reg_no)
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)

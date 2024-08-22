@@ -7,10 +7,10 @@
 <div class="col-md-10 bg-secondary bg-opacity-10 p-5 mt-5 mx-auto">
     <div class="button-group d-flex justify-content-end mb-3">
         <a class="btn btn-success me-2" href="{% url 'students:search' %}">Find Another Student</a>
-        {% if object_list%}
-            <a class="btn btn-success" href="{% url 'results:add' object_list.0.student_reg_no|to_underscore %}">
-            Add A Result For Student</a>
-        {% endif%}
+        <!-- {% if object_list%} -->
+        <a class="btn btn-success" href="{% url 'results:add' object_list.0.student_reg_no|to_underscore %}">
+        Add A Result For Student</a>
+        <!-- {% endif%} -->
     </div> 
     <div class="bg-white p-5">
         {% if object_list%}
