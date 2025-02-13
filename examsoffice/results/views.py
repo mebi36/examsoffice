@@ -169,8 +169,6 @@ def recent_results_bulk(request: HttpRequest) -> HttpResponse:
     for idx, entry in enumerate(qs):
         if idx != 0 and qs[idx].course != qs[idx - 1].course:
             course_count += 1
-        if course_count == 26:
-            break
     min_id: Any = qs[idx].id
     final_qs: QuerySet = (
         ex.Result.objects.all()

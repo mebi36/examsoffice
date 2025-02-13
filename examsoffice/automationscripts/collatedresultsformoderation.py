@@ -1,6 +1,7 @@
 import csv
 import os
 
+from tqdm import tqdm
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import pandas as pd
@@ -31,7 +32,7 @@ def collate_results(input_results_df):
     all_students = input_results_df.reg_no.unique().tolist()
     student_names = []
 
-    for student in all_students:
+    for student in tqdm(all_students, desc="Collating student results..."):
         name = Student.objects.filter(student_reg_no=student)
         if name.exists():
             name = name.first()
