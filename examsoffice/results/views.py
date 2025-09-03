@@ -1,6 +1,7 @@
+import json
 from typing import Any, Callable, ClassVar, Dict, List, Optional, Union
 
-from django.http import HttpResponse, HttpRequest
+from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.db.models.query import QuerySet
 from django.forms import Form
 from django.core.exceptions import ValidationError
@@ -13,6 +14,7 @@ from django.db.models import OuterRef, Subquery, Value
 from django.db.models.functions import Concat
 from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.views.decorators.http import require_http_methods
 from django.views import generic
 from openpyxl import Workbook
 from openpyxl.writer.excel import save_virtual_workbook
@@ -120,13 +122,15 @@ class StudentAcademicRecordsListView(generic.ListView):
         if res.exists():
             return res
         else:
-            return Student.objects.filter(student_reg_no=student_reg_no)
+            return Student.objects.filter(student_reg_no=student_reg_no).order_by("semester__desc")
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["student"] = get_object_or_404(
             ex.Student, student_reg_no=self.kwargs["reg_no"].replace("_", "/")
         )
+        context["courses"] = ex.Course.objects.all().order_by("course_code")
+        context["semesters"] = ex.SemesterSession.objects.all().order_by("-desc")
         return context
 
 
@@ -169,6 +173,8 @@ def recent_results_bulk(request: HttpRequest) -> HttpResponse:
     for idx, entry in enumerate(qs):
         if idx != 0 and qs[idx].course != qs[idx - 1].course:
             course_count += 1
+        if course_count == 26:
+            break
     min_id: Any = qs[idx].id
     final_qs: QuerySet = (
         ex.Result.objects.all()
@@ -212,6 +218,16 @@ class AggregatedResultsListView(generic.ListView):
         grouped_dict = df_with_count.to_dict("dict")["course__course_title"]
         grouped_list = [[k, v] for (k, v) in grouped_dict.items()]
         return grouped_list
+
+    def render_to_response(self, context, **response_kwargs):
+        """
+        If the client requests JSON return a JsonResponse instead of
+        rendering HTML.
+        """
+        if self.request.headers.get("x-requested-with") == "XMLHttpRequest" or self.request.headers.get("accept") == "application/json":
+            data = self.get_queryset()
+            return JsonResponse({"results": data}, safe=False)
+        return super().render_to_response(context, **response_kwargs)
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -304,7 +320,7 @@ class ResultUploadFormView(generic.FormView):
                 break
         
         valid_grade_vals = Result.VALID_GRADES + ["FF"]
-        expceted_grade_col = None
+        expected_grade_col = None
 
         for col in range(reg_no_col+1, max(list(results_row_df.columns))+1):
             try:
@@ -317,9 +333,9 @@ class ResultUploadFormView(generic.FormView):
             results_row_df[col] = results_row_df[col].apply(lambda x: str(x).strip().upper())
             results_row_df["grade_checker"] = results_row_df[col].apply(lambda x: x in valid_grade_vals)
             if results_row_df["grade_checker"].sum() >= len(results_row_df) * .75:
-                expceted_grade_col = col
+                expected_grade_col = col
                 results_row_df.rename(
-                    columns={expceted_grade_col: "letter_grade", reg_no_col: "reg_no"},
+                    columns={expected_grade_col: "letter_grade", reg_no_col: "reg_no"},
                     inplace=True
                 )
                 results_row_df["letter_grade"] = results_row_df["letter_grade"].replace("FF", "F")
@@ -381,7 +397,7 @@ class ResultUploadFormView(generic.FormView):
             return response
         else:
             messages.info(self.request, "Upload complete")
-            return HttpResponseRedirect(reverse("results:upload_result_file"))
+            return HttpResponseRedirect(f'{reverse("results:list")}?course={course.course_code}&semester={semester.desc}')
 
 
 @method_decorator(login_required, name="dispatch")
@@ -777,3 +793,112 @@ def possible_graduands(
     )
     response["Content-Disposition"] = f"attachment; filename={file_name}"
     return response
+
+
+# API Views for results
+def results_list(request):
+    qs = Result.objects.values("id", "student_reg_no", "letter_grade", "course__course_code", "course__course_title", "semester__desc").order_by("-id")
+    if (course := request.GET.get("course")) and (
+            session := request.GET.get("semester")
+        ):
+            qs = qs.filter(course__course_code=course, semester__desc=session)
+    return JsonResponse(list(qs), safe=False)
+
+
+@require_http_methods({"POST"})
+def update_result(request, pk):
+    result = get_object_or_404(Result, pk=pk)
+
+    try:
+        body = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
+    
+    print(body)
+    grade = body.get("grade")
+    result.letter_grade = grade
+    result.save()
+    return JsonResponse({"success": True})
+
+
+@require_http_methods({"POST"})
+def create_result(request):
+    try:
+        body = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
+    
+    student_reg_no = body.get("student")
+    grade = body.get("grade")
+    course = body.get("course")
+    semester = body.get("semester")
+
+    if not all([student_reg_no, grade, course, semester]):
+        return JsonResponse({"success": False, "error": "Missing required fields"}, status=400)
+    
+    try:
+        ex.Result.objects.create(
+            student_reg_no=student_reg_no,
+            letter_grade=grade,
+            course_id=course,
+            semester_id=semester
+        )
+    except ValidationError as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception as e:
+        return JsonResponse({"success": False, "error": "An error occurred"}, status=500)
+    return JsonResponse({"success": True})
+
+
+@require_http_methods(["DELETE"])
+def delete_result(request, pk):
+    result = get_object_or_404(Result, pk=pk)
+    result.delete()
+    return JsonResponse({"success": True})
+
+
+@require_http_methods(["POST"])
+def bulk_delete_results(request):
+
+    try:
+        body = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
+    
+    ids = body.get("ids", [])
+    if not isinstance(ids, list):
+        return JsonResponse({"success": False, "error": "Invalid data format"}, status=400)
+
+    Result.objects.filter(id__in=ids).delete()
+    return JsonResponse({"success": True})
+
+
+@require_http_methods(["POST"])
+def delete_entire_semester_result(request):
+    try:
+        body = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
+    course_code = body.get("course_code", None)
+    semester = body.get("semester", None)
+    if course_code is not None and semester is not None:
+        Result.objects.filter(course__course_code=course_code, semester__desc=semester).delete()
+        return JsonResponse({"success": True})
+    else:
+        return JsonResponse({"success": False, "error": "Specify Course and Semester"}, status=400)
+
+
+def aggregated_results_json(request):
+    view = AggregatedResultsListView()
+    view.request = request
+    data = view.get_queryset()
+
+    results = [
+        {
+            "course_code": course_code,
+            "semester": semester,
+            "count": count,
+        }
+        for (course_code, semester), count in data
+    ]
+    return JsonResponse({"results": results})

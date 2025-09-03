@@ -4,39 +4,190 @@
 {% load static %}
 {% block title %}Student Academic Records{% endblock %}
 {% block content %}
-<div class="col-md-10 bg-secondary bg-opacity-10 p-5 mt-5 mx-auto">
+<div id="app" class="col-md-10 bg-secondary bg-opacity-10 p-5 mt-5 mx-auto">
     <div class="button-group d-flex justify-content-end mb-3">
         <a class="btn btn-success me-2" href="{% url 'students:search' %}">Find Another Student</a>
-        <!-- {% if object_list%} -->
-        <a class="btn btn-success" href="{% url 'results:add' object_list.0.student_reg_no|to_underscore %}">
+        <a class="btn btn-success" href="javascript:void(0)" @click="startAddResult">
         Add A Result For Student</a>
-        <!-- {% endif%} -->
     </div> 
     <div class="bg-white p-5">
-        {% if object_list%}
-        {% if student %}
+        {% if object_list and student %}
         <h3 class="text-center">Academic Records of {{ student.last_name|title }}, {{ student.first_name|title }} ({{ student.student_reg_no }})</h3>
         <h6 class="text-center">Mode of Admission: {{ student.mode_of_admission.mode_of_admission|default:"N/A" }}</h6>
-        {% endif %}
         <hr>
-        {% regroup object_list by semester.desc as session_list %}
-        <ul>
-            {% for session in session_list %}
-            <li><strong>{{ session.grouper }}</strong>
-                <ul>
-                    {% for result in session.list %}
-                    <li><a href="{{ result.get_edit_url }}">
-                        {{ result.course.course_code }}: 
-                        {{ result.course.course_title | upper }}: 
-                        {{ result.letter_grade }}</a>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </li>
-            <br>
-            {% endfor %}
-        </ul>
+
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Semester</th>
+                    <th>Course Code</th>
+                    <th>Course Title</th>
+                    <th>Grade</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-if="addingNew">
+                    <td>
+                        <select v-model="newResult.semester" class="form-select form-select-sm">
+                            <option disabled value="">Select Semester</option>
+                            {% for sem in semesters %}
+                            <option value="{{ sem.id }}">{{ sem.desc }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        <select v-model="newResult.course" class="form-select form-select-sm">
+                            <option disabled value="">Select Course</option>
+                            {% for course in courses %}
+                            <option value="{{ course.id }}">{{ course.course_code }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        <span v-if="newResult.course">
+                            {% for course in courses %}
+                                <span v-if="newResult.course == {{ course.id }}">{{ course.course_title|upper }}</span>
+                            {% endfor %}
+                        </span>
+                    </td>
+                    <td>
+                        <select v-model="newResult.grade" class="form-select form-select-sm w-auto d-inline">
+                            <option disabled value="">Select Grade</option>
+                            <option v-for="g in gradeOptions" :key="g" :value="g">[[ g ]]</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-primary me-1" @click="saveNewResult">Save</button>
+                        <button class="btn btn-sm btn-secondary" @click="cancelAdd">Cancel</button>
+                    </td>
+                </tr>
+                {% for result in object_list %}
+                <tr>
+                    <td>{{ result.semester.desc }}</td>
+                    <td>{{ result.course.course_code }}</td>
+                    <td>{{ result.course.course_title|upper }}</td>
+                    <td>
+                        <select v-model="grades[{{ result.id}}]" class="form-select forselect-sm w-auto d-inline">
+                            <option v-for="g in gradeOptions" :key="g" :value="g">[[ g ]]</option>
+                        </select>
+                        <button class="btn btn-sm btn-outline-primary ms-2"
+                            @click="updateGrade({{ result.id }})"
+                            :disabled="grades[{{ result.id }}] === originalGrades[{{ result.id}}]">
+                            Save
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-danger"
+                            @click="deleteResult({{ result.id }})">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p class="lead text-center">No academic records found</p>
         {% endif %}
     </div>
 </div> 
+{% endblock %}
+
+{% block frontend_mount %}
+<script>
+    const { createApp, ref } = Vue;
+
+    createApp({
+        delimiters: ["[[", "]]"],
+        setup() {
+            const gradeOptions = ["A", "B", "C", "D", "E", "F"];
+            const grades = ref({});
+            const originalGrades = ref({});
+            const addingNew = ref(false);
+
+            {% for result in object_list %}
+                grades.value[{{ result.id }}] = "{{ result.letter_grade | upper }}";
+                originalGrades.value[{{ result.id }}] = "{{ result.letter_grade | upper }}";
+            {% endfor %}
+
+            const newResult = ref({
+                semester: "",
+                course: "",
+                grade: "",
+            });
+
+            const startAddResult = () => {
+                addingNew.value = true;
+            };
+
+            const cancelAdd = () => {
+                addingNew.value = false;
+                newResult.value = {semester: "", course: "", grade: ""};
+            };
+
+            const saveNewResult = async () => {
+                if (!newResult.value.semester || !newResult.value.course || !newResult.value.grade) {
+                    alert("Please select semester, course, and grade.");
+                    return;
+                }
+                const res = await fetch("/results/api/results/create/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}"},
+                    body: JSON.stringify({
+                        semester: newResult.value.semester,
+                        course: newResult.value.course,
+                        grade: newResult.value.grade,
+                        student: "{{ student.student_reg_no }}"
+                    })
+                });
+                if (res.ok) {
+                    location.reload();
+                } else {
+                    alert("Failed to add result. Please try again.");
+                }
+            };
+
+            const updateGrade = async (id) => {
+                if(!confirm("Are you sure you want to modify this result")) {
+                    return;
+                }
+                const grade = grades.value[id];
+                if (!gradeOptions.includes(grade)) {
+                    alert("Invalid grade value");
+                    return;
+                }
+                await fetch(`/results/api/results/update/${id}/`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}"},
+                    body: JSON.stringify({ grade }),
+                });
+                originalGrades.value[id] = grade;
+                alert("Grade updated successfully");
+            };
+
+            const deleteResult = async (id) => {
+                if(!confirm("Are you sure you want to delete this result?")) {
+                    return;
+                }
+                await fetch(
+                    `/results/api/results/${id}/`, {
+                        method: "DELETE",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": "{{ csrf_token }}",
+                        }
+                });
+                location.reload();
+            };
+
+            return {
+                grades, gradeOptions, originalGrades,
+                addingNew, newResult, startAddResult,
+                cancelAdd, saveNewResult, updateGrade,
+                deleteResult
+            };
+        },
+    }).mount("#app");
+</script>
 {% endblock %}

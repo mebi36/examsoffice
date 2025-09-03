@@ -269,6 +269,7 @@ class Course(models.Model):
     credit_load = models.IntegerField(
         db_column="CreditLoad", blank=True, null=True
     )
+    archived = models.BooleanField(db_column="Archived", default=False)
     elective = models.BooleanField(db_column="Elective", default=False)
 
     class Meta:

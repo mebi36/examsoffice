@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "programs",
     "graduationclasses",
     "django_htmx",
+    "result_analytics",
 ]
 
 MIDDLEWARE = [

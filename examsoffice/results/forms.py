@@ -107,7 +107,7 @@ class ResultCollationBySessionAndLevelOfStudyForm(forms.Form):
 class UnmoderatedResultDirectorySelectionForm(forms.Form):
     """Select directory containing unmoderated result files."""
     result_directory = forms.FilePathField(
-        path=Path.home().drive,
+        path=Path(__file__).parent.parent,
         allow_files=False,
         allow_folders=True,
         label="Directory containing results"

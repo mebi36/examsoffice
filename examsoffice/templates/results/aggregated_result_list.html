@@ -2,77 +2,104 @@
 {% load static %}
 {% block title %}Result List{% endblock %}
 {% block content %}
-<div class="row">
-    {% if sessions %}
-    <form action="?session= {{ session_div }}" method="get">
-    {% csrf_token %}
-    <div class="form-group">
-        <select name="session" >
-            <option disabled selected value> -- select semester -- </option>
-            {% for session in sessions %}
-            <option value="{{ session.session}}">{{ session.session }}</option>
-            {% endfor %}
-        </select>
-        <select name="level" >
-            <option disabled selected value> -- select level of study -- </option>
-            {% for level in levels %}
-            <option value="{{ level.level }}">{{ level.level_name }}</option>
-            {% endfor %}
-        </select>
-        <button type="submit" class="btn btn-success">
-            <img src="{% static 'images/save.svg' %}" alt="save-icon" class="mr-2">
-            Filter
-        </button>
-    </div>
-    </form>
-    {% endif%}
-</div>
-<table class="table table-hover">
-    <thead>
-        <tr>
-            <th>Course Code</th>
-            <th>Session</th>
-            <th>Number of Records</th>
-        </tr>
-    </thead>
-    <tbody>
-        
-        {% if object_list %}
-        {% for key in object_list %}
-        
-        <tr>
-        <td><a href="{% url 'results:list' %}?course={{key.0.0}}&semester={{key.0.1}}">{{ key.0.0 }}</a></td>
-        <td>{{ key.0.1 }}</td>
-        <td>{{ key.1 }}</td>
-        </tr>
-        {% endfor %}
-        {% else%}
-        <p class="lead">No aggregated results found</p>
-        {% endif%}
-        
-    </tbody>
-    <tfoot>
-        <tr>
-            <td class="text-center">
-        <div class="pagination">
-            <span class="step-links">
-                {% if page_obj.has_previous %}
-                    <a href="?page=1">&laquo; first</a>
-                    <a href="?page={{ page_obj.previous_page_number }}">previous</a>
-                {% endif %}
-
-                <span class="page-current">
-                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                </span>
-
-                {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}">next</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
-                {% endif %}
-            </span>
+<div id="app" class="col-md-10 mx-auto">
+    <div class="bg-secondary bg-opacity-10 p-5">
+        <div v-if="loading" class="text-center my-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Loading results...</p>
         </div>
-    </td>
-    </tr>
-    </tfoot>
-</table>
+
+        <table class="table table-hover" v-else-if="results.length">
+            <thead>
+                <tr>
+                    <th>Course Code</th>
+                    <th>Session</th>
+                    <th>Number of Records</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="r in results" :key="r.course_code + '-' + r.semester">
+                    <td>
+                        <a :href="`{% url 'results:list' %}?course=${r.course_code}&semester=${r.semester}`">
+                            [[ r.course_code ]]
+                        </a>
+                    </td>
+                    <td>[[ r.semester ]]</td>
+                    <td>[[ r.count ]]</td>
+                    <td>
+                        <button @click="deleteGroup(r)" class="btn btn-sm btn-danger">
+                            <span v-if="deletingId === (r.course_code + '-' + r.semester)"
+                                class="spinner-border spinner-border-sm"
+                                role="status" aria-hidden="true"></span>
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p v-else class="lead text-center">No results found</p>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block frontend_mount %}
+<script>
+    const { createApp, ref, onMounted, computed } = Vue;
+
+    createApp({
+        delimiters: ["[[", "]]"],
+        setup() {
+            const results = ref([]);
+            const loading = ref(true);
+            const deletingId = ref(null);
+
+            const fetchResults = async () => {
+                loading.value = true;
+                try {
+                    const res = await fetch("/results/api/results/aggregated/");
+                    const data = await res.json();
+                    results.value = data.results;
+                } finally {
+                    loading.value = false;
+                }
+            };
+
+            const deleteGroup = async (group) => {
+                if (!confirm(`Delete all results for ${group.course_code} (${group.semester})?`)) {
+                    return;
+                }
+
+                deletingId.value = group.course_code + '-' + group.semester;
+                try {
+                    await fetch("/results/api/results/delete/entire-session/", {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}"},
+                        body: JSON.stringify({
+                            course_code: group.course_code,
+                            semester: group.semester,
+                        }),
+                });
+
+                results.value = results.value.filter(
+                    (r) =>
+                        !(
+                            r.course_code === group.course_code &&
+                            r.semester === group.semester
+                        )
+                );
+            } finally {
+                    deletingId.value = null;
+                }
+            };
+
+            onMounted(fetchResults);
+
+            return { results, loading, deletingId, deleteGroup };
+        },
+    }).mount("#app")
+</script>
 {% endblock %}

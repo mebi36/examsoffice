@@ -32,6 +32,9 @@
                             <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Results</a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                 <li>
+                                    <a class="nav-link" href="{% url 'results:all' %}">All Results</a>
+                                </li>
+                                <li>
                                     <a class="nav-link" href="{% url 'results:collation' %}">Collated Results</a>
                                 </li>
                                 <li>
@@ -76,6 +79,18 @@
                                 </li>
                             </ul>
                         </li>
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Courses</a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li>
+                                    <a class="nav-link" href="{% url 'courses:list' %}">All Courses</a>
+                                </li>
+                                <li>
+                                    <a class="nav-link" href="{% url 'courses:add' %}">Add New Course</a>
+                                </li>
+                            </ul>
+                        </li>
+
                         <li class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">Administration</a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -150,6 +165,23 @@
             document.body.addEventListener('htmx:configRequest', (e) => {
                 e.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
             })
+        </script>
+        <script>
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== ""){
+                    const cookies = document.cookie.split(";");
+                    for (let i = 0; i < cookies.length; i++){
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            const csrftoken = getCookie("csrftoken")
         </script>
         {% block frontend_mount %}{% endblock %}
     </body>

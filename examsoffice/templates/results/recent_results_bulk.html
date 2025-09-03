@@ -18,7 +18,7 @@
                 {% for key, count in qs.items %}
                 
                 <tr>
-                <td><a href="{% url 'results:list' %}">{{ key.0 }}</a></td>
+                <td><a href="{% url 'results:list' %}?course={{key.0}}&semester={{key.1}}">{{ key.0 }}</a></td>
                 <td>{{ key.1 }}</td>
                 <td>{{ count }}</td>
                 </tr>

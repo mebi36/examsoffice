@@ -127,7 +127,7 @@ def student_transcript(transcript_data: Dict[str, Any]) -> Workbook:
     col = 5
     # writing result block
     student_bio: List[str] = transcript_data["student_bio"]
-    result_columns = [1, 4, 11, 44, 51, 55, 62]
+    result_columns = [1, 4, 12, 45, 52, 56, 64]
     for idx, el in enumerate(bio_info):
         _ = ws.cell(row=row + idx, column=col, value=el)
         _.font = Font(bold=True)
@@ -271,14 +271,16 @@ def student_transcript(transcript_data: Dict[str, Any]) -> Workbook:
             row = r_idx + 4
         _ = ws.cell(row=(r_idx + 2), column=result_columns[5], value="CGPA")
         _.font = Font(bold=True)
-        _.alignment = Alignment(horizontal="center")
+        _.alignment = Alignment(horizontal="center", vertical="top")
 
         _ = ws.cell(
             row=(r_idx + 2),
             column=result_columns[6],
             value=round(weight_sum / credit_sum, 2),
         )
+        ws.row_dimensions[r_idx+2].height = 20
         _.font = Font(bold=True)
+        _.alignment = Alignment(horizontal="center", vertical="top")
         _.border = Border(bottom=Side(style="thick"))
         _merge_row_wise(
             ws,
@@ -286,14 +288,13 @@ def student_transcript(transcript_data: Dict[str, Any]) -> Workbook:
             col_start=result_columns[6],
             col_end=(result_columns[6] + 4),
         )
-        ws.row_breaks.append(Break(id=r_idx + 2))
-
+        ws.row_breaks.append(Break(id=r_idx + 3))
     hod_name = Lecturer.objects.get(head_of_dept=True).full_name
     ws.HeaderFooter.differentFirst = False
-    ws.oddFooter.left.text = "&BHead of Dept.: " + "&U" + hod_name + "  &U&B\n"
-    ws.oddFooter.center.text = "&BSign:__________________&B\n"
+    ws.oddFooter.left.text = "&BHead of Dept.: " + "&U" + hod_name + "  &U&B"
+    ws.oddFooter.center.text = "&BSign:__________________&B"
     ws.oddFooter.right.text = (
-        "&BDate:__________________&B\nPage &[Page] of &[Pages]"
+        "&BDate:__________________&B  Pg &[Page] of &[Pages]"
     )
     return wb
 
@@ -922,7 +923,10 @@ def possible_graduands_wb(expected_yr_of_grad: str) -> Worksheet:
     grad_df = bio_df[bio_df["student_reg_no"].isin(eligible_students)]
 
     # cleaning up some columns of the df
-    grad_df["date_of_birth"] = grad_df["date_of_birth"].dt.strftime("%d/%m/%Y")
+    try:
+        grad_df["date_of_birth"] = grad_df["date_of_birth"].dt.strftime("%d/%m/%Y")
+    except Exception:
+        pass
     grad_df["jamb_no_phone_no"] = (
         grad_df["jamb_number"].fillna("")
         + "/+234"

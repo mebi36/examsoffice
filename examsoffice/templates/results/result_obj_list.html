@@ -1,38 +1,179 @@
 {% extends 'base.html' %}
 {% block title %}Recent Results{% endblock %}
 {% block content %}
-<div class="col-md-10 mx-auto">
-    <div class="bg-secondary bg-opacity-10 p-5">
-        <div id="page-body">
-            {% if object_list %}
-            <h4 class="mb-4 text-center text-success">
-                {% with object_list.all|first as course %}
-                
-                {{ course.course.course_title }} {{ course.course.course_code }}: {{ course.semester.session }}
-                {% endwith %}
-            </h4>
-            <table class="table table-hover">
-                <thead>
-                    <th>Reg. Number</th>
-                    <th>Grade</th>
-                </thead>
-                {% for result in object_list %}
-                    <tr>
-                        <td>{{ result.student_reg_no }}</td>
-                        <!-- <td>{{ result.course.course_title }}</td> -->
-                        <!-- <td>{{ result.course.course_semester.semester }}</td> -->
-                        <!-- <td>{{ result.course.course_code }}</td> -->
-                        <!-- <td>{{ result.semester.desc }}</td> -->
-                        <!-- <td>{{ result.semester.semester }}</td> -->
-                        <td>{{ result.letter_grade|upper }}</td>
-                        <td>
-                            <a href="{% url 'results:delete' result.id %}?next={{ request.get_full_path }}" class="text-danger">Delete</a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </table>
-            {% endif %}
-        </div>
+
+<div id="app" class="col-md-10 bg-secondary bg-opacity-10 p-5 mt-5 mx-auto">
+  <div v-if="loading" class="text-center my-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
     </div>
+    <p class="mt-2 text-muted">Loading results...</p>
+  </div>
+  <h4 v-else-if="results.length" class="mb-4 text-center text-success">
+    [[ courseTitle ]]
+  </h4>
+  <div v-else class="text-center text-muted">
+    No results found for the selected course and session.
+  </div>
+
+  <table v-if="results.length" class="table table-bordered table-hover">
+    <thead class="table-light">
+      <tr>
+        <th>
+          <input type="checkbox" v-model="selectAll" @change="toggleAll" />
+        </th>
+        <th>Reg. Number</th>
+        <th>Grade</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="r in results" :key="r.id">
+        <td><input type="checkbox" v-model="selected" :value="r.id" /></td>
+        <td>[[ r.student_reg_no ]]</td>
+        <td>
+          <select v-model="r.letter_grade" class="form-select form-select-sm w-auto d-inline">
+            <option v-for="g in ['A', 'B', 'C', 'D', 'E', 'F']" :key="g" :value="g">
+              [[ g ]]
+            </option>
+          </select>
+          <button class="btn btn-sm btn-outline-primary ms-2" @click="updateGrade(r.id)" :disabled="r.letter_grade === originalGrades[r.id]">
+            Update
+          </button>
+        </td>
+        <td>
+          <button @click="deleteOne(r.id)" class="btn btn-sm btn-danger">
+            Delete
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <button
+    v-if="selected.length"
+    @click="deleteSelected"
+    class="btn btn-danger mt-3"
+  >
+    Delete Selected
+  </button>
+  <button v-else disabled="true" class="disabled">Delete Selected</button>
 </div>
+{% endblock %}
+
+{% block frontend_mount %}
+<script>
+const { createApp, ref, onMounted, computed } = Vue;
+
+createApp({
+  delimiters: ["[[", "]]"],
+  setup() {
+    const results = ref([]);
+    const originalGrades = ref({});
+    const selected = ref([]);
+    const loading = ref(true);
+    const selectAll = ref(false);
+    const params = window.location.search;
+
+    const fetchResults = async () => {
+      loading.value = true;
+      try {
+        const res = await fetch("/results/api/results/" + params);
+        res_obj = await res.json();
+        results.value = res_obj;
+        originalGrades.value = {};
+
+        res_obj.forEach(r => {
+          originalGrades.value[r.id] = r.letter_grade;
+        });
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    const deleteOne = async (id) => {
+    if (!confirm("Are you sure you want to delete this result?")) {
+        return;
+    }
+
+      await fetch(`/results/api/results/${id}/`, { 
+        method: "DELETE",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+    });
+      results.value = results.value.filter((r) => r.id !== id);
+      originalGrades = originalGrades.value.filter((r) => r.id !== id);
+      selected.value = selected.value.filter((sid) => sid !== id);
+    };
+
+    const deleteSelected = async () => {
+      if (!confirm("Are you sure you want to delete selected result(s)?")) {
+        return;
+    }
+      await fetch("/results/api/results/bulk-delete/", {
+        method: "POST",
+        headers: { 
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+        },
+        body: JSON.stringify({ ids: selected.value }),
+      });
+      results.value = results.value.filter((r) => !selected.value.includes(r.id));
+      originalGrades = originalGrades.value.filter((r) => !selected.value.includes(r.id));
+      selected.value = [];
+      selectAll.value = false;
+    };
+
+    const updateGrade = async (id) => {
+      if (!confirm("Are you sure you want to modify this result?")) {
+        return;
+    }
+    const result = results.value.find(r => r.id === id);
+    if(!result) {
+      alert("Result not found");
+      return;
+    };
+
+    const res = await fetch(`/results/api/results/update/${id}/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+      body: JSON.stringify({ grade: result.letter_grade }),
+    });
+
+    if (res.ok) {
+      originalGrades.value[id] = result.letter_grade;
+
+    } else {
+      alert("Failed to update grade");
+    }
+  };
+
+    const toggleAll = () => {
+      selected.value = selectAll.value ? results.value.map((r) => r.id) : [];
+    };
+
+    const courseTitle = computed(() => {
+      if (!results.value.length) return "";
+      const first = results.value[0];
+      return first.course__course_title + " (" + first.course__course_code + "): " + first.semester__desc ;
+    });
+
+    onMounted(fetchResults);
+
+    return {
+      results,
+      originalGrades,
+      selected,
+      loading,
+      selectAll,
+      updateGrade,
+      fetchResults,
+      deleteOne,
+      deleteSelected,
+      toggleAll,
+      courseTitle,
+    };
+  },
+}).mount("#app");
+</script>
+
 {% endblock %}
