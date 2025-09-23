@@ -1,13 +1,15 @@
 {% extends 'students/base.html' %}
+{% load static %}
 {% load to_underscore %}
 {% block title %}Student Profile{% endblock %}
+
 {% block content %}
 <p>{{student | json_script:"student_data"}}</p>
 <p>{{student_obj.grades_breakdown | json_script:"student_grades_breakdown"}}</p>
 <p>{{student_obj.cgpa_by_session | json_script:"student_cgpa_by_session"}}</p>
 <p>{{results | json_script:"result_data"}}</p>
 
-<div class="col-md-10 mx-auto">
+<div id="app" class="col-md-10 mx-auto">
     <div class="d-flex justify-content-start">
         <a href="{% url 'students:search'  %}"><< Back to search</a>
     </div>
@@ -40,6 +42,21 @@
     <div class="bg-secondary bg-opacity-10 p-5">
         <h1 class="text-center text-success mb-5">Student Profile</h1>
         <div class="table">
+            <div class="row">
+                <div id="picture_app" class="col d-inline-flex justify-content-center align-items-center mb-3">
+                    <!-- <div>
+                        <img
+                            src="{% static 'images/profile_pics/' %}{{ student_obj.student_reg_no|to_underscore }}.png"
+                            @error="imageError = true"
+                            v-if="!imageError"
+                        />
+                    </div> -->
+                    <person-icon class="rounded bg-white text-success" style="width: 150px; height: 150px;"></person-icon>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">Registration Number: <strong>{{ student.student_reg_no|default:"N/A" }}</strong></div>
+            </div>
             <div class="row">
                 <div class="col">First Name: <strong>{{ student.first_name|default:"N/A" }}</strong></div>
                 <div class="col">Last Name: <strong>{{ student.last_name|default:"N/A" }}</strong></div>
@@ -111,15 +128,15 @@
                         </div>
                     </div>
                     <div class="row mx-auto">
-                        <div class="col-md shadow-sm bg-white me-5 p-3">
+                        <div class="col-md-6 shadow-sm bg-white p-3">
                             <div class="card-title fw-bold text-success text-center">Grades Breakdown</div>
                             <hr>
-                            <div id="grades_breakdown_mount" style="height:350px;"></div>
+                            <div id="grades_breakdown_mount" style="height:300px;"></div>
                         </div>
-                        <div class="col-md shadow-sm bg-white p-3">
+                        <div class="col-md-6 shadow-sm bg-white p-3">
                             <div class="card-title fw-bold text-success text-center">CGPA by Academic Session</div>
                             <hr>
-                            <div id="cgpa_by_session_mount" style="height:350px;"></div>
+                            <div id="cgpa_by_session_mount" style="height:300px;"></div>
                         </div>
                     </div>
                     <div class="row mt-3 py-5 border-top border-bottom">
@@ -136,6 +153,11 @@
                             {% endif %}
                         </div>
                     </div>
+                    <div class="row mt-3 py-5 border-top border-bottom">
+                        <h4 class="text-center text-success mb-3">Results</h4>
+                        <div class="overflow-auto bg-white p-3" style="height:200px;">
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -145,6 +167,7 @@
     </div>
 </div>
 {% endblock %}
+
 {% block frontend_mount %}
 <script>
 var chartDiv = document.getElementById('cgpa_by_session_mount');
@@ -241,6 +264,13 @@ option && myChart.setOption(option);
 <script>
     let app = Vue.createApp({
         delimiters: ["[[", "]]"],
+
+        setup() {
+            return {
+                imageError: Vue.ref(false)
+            }
+        },
+
         data() { 
             return{
                 student_info: null,
@@ -276,7 +306,20 @@ option && myChart.setOption(option);
             }
 
         }
-    })
-    let vm = app.mount('#performance_app')
+    });
+    registerGlobalComponents(app);
+    app.mount('#performance_app');
+
+    let pic_app = Vue.createApp({
+        delimiters: ["[[", "]]"],
+
+        setup() {
+            return {
+                imageError: Vue.ref(false)
+            }
+        }
+    });
+    registerGlobalComponents(pic_app);
+    pic_app.mount('#picture_app');
 </script>
 {% endblock %}

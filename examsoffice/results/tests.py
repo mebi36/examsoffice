@@ -1,9 +1,14 @@
+import io
+
+import pandas as pd
 from django.http import response
-from django.test import TestCase
-from results.models import Student
+from django.urls import reverse
+from django.test import TestCase, Client
 from django.contrib.auth.models import User
 
-from django.urls import reverse
+from results import models as ex
+from results.forms import ResultFileUploadForm
+from results.models import Student
 
 
 # a generic class providing an authorized user for views that require login
@@ -34,12 +39,6 @@ class LoggedInTestCase(TestCase):
 #         response = Student.objects.get(student_reg_no='2010/170254')
 #         self.assertEqual(response.last_name,'Doe')
 #         self.assertEqual(response.first_name,'John')
-
-# views test
-class ResultMenuTest(TestCase):
-    def test_menu_view(self):
-        response = self.client.get(reverse("results:results_menu"))
-        self.assertEqual(response.status_code, 200)
 
 
 class EditResultTest(LoggedInTestCase):
@@ -78,3 +77,146 @@ class FindStudentTest(LoggedInTestCase):
 #         response = self.client.get(reverse('student-records',
 #                                 kwargs={'reg_no': '2010/170254'}))
 #         self.assertEqual(response.status_code, 500)
+
+class ResultUploadFormViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="tester", password="pass123")
+        self.client = Client()
+        self.client.login(username="tester", password="pass123")
+        self.level_of_study = ex.LevelOfStudy.objects.create(
+            level="100", level_name="100 Level", level_description="Freshman"
+        )
+        self.session = ex.Session.objects.create(
+            session="2020/2021"
+        )
+        self.actual_semester = ex.Semester.objects.create(
+            semester="First"
+        )
+        self.course = ex.Course.objects.create(
+            course_code="GSP 111",
+            course_title="Library Jargon",
+            course_level_id=100,
+            course_semester_id="First",
+            credit_load=3,
+        )
+        self.semester = ex.SemesterSession.objects.create(
+            session=self.session, semester=self.actual_semester
+        )
+
+        self.url.reverse("results:upload_results")
+    
+    def make_excel_file(self, rows):
+        """Helper to create an in-memory Excel file.
+        :arg rows: List of rows, where each row is a list of cell values.
+        """
+        df = pd.DataFrame(rows)
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
+            df.to_excel(writer, index=False, header=False)
+        buffer.seek(0)
+        return buffer
+    
+    def test_valid_upload_creates_results(self):
+        file = self.make_excel_file([
+            ["Student Registration Number", "Grade"],
+            ["2010/170254", "A"],
+            ["2010/170255", "A"],
+        ])
+        response = self.client.post(
+            self.url,
+            {
+                "course": self.course.pk,
+                "semester": self.semester.pk,
+                "skip_existing_rows": True,
+                "result_file": file,
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual("Upload complete", response.json()["message"])
+        self.assertEqual(ex.Result.objects.count(), 2)
+    
+    def test_invalid_excel_file_returns_error(self):
+        file = io.BytesIO(b"not an excel file")
+        file.name = "invalid.xlsx"
+
+        response = self.client.post(
+            self.url,
+            {
+                "course": self.course.pk,
+                "semester": self.semester.pk,
+                "skip_existing_rows": True,
+                "result_file": file,
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Problem reading excel file", response.json()["error"])
+
+    def test_invalid_registration_number(self):
+        file = self.make_excel_file([
+            ["Student Registration Number", "Grade"],
+            ["2010/170254", "A"],
+            ["2010/170255.", "A"],
+        ])
+
+        response = self.client.post(
+            self.url,
+            {
+                "course": self.course.pk,
+                "semester": self.semester.pk,
+                "skip_existing_rows": True,
+                "result_file": file,
+            }
+        )
+        self.assertEqual(response.status_code, 207)
+        data = response.json()
+        self.assertIn("invalid_rows", data)
+        self.assertEqual(len(data["invalid_rows"]), 1)
+    
+    def test_existing_result_skipped_if_flag_true(self):
+        ex.Result.objects.create(
+            student_reg_no="2019/123456",
+            course=self.course,
+            semester=self.semester,
+            letter_grade="B",
+        )
+
+        file = self.make_excel_file([
+            ["Student Registration Number", "Grade"],
+            ["2019/123456", "A"]
+        ])
+        response = self.client.post(
+            self.url,
+            {
+                "course": self.course.pk,
+                "semester": self.semester.pk,
+                "skip_existing_rows": True,
+                "result_file": file,
+            }
+        )
+        self.assertEqual(response.status_code, 207)
+        self.assertIn("invalid_rows", response.json())
+
+    def test_existing_result_updated_if_flag_false(self):
+        result = ex.Result.objects.create(
+            student_reg_no="2019/123456",
+            course=self.course,
+            semester=self.semester,
+            letter_grade="A",
+        )
+        
+        file = self.make_excel_file([
+            ["Student Registration Number", "Grade"],
+            ["2019/123456", "B"]
+        ])
+        response = self.client.post(
+            self.url,
+            {
+                "course": self.course.pk,
+                "semester": self.semester.pk,
+                "skip_existing_rows": False,
+                "result_file": file,
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        result.refresh_from_db()
+        self.assertEqual(result.letter_grade, "B")

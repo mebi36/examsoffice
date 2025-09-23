@@ -11,14 +11,17 @@
         Add A Result For Student</a>
     </div> 
     <div class="bg-white p-5">
-        {% if object_list and student%}
         {% if student %}
         <h3 class="text-center">Academic Records of {{ student.last_name|title }}, {{ student.first_name|title }} ({{ student.student_reg_no }})</h3>
         <h6 class="text-center">Mode of Admission: {{ student.mode_of_admission.mode_of_admission|default:"N/A" }}</h6>
         {% endif %}
         <hr>
-
-        <table class="table table-bordered table-striped">
+        <div class="text-cetner my-5" v-if="loading">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+        <table class="table table-bordered table-striped" v-else>
             <thead>
                 <tr>
                     <th>Semester</th>
@@ -53,17 +56,16 @@
                 </tr>
                 {% endfor %}
             </tbody>
-        </table>
+        </table></div>
         {% else %}
-            <p class="lead text-center">No academic records found</p>
+            <p class="text-center text-muted">No academic records found</p>
         {% endif %}
-    </div>
 </div> 
 {% endblock %}
 
 {% block frontend_mount %}
 <script>
-    const { createApp, ref } = Vue;
+    const { createApp, ref, onMounted } = Vue;
 
     createApp({
         delimiters: ["[[", "]]"],
@@ -71,6 +73,7 @@
             const gradeOptions = ["A", "B", "C", "D", "E", "F"];
             const grades = ref({});
             const originalGrades = ref({});
+            const loading = ref(true);
 
             {% for result in object_list %}
                 grades.value[{{ result.id }}] = "{{ result.letter_grade | upper }}";
@@ -109,7 +112,13 @@
                 });
                 location.reload();
             };
-            return { grades, gradeOptions, originalGrades, updateGrade, deleteResult };
+
+            onMounted(() => {
+                setTimeout(() => {
+                    loading.value = false;
+                }, 3000);
+            })
+            return { grades, gradeOptions, originalGrades, updateGrade, deleteResult, loading };
         },
     }).mount("#app");
 </script>

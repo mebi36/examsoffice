@@ -1,3 +1,4 @@
+import re
 import json
 from typing import Any, Callable, ClassVar, Dict, List, Optional, Union
 
@@ -14,6 +15,7 @@ from django.db.models import OuterRef, Subquery, Value
 from django.db.models.functions import Concat
 from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.views import generic
 from openpyxl import Workbook
@@ -119,10 +121,7 @@ class StudentAcademicRecordsListView(generic.ListView):
         res = Result.objects.filter(
             student_reg_no=student_reg_no
         ).select_related("course", "semester")
-        if res.exists():
-            return res
-        else:
-            return Student.objects.filter(student_reg_no=student_reg_no).order_by("semester__desc")
+        return res
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -200,6 +199,7 @@ class AggregatedResultsListView(generic.ListView):
     def get_queryset(self) -> List[List[str]]:
         session = self.request.GET.get("session")
         level = self.request.GET.get("level")
+        course = self.request.GET.get("course")
 
         qs = Result.objects.all()
 
@@ -207,10 +207,13 @@ class AggregatedResultsListView(generic.ListView):
             qs = qs.filter(semester__session=session)
         if level:
             qs = qs.filter(course__course_level=level)
-
+        if course:
+            qs = qs.filter(course__id=course)
         qs = qs.values(
             "course__course_title", "course__course_code", "semester__desc"
         )
+        if not qs.exists():
+            return []
 
         df = pd.DataFrame(qs)
         grouped_df = df.groupby(["course__course_code", "semester__desc"])
@@ -240,46 +243,143 @@ class AggregatedResultsListView(generic.ListView):
 # class result uploads
 # deletion of entire results for a particular session
 # =====================================================================
-@method_decorator(login_required, name="dispatch")
-class ResultFileFormatFormView(generic.FormView):
-    """Present user with choices of valid result file formats system accepts."""
+@csrf_exempt
+@require_http_methods(["POST"])
+def preview_result_file(request):
+    file = request.FILES["result_file"]
+    if not file:
+        return JsonResponse({"success": False, "error": "No file uploaded"}, status=400)
 
-    RESULT_FILE_COL_WITH_SCORES: ClassVar[List[str]] = [
-        "Student Registration Number",
-        "CA Score",
-        "Exam Score",
-        "Grade",
-    ]
-    RESULT_FILE_COL_NO_SCORES: ClassVar[List[str]] = [
-        "Student Registration Number",
-        "Grade",
-    ]
-    template_name: str = "results/result_upload_format.html"
-    form_class = ResultFileUploadFormatOptionForm
+    try:
+        df = pd.read_excel(file)
+    except Exception as exc:
+        return JsonResponse({"success": False, "error": f"Problem reading excel file {exc}"}, status=400)
+    if "Student Registration Number" not in df.columns or "Grade" not in df.columns:
+        try:
+            df = pd.read_excel(file, header=None)
+        except Exception as exc:
+            return JsonResponse({"success": False, "error": f"Problem reading excel file {exc}"}, status=400)
+        results_row_df = pd.DataFrame()
+        reg_no_col = None
 
-    def form_valid(self, form: Form) -> HttpResponse:
-        response = HttpResponse(
-            content_type="application/ms-excel",
-            headers={
-                "Content-Disposition": 'attachment; filename="resultformat.xlsx"'
+        # find reg number column
+        for col in df.columns:
+            try:
+                df_gen = (
+                    df[df[col].str.contains(
+                        pat="^[0-9]{4}\/[0-9]{6}",
+                        regex=True,
+                        na=False
+                    )]
+                )
+            except Exception as exc:
+                continue
+                
+
+            if not df_gen.empty:
+                reg_no_col = col
+                results_row_df = df_gen
+                break
+        
+        valid_grade_vals = Result.VALID_GRADES + ["FF"]
+        expected_grade_col = None
+
+        for col in range(reg_no_col+1, max(list(results_row_df.columns))+1):
+            try:
+                if not is_string_dtype(results_row_df[col]):
+                    continue
+            except Exception as exc:
+                return JsonResponse(
+                    {"success": False, "error": f"Problem processing file. {exc}"},
+                    status=400
+                )
+
+            results_row_df[col] = results_row_df[col].apply(lambda x: str(x).strip().upper())
+            results_row_df["grade_checker"] = results_row_df[col].apply(lambda x: x in valid_grade_vals)
+            if results_row_df["grade_checker"].sum() >= len(results_row_df) * 0.75:
+                expected_grade_col = col
+                results_row_df.rename(
+                    columns={expected_grade_col: "letter_grade", reg_no_col: "reg_no"},
+                    inplace=True
+                )
+                results_row_df["letter_grade"] = results_row_df["letter_grade"].replace("FF", "F")
+                results_row_df = results_row_df[results_row_df["grade_checker"]]
+                results_row_df = results_row_df[["reg_no", "letter_grade"]]
+                break
+        
+        if "letter_grade" not in results_row_df:
+            return JsonResponse({"success": False, "error": "Grades not detected in uploaded file"}, status=400)
+    else:
+        results_row_df = df
+        results_row_df.rename(
+            columns={
+                "Student Registration Number": "reg_no",
+                "Grade": "letter_grade"
             },
+            inplace=True
         )
-        wb = Workbook()
-        ws = wb.worksheets[0]
-        ws.title = "Format"
-        row_num = 0
+        if "Exam Score" in df.columns and "CA Score" in df.columns:
+            results_row_df.rename(
+                columns={"Exam Score": "exam_score", "CA Score": "ca_score"},
+                inplace=True
+            )
+    
+    rows = []
+    valid_grade_vals = Result.VALID_GRADES + ["FF"]
+    common_reg_no_len = results_row_df["reg_no"].str.len().mode()[0]
+    for row in results_row_df.itertuples():
+        row_dict = {"reg_no": row.reg_no.strip(), "letter_grade": row.letter_grade.strip(), "error": None}
+        if row_dict["reg_no"] is None:
+            row_dict["error"] = "MISSING REGISTRATION NUMBER"
+        if " " in row_dict["reg_no"]:
+            row_dict["error"] = "REGISTRATION NUMBER CONTAINS SPACES"
+        if len(row_dict["reg_no"]) != common_reg_no_len:
+            row_dict["error"] = "INVALID REGISTRATION NUMBER"
+        if re.search(r"^[0-9]{4}/[0-9]{6}$", row_dict["reg_no"]) is None:
+            row_dict["error"] = "INVALID REGISTRATION NUMBER"
+        if row_dict["letter_grade"] is None:
+            row_dict["error"] = "MISSING GRADE"
+        if row_dict["letter_grade"] not in valid_grade_vals:
+            row_dict["error"] = "GRADE NOT RECOGNIZED. WILL NOT APPEAR ON TRANSCRIPTS"
+        if any([existing_row["reg_no"] == row_dict["reg_no"] for existing_row in rows]):
+            row_dict["error"] = "DUPLICATE REGISTRATION NUMBER"
+        rows.append(row_dict)
+    return JsonResponse({
+        "columns": ["reg_no", "letter_grade", "error"],
+        "rows": rows
+    })
 
-        columns = (
-            self.RESULT_FILE_COL_WITH_SCORES
-            if form.cleaned_data["upload_option"] == "Upload results with scores"
-            else self.RESULT_FILE_COL_NO_SCORES
-        )
 
-        for col_num in range(len(columns)):
-            c = ws.cell(row=row_num+1, column=col_num+1)
-            c.value = columns[col_num]
-        wb.save(response)
-        return response
+def result_upload_file_format(request, upload_type: int):
+    if upload_type == 1:
+        columns = [
+        "Student Registration Number",
+        "Grade",
+    ]
+    elif upload_type == 2:
+        columns = [
+            "Student Registration Number",
+            "CA Score",
+            "Exam Score",
+            "Grade",
+        ]
+    else:
+        return HttpResponseBadRequest("Invalid upload_type specified.")
+    response = HttpResponse(
+        content_type="application/ms-excel",
+        headers={
+            "Content-Disposition": 'attachment; filename="resultformat.xlsx"'
+        },
+    )
+    wb = Workbook()
+    ws = wb.worksheets[0]
+    ws.title = "Format"
+    row_num = 0
+    for col_num in range(len(columns)):
+        c = ws.cell(row=row_num+1, column=col_num+1)
+        c.value = columns[col_num]
+    wb.save(response)
+    return response
 
 
 @method_decorator(login_required, name="dispatch")
@@ -289,13 +389,12 @@ class ResultUploadFormView(generic.FormView):
     template_name = "results/upload_result_file.html"
     form_class = ResultFileUploadForm
 
-    def form_valid(self, form: Form) -> HttpResponse:
+    def form_valid(self, form: Form):
         excel_file = self.request.FILES["result_file"]
         try:
             df = pd.read_excel(excel_file, header=None)
         except Exception as exc:
-            messages.error(self, self.request, "Problem reading excel file")
-            return super().form_invalid(form)
+            return JsonResponse({"error": f"Problem reading excel file {exc}"}, status=400)
 
         results_row_df = pd.DataFrame()
         reg_no_col = None
@@ -327,8 +426,7 @@ class ResultUploadFormView(generic.FormView):
                 if not is_string_dtype(results_row_df[col]):
                     continue
             except Exception as exc:
-                messages.error(self.request, f"Problem processing file.")
-                return HttpResponseRedirect(reverse("results:upload_result_file"))
+                return JsonResponse({"error": f"Problem processing file. {exc}"}, status=400)
 
             results_row_df[col] = results_row_df[col].apply(lambda x: str(x).strip().upper())
             results_row_df["grade_checker"] = results_row_df[col].apply(lambda x: x in valid_grade_vals)
@@ -344,12 +442,31 @@ class ResultUploadFormView(generic.FormView):
                 break
         
         if "letter_grade" not in results_row_df:
-            messages.error(self.request, "Grades not detected in uploaded file")
-            return super().form_invalid(form)
+            return JsonResponse({"error": "Grades not detected in uploaded file"}, status=400)
         course = form.cleaned_data["course"]
         semester = form.cleaned_data["semester"]
         invalid_results_df = pd.DataFrame()
+        results_row_df["reg_no"] = results_row_df["reg_no"].str.strip()
+        results_row_df["letter_grade"] = results_row_df["letter_grade"].str.strip().str.upper()
+        results_row_df = results_row_df.drop_duplicates(subset=["reg_no"], keep="first")
+
+        # ensure all reg nos are of the same length
+        results_row_df["reg_no_len"] = results_row_df["reg_no"].str.len()
+        results_row_df["reg_no_common_len"] = results_row_df["reg_no_len"].mode()[0]
+        reg_no_common_len = results_row_df["reg_no_len"].mode()[0]
+        invalid_results_df = results_row_df[results_row_df["reg_no_len"] != results_row_df["reg_no_common_len"]]
+        results_row_df = results_row_df[results_row_df["reg_no_len"] == results_row_df["reg_no_common_len"]]
+        invalid_results_df["error"] = "INVALID REGISTRATION NUMBER"
+
         for index, row in results_row_df.iterrows():
+            if len(row["reg_no"]) != reg_no_common_len or " " in row["reg_no"] or not re.fullmatch(r"[0-9/]+", row["reg_no"]) or len(row["reg_no"].split("/")) != 2:
+                offending_row = row.append(
+                    pd.Series({"error": "INVALID REGISTRATION NUMBER"})
+                )
+                invalid_results_df = invalid_results_df.append(
+                    offending_row, ignore_index=True
+                )
+                continue
             if form.cleaned_data["skip_existing_rows"]:
                 try:
                     ex.Result.objects.create(
@@ -359,18 +476,10 @@ class ResultUploadFormView(generic.FormView):
                         letter_grade=row["letter_grade"].upper()
                     )
                 except ValidationError:
-                    messages.add_message(
-                        self.request,
-                        messages.ERROR,
-                        "%s already has a result for this course and session"
-                        % row["reg_no"],
-                    )
                     offending_row = row.append(
-                        pd.Series(
-                            {
-                                "error": "STUDENT ALREADY HAS A RESULT FOR SELECTED COURSE AND SESSION."
-                            }
-                        )
+                        pd.Series({
+                            "error": "STUDENT ALREADY HAS A RESULT FOR SELECTED COURSE AND SESSION."
+                        })
                     )
                     invalid_results_df = invalid_results_df.append(
                         offending_row, ignore_index=True
@@ -383,21 +492,20 @@ class ResultUploadFormView(generic.FormView):
                     defaults={"letter_grade": row["letter_grade"].upper()},
                 )
         if len(invalid_results_df) > 0:
-            messages.add_message(
-                self.request, messages.INFO, "Upload complete with some errors"
-            )
-            response = HttpResponse(
-                self.request,
-                content_type="text/csv",
-                headers={
-                    "Content-Disposition": 'attachment; filename="invalid_result_file_rows.csv"'
+            return JsonResponse(
+                {
+                    "message": "Upload complete with some invalid rows.",
+                    "invalid_rows": invalid_results_df.to_dict("records"),
                 },
+                status=207
             )
-            invalid_results_df.to_csv(response)
-            return response
         else:
-            messages.info(self.request, "Upload complete")
-            return HttpResponseRedirect(f'{reverse("results:list")}?course={course.course_code}&semester={semester.desc}')
+            return JsonResponse(
+                {
+                    "message": "Upload complete.",
+                    "redirect_url": f"{reverse('results:list')}?course={course.course_code}&semester={semester.desc}"
+                }
+            )
 
 
 @method_decorator(login_required, name="dispatch")
@@ -797,11 +905,14 @@ def possible_graduands(
 
 # API Views for results
 def results_list(request):
-    qs = Result.objects.values("id", "student_reg_no", "letter_grade", "course__course_code", "course__course_title", "semester__desc").order_by("-id")
-    if (course := request.GET.get("course")) and (
-            session := request.GET.get("semester")
-        ):
-            qs = qs.filter(course__course_code=course, semester__desc=session)
+    try:
+        qs = Result.objects.values("id", "student_reg_no", "letter_grade", "course__course_code", "course__course_title", "semester__desc").order_by("-id")
+        if (course := request.GET.get("course")) and (
+                session := request.GET.get("semester")
+            ):
+                qs = qs.filter(course__course_code=course, semester__desc=session)
+    except Exception as exc:
+        return JsonResponse({"error": str(exc)}, status=500)
     return JsonResponse(list(qs), safe=False)
 
 
@@ -813,11 +924,12 @@ def update_result(request, pk):
         body = json.loads(request.body)
     except json.JSONDecodeError:
         return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
-    
-    print(body)
-    grade = body.get("grade")
-    result.letter_grade = grade
-    result.save()
+    try:
+        grade = body.get("grade")
+        result.letter_grade = grade
+        result.save()
+    except Exception as exc:
+        return JsonResponse({"success": False, "error": str(exc)}, status=500)
     return JsonResponse({"success": True})
 
 
@@ -846,14 +958,17 @@ def create_result(request):
     except ValidationError as e:
         return JsonResponse({"success": False, "error": str(e)}, status=400)
     except Exception as e:
-        return JsonResponse({"success": False, "error": "An error occurred"}, status=500)
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
     return JsonResponse({"success": True})
 
 
 @require_http_methods(["DELETE"])
 def delete_result(request, pk):
     result = get_object_or_404(Result, pk=pk)
-    result.delete()
+    try:
+        result.delete()
+    except Exception as exc:
+        return JsonResponse({"success": False, "error": str(exc)}, status=500)
     return JsonResponse({"success": True})
 
 
@@ -864,11 +979,9 @@ def bulk_delete_results(request):
         body = json.loads(request.body)
     except json.JSONDecodeError:
         return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
-    
     ids = body.get("ids", [])
     if not isinstance(ids, list):
         return JsonResponse({"success": False, "error": "Invalid data format"}, status=400)
-
     Result.objects.filter(id__in=ids).delete()
     return JsonResponse({"success": True})
 
@@ -882,7 +995,10 @@ def delete_entire_semester_result(request):
     course_code = body.get("course_code", None)
     semester = body.get("semester", None)
     if course_code is not None and semester is not None:
-        Result.objects.filter(course__course_code=course_code, semester__desc=semester).delete()
+        try:
+            Result.objects.filter(course__course_code=course_code, semester__desc=semester).delete()
+        except Exception as exc:
+            return JsonResponse({"success": False, "error": str(exc)}, status=500)
         return JsonResponse({"success": True})
     else:
         return JsonResponse({"success": False, "error": "Specify Course and Semester"}, status=400)
@@ -902,3 +1018,22 @@ def aggregated_results_json(request):
         for (course_code, semester), count in data
     ]
     return JsonResponse({"results": results})
+
+
+def download_by_session(request):
+    course = request.GET.get("course")
+    session = request.GET.get("semester")
+    if not course or not session:
+        return JsonResponse({"success": False, "error": "Course and semester must be provided"}, status=400)
+    qs = Result.objects.filter(course__course_code=course, semester__desc=session).select_related("semester", "course").order_by("-id")
+    if not qs.exists():
+        return JsonResponse({"success": False, "error": "No results found for the specified course and semester"}, status=400)
+    df = pd.DataFrame(list(qs.values("student_reg_no", "letter_grade")))
+    response = HttpResponse(
+        content_type="text/csv",
+        headers={
+            "Content-Disposition": f'attachment; filename="Results-{course}-{session}.csv"'
+        },
+    )
+    df.to_csv(response, index=False)
+    return response

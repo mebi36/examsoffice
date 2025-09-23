@@ -100,6 +100,13 @@ class StudentProfileSearchResultListView(generic.ListView):
         return Student.objects.filter(
             Q(last_name__iexact=search) | Q(student_reg_no=search)
         )
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['reg_no'] = None
+        if "/" in self.kwargs['search']:
+            context['reg_no'] = self.kwargs['search'].replace("/", "_")
+        return context
 
 
 @never_cache

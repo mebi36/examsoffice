@@ -23,16 +23,24 @@ urlpatterns = [
     path("recent uploads/", views.recent_results_bulk, name="recent_uploads"),
     path("list/", views.ResultListView.as_view(), name="list"),
     path("delete/<int:pk>/", views.ResultDeleteView.as_view(), name="delete"),
-    path("upload/", views.ResultFileFormatFormView.as_view(), name="upload"),
     path(
-        "upload file/",
+        "upload/",
         views.ResultUploadFormView.as_view(),
         name="upload_result_file",
+    ),
+    path("preview-upload/", views.preview_result_file, name="preview_upload"),
+    path(
+        "upload_format/<int:upload_type>",
+        views.result_upload_file_format,
+        name="upload_format"
     ),
     path(
         "delete by session/",
         views.CourseResultDeleteFormView.as_view(),
         name="delete_by_session",
+    ),
+    path(
+        "download by session/", views.download_by_session, name="download_by_session"
     ),
     path(
         "transcript download/<str:reg_no>/",

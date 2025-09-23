@@ -3,22 +3,324 @@
 {% block title %}Upload Result File{% endblock %}
 
 {% block content %}
-<div class="col-md-8 mt-5 mx-auto">
-    <div class="mx-auto bg-secondary bg-opacity-10 p-5 m-5">
+<div id="app" class="col-md-8 mt-5 mx-auto">
+    <div v-if="message.text" :class="['alert', message.type, 'alert-dismissible', 'fade', 'show']" style="position: fixed; top: 1rem; right: 1rem; z-index: 1055; min-width:  250px;" role="alert">
+        [[ message.text ]]
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" @click="clearMessage"></button>
+    </div>
+    <div class="d-flex justify-content-end">
+        <a href="{% url 'results:upload_format' 1 %}" class="d-inline-flex align-items-center"><span class="me-1"><download-icon class="text-success" /></span>Format for results with no scores</a>
+        <span class="mx-3">
+            <a href="{% url 'results:upload_format' 2 %}" class="d-inline-flex align-items-center"><span class="me-1"><download-icon class="text-success" /></span>Format for results with scores</a>
+        </span>
+    </div>
+    <div class="mx-auto bg-secondary bg-opacity-10 p-5 mx-5 my-2">
         <h2 class="mb-4 text-center text-success">Upload Result File</h2>
         <div class="d-flex justify-content-start">
-            <a href="{% url 'courses:add' %}" class="mx-1">New course</a>
-            <a href="{% url 'sessions:add' %}">New session</a>
+            <a href="{% url 'courses:add' %}" class="mx-1"><span class="me-1"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/></svg></span> New course</a>
+            <a href="{% url 'sessions:add' %}"><span class="me-1"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/></svg></span>New session</a>
         </div>
-        <form action="." method="post" enctype="multipart/form-data">
+        <form @submit.prevent="handleSubmit" action="." method="post" enctype="multipart/form-data">
             {% csrf_token %}
+            <p><label for="id_semester">Select Session/Semester:</label>
+                <select v-model="selectedSemester" name="semester" class="form-control" required="" id="id_semester">
+                  <option value="" selected="">---------</option>
+                  <option v-for="sem in semester_sessions" :key="sem.semester_id" :value="sem.id">[[ sem.desc ]]</option>
+              </select>
+            </p>
+            <div class="d-flex align-items-center gap-3">
+                <div class="form-check me-3 mb-0">
+                    <label for="show_archived" class="form-check-label">
+                        Include archived courses
+                        <input type="checkbox" v-model="includeArchived" id="show_archived" checked="false" class="form-check-input">
+                    </label>
+                </div>
 
-            {{ form.as_p }}
+                <select v-model="courseLevel" class="form-select w-auto">
+                    <option value="">Filter by level of study</option>
+                    <option v-for="level in [1, 2, 3, 4, 5]" :key="level" :value="level">[[ level ]]</option>
+                </select>
+            </div>
+            <p>
+                <label for="id_course">Select Course:</label>
+                <select v-model="selectedCourse" name="course" class="form-control" required id="id_course" :disabled="!selectedSemester">
+                    <option value="" selected="">---------</option>
+                    <option v-for="c in filteredCourses" :value="c.id" :key="c.id">[[ c.course_code ]] - [[ c.course_title ]] ([[ c.credit_load ]] units)</option>
+                </select>
+            </p>
+            <p><label for="id_result_file">Select Result File (XLSX):</label> <input type="file" name="result_file" accept=".xlsx,.xls" class="form-control" required id="id_result_file" @change="uploadAndPreview" ref="fileInput"></p>
+            <p><label for="id_skip_existing_rows">Skip students that already have a result for selected course and semester:</label> <input type="checkbox" name="skip_existing_rows" id="id_skip_existing_rows" checked=""></p>
+            <div v-if="problemRows.length" class="mt-4">
+                <h4 class="text-center mb-3 text-danger">Problem Rows</h4>
+                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                    <table class="table table-bordered table-hover table-sm">
+                        <thead class="table-danger">
+                            <tr>
+                                <th v-for="col in problemColumns" :key="col">[[ col ]]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(row, index) in problemRows" :key="index">
+                                <td v-for="col in problemColumns" :key="col"> [[ row[col] ]]</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <button class="btn btn-outline-danger mt-2" @click.prevent="downloadProblemRowsCSV">
+                    <span class="me-1"><download-icon /></span>
+                    Download Problem Rows (CSV)
+                </button>
+            </div>
+            <div v-else-if="previewData.length" class="mt-4">
+                <h4 class="text-center mb-3">Preview of Uploaded File</h4>
+                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th v-for="col in previewColumns" :key="col">[[ col ]]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(row, index) in previewData" :key="index" :class="{'text-danger': row.error != null}">
+                                <td v-for="col in previewColumns" :key="col">
+                                    <!-- <input type="text" class="form-control" v-model="row[col]"> -->
+                                    [[ row[col] ]]
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             <button type="submit" class="btn btn-success my-2">
-                <img src="{% static 'images/save.svg' %}" alt="save-icon" class="mr-2">
+                <span class="me-1"><upload-icon /></span>
                 Upload File
             </button>
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block frontend_mount %}
+<script>
+    const { createApp, ref, onMounted, computed, watch } = Vue;
+
+    const app = createApp({
+        delimiters: ["[[", "]]"],
+        setup() {
+            const courses = ref([]);
+            const semester_sessions = ref([]);
+            const selectedSemester = ref("");
+            const selectedCourse = ref("");
+            const fileInput = ref(null);
+
+            const includeArchived = ref(false);
+            const courseLevel = ref("");
+            const loading = ref(true);
+
+            const message = ref({text: "", type: "alert-info"});
+
+            const problemRows = ref([]);
+            const problemColumns = ref([]);
+
+            const clearMessage = () => {
+                message.value = {text: "", type: "alert-info"};
+            };
+
+            const showMessage = (text, type = "alert-info") => {
+                message.value = {text, type};
+
+                setTimeout(clearMessage, 6000);
+            };
+
+            const previewColumns = ref([]);
+            const previewData = ref([]);
+
+            watch([() => selectedSemester.value, () => selectedCourse.value], () => {
+                if (fileInput.value) {
+                    fileInput.value.value = null;
+                }
+                previewColumns.value = [];
+                previewData.value = [];
+                problemColumns.value = [];
+                problemRows.value = [];
+            });
+
+            const fetchSemesterSessions = async () => {
+                try {
+                    const res = await fetch("/academic-sessions/api/sessions/");
+                    if (!res.ok) {
+                        let errorMsg = "";
+                        try {
+                            const errData = await res.json();
+                            errorMsg = errData.error || JSON.stringify(errData);
+                        } catch {
+                            errorMsg = await res.text();
+                        }
+                        throw new Error("Server error. " + errorMsg);
+                    }
+                    let res_obj = await res.json();
+                    semester_sessions.value = res_obj.semester_sessions;
+                } catch (error) {
+                    showMessage("Error fetching semester data: " + error.message, "alert-danger");
+                }
+            };
+            const fetchCourses = async () => {
+                try {
+                    const res = await fetch("/courses/api/courses/");
+                    if (!res.ok) {
+                        let errorMsg = "";
+                        try {
+                            const errData = await res.json();
+                            errorMsg = errData.error || JSON.stringify(errData);
+                        } catch {
+                            errorMsg = await res.text();
+                        }
+                        throw new Error("Server error. " + errorMsg);
+                    }
+                    let res_obj = await res.json();
+                    courses.value = res_obj;
+                } catch (error) {
+                    showMessage("Error fetching courses. "+error.message, "alert-danger");
+                }
+            };
+            const fetchData = async () => {
+                loading.value = true;
+                try{
+                    await fetchSemesterSessions();
+                    await fetchCourses();
+                } finally {
+                    loading.value = false;
+                }
+            };
+            
+            const uploadAndPreview = async (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                previewColumns.value = [];
+                previewData.value = [];
+                problemColumns.value = [];
+                problemRows.value = [];
+
+                const formData = new FormData();
+                formData.append("result_file", file);
+
+                try {
+                    const res = await fetch("/results/preview-upload/", {
+                        method: "POST",
+                        body: formData,
+                        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+                    });
+
+                    const data = await res.json();
+                    if (!res.ok) {
+                        let errorMsg = res.error || "Unknown error occurred";
+                        throw new Error(errorMsg);
+                    };
+                    previewColumns.value = data.columns;
+                    previewData.value = data.rows;
+                } catch (err) {
+                    showMessage("Error previewing file: " + err.message, "alert-danger");
+                }
+            };
+            
+            const handleSubmit = async (event) => {
+                const hasErrors = previewData.value.some(r => r.error != null);
+
+                if (hasErrors) {
+                    const proceed = confirm("Some rows have errors and will likely be omitted. Are you sure you want to proceed with the upload?");
+                    if (!proceed) return;
+                }
+
+                const form = event.target.closest("form");
+                const formData = new FormData(form);
+
+                try {
+                    const res = await fetch(".", {
+                        method: "POST",
+                        body: formData,
+                        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+                    });
+
+                    const data = await res.json();
+                    if (!res.ok) {
+                        let errorMsg = data.error || "Unknown error occurred";
+                        throw new Error(errorMsg);
+                    };
+
+                    if (data.invalid_rows && data.invalid_rows.length > 0) {
+                        problemRows.value = data.invalid_rows;
+                        problemColumns.value = Object.keys(data.invalid_rows[0]);
+                        showMessage(`File uploaded with some issues. ${data.invalid_rows.length} row(s) could not be processed.`, "alert-warning");
+                        return;
+                    } else {
+                        showMessage("File uploaded successfully", "alert-success");
+                    }
+                } catch (err) {
+                    showMessage("Error uploading file: " + err.message, "alert-danger");
+                }
+            };
+
+            const downloadProblemRowsCSV = () => {
+                if (!problemRows.value.length) return;
+
+                const header = problemColumns.value.join(",");
+                const rows = problemRows.value.map(r => Object.values(r).map(v => `${v || ""}`).join(","));
+                const csvContent = [header, ...rows].join("\n");
+
+                const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = "problem_rows.csv";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            const filteredCourses = computed(() => {
+                if (!selectedSemester.value) return [];
+                return courses.value.filter(c => {
+                    let sem = semester_sessions.value.find(c => c.id === selectedSemester.value);
+                    if (!sem) return false;
+                    const matchesSemester = c.course_semester_id === sem.semester_id;
+                    const matchesArchive = includeArchived.value ? true : !c.archived;
+                    const matchesLevel = courseLevel.value ? c.course_level_id == courseLevel.value : true;
+                    return matchesSemester && matchesArchive && matchesLevel;
+            });
+            })
+
+            onMounted(fetchData);
+
+            return {
+                courses,
+                semester_sessions,
+                selectedSemester,
+                selectedCourse,
+                fileInput,
+
+                filteredCourses,
+                includeArchived,
+                loading,
+                courseLevel,
+                fetchData,
+
+                previewColumns,
+                previewData,
+                uploadAndPreview,
+                handleSubmit,
+
+                problemColumns,
+                problemRows,
+                downloadProblemRowsCSV,
+
+                message,
+                clearMessage,
+            };
+        }
+    });
+    registerGlobalComponents(app);
+    app.mount("#app");
+</script>
 {% endblock %}

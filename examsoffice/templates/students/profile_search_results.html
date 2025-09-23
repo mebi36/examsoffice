@@ -1,6 +1,7 @@
 {% extends 'students/base.html' %}
+{% load to_underscore %}
 {% load static %}
-{% block title %}Student Profile Serch Results{% endblock %}
+{% block title %}Student Profile Search Results{% endblock %}
 {% block content %}
 <div class="col-md-10 mx-auto bg-secondary bg-opacity-10 p-5 mt-5">
     <h1 class="text-center text-success">Search Results</h1>
@@ -13,7 +14,7 @@
         </ul>
     </div>
     {% else %}
-    <p class="text-muted">0 students found.</p>
+    <p class="text-muted">0 students found. {% if reg_no %}<a href="{% url 'students:create_bio' reg_no|to_underscore %}">Create Student Profile.</a>{% endif %}</p>
     {% endif %}
 </div>
 {% endblock %}

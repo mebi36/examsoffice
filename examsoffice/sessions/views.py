@@ -1,3 +1,6 @@
+import json
+
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib import messages
 
@@ -53,3 +56,7 @@ def add(request):
             extra_tags="text-success",
         )
         return render(request, template, {"form": form})
+
+def api_semester_session_list(request):
+    data = list(SemesterSession.objects.all().order_by("-id").values())
+    return JsonResponse({"semester_sessions": data}, safe=False)

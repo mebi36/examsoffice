@@ -1,0 +1,662 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Result Analytics{% endblock %}
+
+{% block content %}
+<div id="app" class="col-md mt-5 mx-auto bg-secondary bg-opacity-10 p-5">
+  <div v-if="message.text" :class="['alert', message.type, 'alert-dismissible', 'fade', 'show']" style="position: fixed; top: 1rem; right: 1rem; z-index: 1055; min-width:  250px;" role="alert">
+    [[ message.text ]]
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" @click="clearMessage"></button>
+  </div>
+    <div class="row">
+        <div class="col-md-3 bg-light p-3 border-end position-sticky" style="top: 0; height: 100vh; overflow-y: auto;">
+            <div class="fw-bold mb-3">Cached Results</div>
+            <ul class="list-group list-unstyled">
+                <li v-for="item in savedResults" :key="item.id" class="d-flex align-items-stretch align-items-center  justify-content-between mb-2">
+                    <button @click="loadSavedResult(item.id)" class="list-group-item list-group-item-action me-1" :class="{ active: selectedResultId === item.id }">
+                        [[ item.name ]]
+                    </button>
+                    <button @click="deleteResult(item.id)" class="btn btn-danger btn-sm d-flex align-items-center justify-content-center"><trash-icon /></button>
+                </li>
+            </ul>
+            <button class="btn btn-danger mt-3 w-100" @click="clearAllResults"><span class="me-1"><x-octagon-icon /></span><span>Clear All</span></button>
+        </div>
+        <div class="col-md-9">
+            <div class="d-flex align-items-center gap-2 my-3">
+                <form @submit.prevent="saveResultDataToTempDB" class="d-flex align-items-center gap-2">
+                    <input v-model="resultName" type="text" class="form-control w-50" placeholder="Result name">
+                    <button type="submit" :disabled="!results || !results.length || resultName === '' " class="btn btn-success d-flex align-items-end"><span class="me-2"><floppy-icon style="height: 1.5em; width: 1.5em;" /></span><span>Cache Result</span></button>
+                </form>
+                <button class="btn btn-success ms-auto d-inline-flex align-items-center" @click="downloadCSV" :disabled="savedResults.length === 0">
+                    <span class="me-1" style="height: 1.5em; width: 1.5em;"><download-icon /></span><span>Download Collated Results</span>
+                </button>
+            </div>
+            
+            <div class="mx-auto bg-white p-5">
+                <h4 class="text-center text-success mb-4">
+                    [[ resultName || "Unnamed Result"]]
+                </h4>
+                <form @submit.prevent="previewFile" class="d-flex align-items-center gap-2">
+                    <input type="file" class="form-control w-50" @change="handleFileChange" placeholder="Select Result Excel File" />
+                    <button type="submit" class="btn btn-success" :disabled="!selectedFile || uploading">
+                        <span class="me-2"><upload-icon /></span>
+                        <span>Preview</span>
+                    </button>
+                </form>
+
+                <div class="mt-4" v-if="previewData.length">
+                    <h5>Select Columns</h5>
+                    <div class="d-flex gap-3 mb-3">
+                        <div>
+                            <label class="form-label">Registration Number Column</label>
+                            <select v-model="regCol" class="form-select">
+                                <option v-for="h in headers" :key="h" :value="h">[[ h ]]</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Score Column</label>
+                            <select v-model="scoreCol" class="form-select">
+                                <option v-for="h in headers" :key="h" :value="h">[[ h ]]</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h6>Result snippet</h6>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th v-for="h in headers" :key="h"
+                                :class="{
+                                    'table-success': h === regCol,
+                                    'table-warning': h === scoreCol,
+                                }">[[ h ]]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(row, idx) in previewData" :key="idx">
+                                <td v-for="h in headers" :key="h"
+                                :class="{
+                                    'table-success': h === regCol,
+                                    'table-warning': h === scoreCol
+                                }">[[ row[h] ]]</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <button class="btn btn-primary mt-3" @click="uploadFile" :disabled="!regCol || !scoreCol">
+                        Confirm & Process
+                    </button>
+
+                </div>
+                <div class="row mt-5">
+                    <div class="col-md-6 shadow-sm bg-white p-3">
+                        <div id="grades_breakdown_mount" style="height:350px;"></div>
+                    </div>
+                    <div class="col-md-6 shadow-sm bg-white p-3">
+                        <div id="grades_barchart_mount" style="height:350px;"></div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6 shadow-sm bg-white p-3">
+                        <div class="card-title fw-bold text-success text-center">Failure Rate</div>
+                        <hr>
+                        <div class="card-body text-danger text-center display-1 p-5 m-5">[[ failureRate ]]%</div>
+                        <div class="card-footer text-muted text-center fs-3 mt-5">Total: [[ displayedResults.length ]]</div>
+                    </div>
+                    <div class="col-md-6 shadow-sm bg-white p-3">
+                        <div class="fw-bold text-success text-center mb-2">Score Summary</div>
+                        <table class="table table-bordered table-striped mt-3">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Range</th>
+                                    <th>Count</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(count, range) in scoreRanges" :key="range">
+                                    <td>[[ range ]]</td>
+                                    <td>[[ count ]]</td>
+                                    <td>[[ (count / Object.values(scoreRanges).reduce((a, b) => a + b, 0) * 100).toFixed(2) ]]</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="table-responsive col-md-6" style="max-height: 300px; overflow-y: auto;">
+                        <table class="table table-bordered table-striped">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th>Reg No.</th>
+                                    <th>Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="result in displayedResults"
+                                    :key="result.reg_no"
+                                    :class="{ 
+                                        'table-secondary': isNaN(parseFloat(result.score)),
+                                        'table-warning': [39, 44, 49, 59, 69].includes(Number(result.score)),
+                                        'table-danger': result.score < 40
+                                    }"
+                                >
+                                    <td>[[ result.reg_no ]]</td>
+                                    <td>[[ result.score ]]</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-6 p-3">
+                        <div class="fw-bold text-success text-center mb-2">Score reivew check</div>
+                        <form @submit.prevent="applyAdjustment" class="d-flex flex-column gap-2">
+                            <select v-model="adjustmentTarget" id="" class="form-select">
+                                <option value="all">All Results</option>
+                                <option value="lt40">< 40</option>
+                                <option value="lt45">< 45</option>
+                                <option value="lt50"> < 50</option>
+                                <option value="lt60"> < 60</option>
+                                <option value="lt70"> < 70</option>
+                            </select>
+                            <input type="number" v-model.number="adjustmentValue" class="form-control" placeholder="Enter +/- value" />
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary w-50">Apply</button>
+                                <button type="button" class="btn btn-secondary w-50" @click="clearAdjustment">Clear</button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+    <div class="toast align-items-center text-white border-0" :class="toastClass" role="alert" aria-live="assertive" aria-atomic="true" v-if="showToast">
+        <div class="d-flex">
+            <div class="toast-body">
+                [[ toastMessage ]]
+            </div>
+            <button class="btn-close btn-close-white me-2 m-auto" @click="showToast = false"></button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block frontend_mount %}
+<script>
+    const { createApp, ref, onMounted, computed } = Vue;
+
+    const app = createApp({
+        delimiters: ["[[", "]]"],
+        setup() {
+            const savedResults = ref([]);
+            const failureRate = ref("");
+
+            const selectedFile = ref(null);
+            const previewData = ref([]);
+            const headers = ref([]);
+            const regCol = ref("");
+            const scoreCol = ref("");
+
+            const selectedResultId = ref(null);
+            const uploading = ref(false);
+            const resultName = ref("");
+            const results = ref([]);
+
+            const message = ref({text: "", type: "alert-info"});
+            const scoreRanges = ref({});
+
+            const chartInstance = ref(null);
+
+            const adjustmentTarget = ref("all");
+            const adjustmentValue = ref(null);
+            const adjustedResults = ref([]);
+
+            const clearMessage = () => {
+                message.value = {text: "", type: "alert-info" };
+            };
+
+            const showMessage = (text, type = "alert-info") => {
+                message.value = {text, type };
+
+                setTimeout(clearMessage, 6000);
+            };
+
+            const applyAdjustment = () => {
+                if (adjustmentValue.value === null) return;
+
+                const val = adjustmentValue.value;
+                adjustedResults.value = results.value.map(r => {
+                    let shouldAdjust = false;
+
+                    if (adjustmentTarget.value === "all") shouldAdjust = true;
+                    else if (adjustmentTarget.value === "lt40" && r.score < 40) shouldAdjust = true;
+                    else if (adjustmentTarget.value === "lt45" && r.score < 45) shouldAdjust = true;
+                    else if (adjustmentTarget.value === "lt50" && r.score < 50) shouldAdjust = true;
+                    else if (adjustmentTarget.value === "lt60" && r.score < 60) shouldAdjust = true;
+                    else if (adjustmentTarget.value === "lt70" && r.score < 70) shouldAdjust = true;
+
+                    return {
+                        ...r,
+                        score: shouldAdjust ? Math.min(r.score + val, 100) : r.score
+                    };
+                });
+
+                const scores = adjustedResults.value.map(r => r.score);
+                updateFailureRate(scores);
+                renderChart(scores);
+            }
+
+            const clearAdjustment = () => {
+                adjustmentTarget.value = "all";
+                adjustmentValue.value = null;
+                adjustedResults.value = [];
+
+                const scores = results.value.map(r => r.score);
+                updateFailureRate(scores);
+                renderChart(scores);
+            }
+
+            const toastClass = computed(() => {
+                return toastSuccess.value ? "bg-success" : "bg-danger";
+            });
+
+            const displayedResults = computed(() => {
+                const base = adjustedResults.value.length ? adjustedResults.value : results.value;
+
+                return [...base].sort((a, b) => {
+                    const aScore = parseFloat(a.score);
+                    const bScore = parseFloat(b.score);
+
+                    const aIsNum = !isNaN(aScore);
+                    const bIsNum = !isNaN(bScore);
+
+                    // if both are number -> sort descending
+                    if (aIsNum && bIsNum) {
+                        return bScore - aScore;
+                    }
+
+                    if (aIsNum && !bIsNum) return -1;
+                    if (!aIsNum && bIsNum) return 1;
+
+                    // if both non-numbers -> keep order
+                    return 0;
+                });
+            });
+
+            const fetchSavedResults = async () => {
+                const res = await fetch("/result_analytics/api/result_analytics/list_results/");
+                const data = await res.json();
+                savedResults.value = data.results;
+            };
+
+            const updateFailureRate = (scores) => {
+                let failureCount = 0;
+                scores.forEach( score => {
+                    if (score < 40) failureCount++; 
+                })
+                failureRate.value = (failureCount/scores.length * 100).toFixed(2)
+            }
+
+            const loadSavedResult = async (id) => {
+                try {
+                    const res = await fetch(`/result_analytics/api/result_analytics/get/${id}/`);
+                    if (!res.ok) {
+                        let errorMsg = "";
+                        try {
+                            const errData = await res.json();
+                            errorMsg = errData.error || JSON.stringify(errData);
+                        } catch {
+                            errorMsg = await res.text();
+                        }
+                        throw new Error("Server error. " + errorMsg);
+                    }
+                    const data = await res.json();
+                    results.value = data.results;
+                    resultName.value = data.name;
+
+                    clearAdjustment();
+
+                    const scores = data.results.map(r => r.score);
+                    updateFailureRate(scores);
+                    renderChart(scores);
+
+                    selectedResultId.value = id;
+                } catch (error) {
+                    showMessage("Error loading cached results: "+error.message, "alert-danger");
+                }
+            };
+            
+            clearAllResults = async () => {
+                if(!confirm("Are you sure you want to clear all saved results?")) return;
+                try {
+                    const res = await fetch("/result_analytics/api/result_analytics/clear_results/", { method: "DELETE"});
+                    if (!res.ok) {
+                        let errorMsg = "";
+                        try {
+                            const errData = await res.json();
+                            errorMsg = errData.error || JSON.stringify(errData);
+                        } catch {
+                            errorMsg = await res.text();
+                        }
+                        throw new Error("Server error. " + errorMsg);
+                    }
+                } catch (error) {
+                    showMessage("Error clearing cached results: "+error.message, "alert-danger");
+                }
+                savedResults.value = [];
+            }
+
+            deleteResult = async (resultId) => {
+                if(!confirm("Are you sure you want to delete result?")) return;
+                try {
+                    const res = await fetch(`/result_analytics/api/result_analytics/delete/${resultId}/`, {method: "DELETE"});
+                    if (!res.ok) {
+                        let errorMsg = "";
+                        try {
+                            const errData = await res.json();
+                            errorMsg = errData.error || JSON.stringify(errData);
+                        } catch {
+                            errorMsg = await res.text();
+                        }
+                        throw new Error("Server error. " + errorMsg);
+                    }
+                    await fetchSavedResults();
+                } catch (error) {
+                    showMessage("Error deleting result. "+error.message, "alert-danger");
+                }
+            }
+            const handleFileChange = (event) => {
+                selectedFile.value = event.target.files[0];
+            };
+
+            const previewFile = async () => {
+                try {
+                    const formData = new FormData();
+                    formData.append("result_file", selectedFile.value);
+
+                    const res = await fetch("/result_analytics/api/result_analytics/preview_excel/", {
+                        method: "POST",
+                        headers: { "X-CSRFToken": "{{ csrf_token }}"},
+                        body: formData,
+                    });
+
+                    if (!res.ok) {
+                            let errorMsg = "";
+                            try {
+                                const errData = await res.json();
+                                errorMsg = errData.error || JSON.stringify(errData);
+                            } catch {
+                                try {
+                                    errorMsg = await res.text();
+                                } catch {
+                                    errorMsg = "Server response status " + res.status;
+                                }
+                            }
+                            throw new Error("Server error. " + errorMsg);                    
+                    }
+
+                    const data = await res.json();
+                    headers.value = data.headers;
+                    previewData.value = data.preview;
+                } catch (error) {
+                    showMessage("Error previewing file"+error.message, "alert-danger");
+                }
+            };
+
+            const renderChart = (scores) => {
+                let gradeCounts = {"A": 0, "B": 0, "C": 0, "D": 0, "E": 0, "F": 0};
+
+                scores.forEach(score => {
+                    if (score >= 70) gradeCounts.A++;
+                    else if (score >= 60) gradeCounts.B++;
+                    else if (score >=50) gradeCounts.C++;
+                    else if (score>=45) gradeCounts.D++;
+                    else if (score>=40) gradeCounts.E++;
+                    else if (score < 40) gradeCounts.F++;
+                });
+
+                const pie_segment_colors = ["#14A44D", "#91cc75", "6080e0", "#ffc107", "#fd9552", "#ee4c4c"];
+                const grade_keys = Object.keys(gradeCounts);
+                const grade_count = Object.values(gradeCounts);
+
+                const res = grade_keys.map((k,i) => ({
+                    value: grade_count[i],
+                    name: k,
+                    itemStyle: {color: pie_segment_colors[i]}
+                }));
+
+                let ranges = {
+                    "0-10": 0,
+                    "10-20": 0,
+                    "20-30": 0,
+                    "30-40": 0,
+                    "40-45": 0,
+                    "45-50": 0,
+                    "50-60": 0,
+                    "60-70": 0,
+                    ">=70": 0
+                };
+
+                scores.forEach(score => {
+                    if (score <10) ranges["0-10"]++;
+                    else if (score < 20) ranges["10-20"]++;
+                    else if (score < 30) ranges["20-30"]++;
+                    else if (score < 40) ranges["30-40"]++;
+                    else if (score < 45) ranges["40-45"]++;
+                    else if (score < 50) ranges["45-50"]++;
+                    else if (score < 60) ranges["50-60"]++;
+                    else if (score < 70) ranges["60-70"]++;
+                    else if (score >= 70) ranges[">=70"]++;
+                });
+                scoreRanges.value = ranges;
+
+                if (!chartInstance.value) {
+                    chartInstance.value = echarts.init(document.getElementById("grades_breakdown_mount"));
+                }
+
+                chartInstance.value.setOption({
+                    tooltip: {
+                        trigger: "item",
+                        formatter: "{a} <br/>{b}: {c} ({d}%)"
+                    },
+                    legend: { top: "5%", left: "center" },
+                    series: [
+                        {
+                            name: "Grades Breakdown",
+                            type: "pie",
+                            radius: ["40%", "70%"],
+                            avoidLabelOverlap: false,
+                            itemStyle: {
+                                borderRadius: 10,
+                                borderColor: "#fff",
+                                borderWidth: 2
+                            },
+                            label: {show: false, position: "center"},
+                            emphasis: {
+                                label: {show: true, fontSize: "20", fontWeight: "bold" },
+                            },
+                            labelLine: {show: false},
+                            data: res
+                        }
+                    ]
+                });
+
+                if (!chartInstance.value.bar) {
+                    chartInstance.value.bar = echarts.init(document.getElementById("grades_barchart_mount"));
+                }
+
+                chartInstance.value.bar.setOption({
+                    tooltip: { trigger: "axis" },
+                    xAxis: {
+                        type: "category",
+                        data: Object.keys(ranges),
+                    },
+                    yAxis: {
+                        type: "value"
+                    },
+                    series: [
+                        {
+                            data: Object.values(ranges),
+                            type: "bar",
+                            barWidth: "60%",
+                            itemStyle: {color: "#14A44D"}
+                        }
+                    ]
+                });
+            };
+
+            const uploadFile = async () => {
+                if (!selectedFile.value) return;
+
+                const formData = new FormData();
+                formData.append("result_file", selectedFile.value);
+                formData.append("reg_col", regCol.value);
+                formData.append("score_col", scoreCol.value);
+
+                uploading.value = true;
+
+                try {
+                    const res = await fetch("/result_analytics/api/result_analytics/upload_excel_file/", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": "{{ csrf_token }}"
+                        },
+                        body: formData
+                    });
+
+                    if (!res.ok) {
+                        let errorMsg = "";
+                        try {
+                            const errData = await res.json();
+                            errorMsg = errData.error || JSON.stringify(errData);
+                        } catch {
+                            errorMsg = await res.text();
+                        }
+                        throw new Error("Server error. " + errorMsg);
+                    }
+
+                    const data = await res.json();
+                    results.value = data.results;
+
+                    clearAdjustment();
+
+                    const scores = data.results.map(r => r.score);
+                    updateFailureRate(scores);
+                    renderChart(scores);
+
+                    resultName.value = "";
+                    previewData.value = [];
+                    showMessage("File uploaded successfully", "alert-success");
+                } catch (error) {
+                    showMessage("Upload error:"+error, "alert-danger");
+                } finally {
+                    uploading.value = false;
+                }
+            }
+
+            const saveResultDataToTempDB = async () => {
+                try {
+                    const res = await fetch("/result_analytics/api/result_analytics/cache_result_data/", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": "{{ csrf_token }}", "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            "results": results.value,
+                            "result_name": resultName.value,
+                        }),
+                    });
+
+                    const data = await res.json();
+                    if (res.ok) {
+                        fetchSavedResults();
+                    } else {
+                        let errorMsg = "";
+                        try {
+                            const errData = data;
+                            errorMsg = errData.error || JSON.stringify(errData);
+                        } catch {
+                            errorMsg = await res.text();
+                        }
+                        throw new Error("Server error. " + errorMsg);
+                    }
+                } catch (error) {
+                    showMessage("Error caching result. "+error.message, "alert-danger");
+                }
+            };
+
+            const downloadCSV = async () => {
+                try {
+                    const res = await fetch("/result_analytics/collated_results/");
+
+                    if(!res.ok) {
+                        let errorMsg = "";
+                        try {
+                            const errData = await res.json();
+                            errorMsg = errData.error || JSON.stringify(errData);
+                        } catch {
+                            errorMsg = await res.text();
+                        }
+                        throw new Error("Server error. " + errorMsg);
+                    }
+
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "collated_results.csv";
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                } catch (error) {
+                    showMessage("Error downloading collated results: "+error, "alert-danger");
+                }
+            }
+            
+            onMounted(() => {
+                fetchSavedResults();
+            });
+
+            return {
+                displayedResults,
+                selectedFile,
+                previewData,
+                headers,
+                regCol,
+                scoreCol,
+                previewFile,
+                selectedResultId,
+                failureRate,
+                uploading,
+                uploadFile,
+                results,
+                resultName,
+                savedResults,
+                fetchSavedResults,
+                saveResultDataToTempDB,
+                loadSavedResult,
+                deleteResult,
+                clearAllResults,
+
+                handleFileChange,
+                scoreRanges,
+
+                adjustmentTarget,
+                adjustmentValue,
+                applyAdjustment,
+                clearAdjustment,
+                downloadCSV,
+
+                message,
+                clearMessage,
+            };
+        }
+    });
+    registerGlobalComponents(app);
+    app.mount("#app");
+</script>
+{% endblock %}

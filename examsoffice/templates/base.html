@@ -38,7 +38,7 @@
                                     <a class="nav-link" href="{% url 'results:collation' %}">Collated Results</a>
                                 </li>
                                 <li>
-                                    <a class="nav-link" href="{% url 'results:upload' %}">Upload Results</a>
+                                    <a class="nav-link" href="{% url 'results:upload_result_file' %}">Upload Results</a>
                                 </li>
                                 <li>
                                     <a class="nav-link" href="{% url 'results:recent_uploads' %}">Recent Uploads</a>
@@ -89,6 +89,9 @@
                                     <a class="nav-link" href="{% url 'courses:add' %}">Add New Course</a>
                                 </li>
                             </ul>
+                        </li>
+                        <li>
+                            <a href="{% url 'result_analytics:dashboard' %}" class="nav-link">Result Analytics</a>
                         </li>
 
                         <li class="nav-item dropdown">
@@ -156,6 +159,7 @@
                 </div>
             </div>
         </div>
+        <script src="{% static 'js/iconcomponents.js' %}"></script>
         <script src="{% static 'js/axios.min.js' %}"></script>
         <script src="{% static 'js/echarts.min.js' %}"></script>
         <script src="{% static 'js/popper.min.js' %}"></script>

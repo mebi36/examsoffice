@@ -3,12 +3,11 @@
 <div class="mt-5 p-5">
 {% block content %}
 <div class="col-md-6 mt-5 mx-auto mt-5">
-    <div class="bg-success bg-opacity-10 p-5">
+    <div class="bg-secondary bg-opacity-10 p-5">
         <h2 class="text-center text-success mb-3">Login</h2>
         {% if form.errors %}
         <p>Your username and password didn't match. Please try again.</p>
         {% endif %}
-
 
         {% if next %}
             {% if user.is_authenticated %}

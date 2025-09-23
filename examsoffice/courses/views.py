@@ -48,7 +48,7 @@ def add(request):
 
 
 def course_list(request):
-    qs = Course.objects.all().order_by("-id")
+    qs = Course.objects.all().order_by("course_code")
     return JsonResponse(list(qs.values()), safe=False)
 
 
@@ -80,7 +80,7 @@ def api_bulk_update(request):
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError:
-        return JsonResponse({"Erroor": "Invalid JSON"}, status=400)
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
     updated_courses = []
     for item in data.get("courses", []):
         try:

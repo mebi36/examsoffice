@@ -26,6 +26,7 @@ from index import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("result_analytics/", include("result_analytics.urls")),
     path("results/", include("results.urls")),
     path("students/", include("students.urls")),
     path("staff/", include("staff.urls")),

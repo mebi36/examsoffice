@@ -1,9 +1,13 @@
+
+===
+if app is connected to a wifi network show url another device connected to the same network can use to
+    access it
+create users for everyone using app
+track each user's activities especially deletion and modification.
 -add course details in student record add new result
 -add analytics page temporarily hold results and generate plots and analytics on them
 - fix level of study issue in transcripts
 ======
-- multiple result entry deletion [check boxed in result list view with delete option] / deletion of entire result for a session 
-- archive old courses to make result uploads more straightforward
 - build serializers to improve reactivity of web pages with Vue
 
 - keep track of all uploads/course result entries
