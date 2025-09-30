@@ -82,11 +82,6 @@ urlpatterns = [
         views.possible_graduands,
         name="possible_graduands",
     ),
-    path(
-        "analyze-unmoderated",
-        views.UnmoderatedResultAnalysis.as_view(),
-        name="analyze_unmoderated"
-    ),
     path("api/results/", views.results_list, name="api_results_list"),
     path("api/results/<int:pk>/", views.delete_result, name="api_delete_result"),
     path("api/results/bulk-delete/", views.bulk_delete_results, name="api_bulk_delete_results"),

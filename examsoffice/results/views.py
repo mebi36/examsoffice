@@ -845,15 +845,6 @@ class ResultCollationByLevelOfStudyAnsSessionFormView(generic.FormView):
         )
 
 
-class UnmoderatedResultAnalysis(generic.FormView):
-    """Analyze results without persisting them in the production database."""
-    template_name: str = "results/unmoderated_results_form.html"
-    form_class: Form = UnmoderatedResultDirectorySelectionForm
-
-    def form_valid(self, form: Form) -> HttpResponse:
-        res_dir: str = form.cleaned_data["results_directory"]
-
-
 @login_required
 def transcript_download_info(request: HttpRequest, reg_no: str) -> HttpResponse:
     template: str = "results/transcript_download_info.html"

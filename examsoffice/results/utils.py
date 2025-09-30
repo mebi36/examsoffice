@@ -371,197 +371,187 @@ def class_result_spreadsheet(
         if len(student_qs) == 0:
             continue
 
-        else:
-            df = DataFrame.from_records(student_qs)
-            df = df.rename(
-                columns={
-                    0: "course_title",
-                    1: "course_code",
-                    2: "credit_load",
-                    3: "course_level",
-                    4: "semester",
-                    5: "grade",
-                }
+        df = DataFrame.from_records(student_qs)
+        df = df.rename(
+            columns={
+                0: "course_title",
+                1: "course_code",
+                2: "credit_load",
+                3: "course_level",
+                4: "semester",
+                5: "grade",
+            }
+        )
+        df = Student.get_weight_col(df)
+        reg_no = student[0]
+        name = student[1]
+        mode_of_admission = student[2] or "N/A"
+        semesters = df["semester"].unique().tolist()
+        semesters = sorted(semesters)
+
+        # writing and formatting student biodata to the excel sheet
+        sn_cell = ws.cell(column=1, row=row, value=serial_number)
+        sn_cell.alignment = TOP_BOT_TEXT_DIRECTION
+        sn_cell.border = NORMAL_BORDER
+        _merge_col_wise(ws, col=1, row_start=row, row_end=row + 3)
+
+        name_cell = ws.cell(column=2, row=row, value=name.upper())
+        name_cell.alignment = Alignment(wrapText=True, vertical="top")
+        name_cell.border = NORMAL_BORDER
+        _merge_col_wise(ws, col=2, row_start=row, row_end=row + 3)
+        ws.column_dimensions["B"].width = 20
+
+        reg_no_cell = ws.cell(column=3, row=row, value=reg_no)
+        reg_no_cell.alignment = Alignment(textRotation=180, vertical="top")
+        reg_no_cell.border = NORMAL_BORDER
+        _merge_col_wise(ws, col=3, row_start=row, row_end=row + 3)
+
+        adm_mode_cell = ws.cell(
+            column=4, row=row, value=mode_of_admission.upper()
+        )
+        adm_mode_cell.alignment = Alignment(
+            textRotation=180, vertical="top"
+        )
+        adm_mode_cell.border = NORMAL_BORDER
+        _merge_col_wise(ws, col=4, row_start=row, row_end=row + 3)
+
+        for el in ["A", "C", "D"]:
+            ws.column_dimensions[el].width = 3
+
+        # writing results to worksheet
+        col = 5
+
+        semester = semesters.extend(["", ""])
+        for semester in semesters:
+            semester_records = df.query("semester == @semester")
+            semester_records = semester_records.sort_values(
+                "course_level", ascending=False
             )
-            df = Student.get_weight_col(df)
-            reg_no = student[0]
-            name = student[1]
-            mode_of_admission = student[2] or "N/A"
-            semesters = df["semester"].unique().tolist()
-            semesters = sorted(semesters)
+            semester_records = semester_records[
+                ["course_code", "credit_load", "grade", "weight"]
+            ].copy()
+            semester_records = semester_records.transpose()
 
-            # writing and formatting student biodata to the excel sheet
-            sn_cell = ws.cell(column=1, row=row, value=serial_number)
-            sn_cell.alignment = TOP_BOT_TEXT_DIRECTION
-            sn_cell.border = NORMAL_BORDER
-            _merge_col_wise(ws, col=1, row_start=row, row_end=row + 3)
-
-            name_cell = ws.cell(column=2, row=row, value=name.upper())
-            name_cell.alignment = Alignment(wrapText=True, vertical="top")
-            name_cell.border = NORMAL_BORDER
-            _merge_col_wise(ws, col=2, row_start=row, row_end=row + 3)
-            ws.column_dimensions["B"].width = 20
-
-            reg_no_cell = ws.cell(column=3, row=row, value=reg_no)
-            reg_no_cell.alignment = Alignment(textRotation=180, vertical="top")
-            reg_no_cell.border = NORMAL_BORDER
-            _merge_col_wise(ws, col=3, row_start=row, row_end=row + 3)
-
-            adm_mode_cell = ws.cell(
-                column=4, row=row, value=mode_of_admission.upper()
-            )
-            adm_mode_cell.alignment = Alignment(
-                textRotation=180, vertical="top"
-            )
-            adm_mode_cell.border = NORMAL_BORDER
-            _merge_col_wise(ws, col=4, row_start=row, row_end=row + 3)
-
-            for el in ["A", "C", "D"]:
-                ws.column_dimensions[el].width = 3
-
-            # writing results to worksheet
-            cred_sum = 0
-            weight_sum = 0
-            col = 5
-
-            semester = semesters.extend(["", ""])
-            for semester in semesters:
-                semester_records = df.query("semester == @semester")
-                semester_records = semester_records.sort_values(
-                    "course_level", ascending=False
+            # Running CGPA
+            col_tally = col
+            cgpa_num = f"{get_column_letter(col+20)}{row+3}"
+            cgpa_denom = f"{get_column_letter(col+20)}{row+1}"
+            while (col_tally - 20) > 0:
+                cgpa_num += f"+{get_column_letter(col_tally-1)}{row+3}"
+                cgpa_denom += f"+{get_column_letter(col_tally-1)}{row+1}"
+                col_tally -= 21
+                if col_tally < 10:
+                    break
+            ws.cell(
+                row=row,
+                column=(col + 20),
+                value=(
+                    f'=IF(ISBLANK({get_column_letter(col)}{row+2}),"",'
+                    f'ROUND((({cgpa_num})/({cgpa_denom})),3))'
                 )
-                semester_records = semester_records[
-                    ["course_code", "credit_load", "grade", "weight"]
-                ].copy()
-                semester_records = semester_records.transpose()
+            )
+            # Total Semester Grade Point cell
+            sem_grade_pt_formula = (
+                f"=SUM({get_column_letter(col)}{row+1}"
+                f":{get_column_letter(col+19)}{row+1})"
+            )
+            ws.cell(
+                row=(row + 1),
+                column=(col + 20),
+                value=sem_grade_pt_formula
+            )
+            # Semester GPA cell
+            sem_cgpa_formula = (
+                f'=IF(ISBLANK({get_column_letter(col)}{row+2}),"",ROUND('
+                f'SUM({get_column_letter(col)}{row+3}:'
+                f'{get_column_letter(col+19)}{row+3})/'
+                f'SUM({get_column_letter(col)}{row+1}:'
+                f'{get_column_letter(col+19)}{row+1}), 3))'
+            )
+            ws.cell(
+                row=(row + 2),
+                column=(col + 20),
+                value=sem_cgpa_formula
+            )
+            # Total semester credit load cell
+            sem_cred_formula = (
+                f"=SUM({get_column_letter(col)}{row+3}:"
+                f"{get_column_letter(col+19)}{row+3})"
+            )
+            ws.cell(
+                row=(row + 3), column=(col + 20), value=sem_cred_formula
+            )
+            _format_summary_block(row, col)
 
-                # calculating the semester CGPA& and writing to the
-                # last column
-                credit_sem_sum = semester_records.sum(axis=1)[1]
-                weight_sem_sum = semester_records.sum(axis=1)[3]
-                weight_sum = weight_sum + weight_sem_sum
-                cred_sum = cred_sum + credit_sem_sum
+            # prepare result dataframe for writing to excel
+            df_rows = dataframe_to_rows(
+                semester_records, index=False, header=False
+            )
 
-                # Running CGPA
-                col_tally = col
-                cgpa_num = f"{get_column_letter(col+20)}{row+3}"
-                cgpa_denom = f"{get_column_letter(col+20)}{row+1}"
-                while (col_tally - 20) > 0:
-                    cgpa_num += f"+{get_column_letter(col_tally-1)}{row+3}"
-                    cgpa_denom += f"+{get_column_letter(col_tally-1)}{row+1}"
-                    col_tally -= 20
-                    if col_tally < 10:
-                        break
+            # working on the semester header
+            ws.cell(column=col, row=(row - 1), value=semester.upper())
+            header_start = get_column_letter(col) + str(row - 1)
+            _merge_row_wise(
+                ws, row=(row - 1), col_start=col, col_end=(col + 19)
+            )
+            ws[header_start].alignment = CENTER_ALIGN
+            ws[header_start].fill = PatternFill(
+                fgColor="50E2F2", fill_type="solid"
+            )
+            ws[header_start].font = Font(bold=True)
+
+            for r_idx, df_row in enumerate(df_rows, row):
+                for all_col in range(col, (col + 20)):
+                    _ = ws.cell(column=all_col, row=r_idx)
+                    _.border = Border(
+                        left=Side(style="thin"),
+                        right=Side(style="thin"),
+                        top=Side(style="thin"),
+                        bottom=Side(style="thin"),
+                    )
+                    ws.column_dimensions[
+                        get_column_letter(all_col)
+                    ].width = 3
+                for c_idx, df_value in enumerate(df_row, col):
+                    _ = ws.cell(column=c_idx, row=r_idx, value=df_value)
+                    _.alignment = Alignment(horizontal="center")
+                    if r_idx == row:
+                        _.alignment = Alignment(
+                            text_rotation=180, vertical="top"
+                        )
+            # Grade Point cells
+            for c in range(20):
+                grd = get_column_letter(col+c) + str(row+2)  # letter grade cell
+                un_ld = get_column_letter(col+c) + str(row+1)  # Unit load cell
                 ws.cell(
-                    row=row,
-                    column=(col + 20),
+                    row=row+3,
+                    column=col+c,
                     value=(
-                        f'=IF(ISBLANK({get_column_letter(col)}{row+2}),"",'
-                        f'ROUND((({cgpa_num})/({cgpa_denom})),3))'
+                        f'=IF(ISBLANK({grd}),"",IF(({grd}="A"),"5",'
+                        f'IF(({grd}="B"),"4",IF(({grd}="C"),"3",'
+                        f'IF(({grd}="D"),"2",IF(({grd}="E"),"1",'
+                        f'IF(({grd}="F"),"0"," "))))))*{un_ld})'
                     )
                 )
-                # Total Semester Grade Point cell
-                sem_grade_pt_formula = (
-                    f"=SUM({get_column_letter(col)}{row+1}"
-                    f":{get_column_letter(col+19)}{row+1})"
-                )
-                ws.cell(
-                    row=(row + 1),
-                    column=(col + 20),
-                    value=sem_grade_pt_formula
-                )
-                # Semester GPA cell
-                sem_cgpa_formula = (
-                    f'=IF(ISBLANK({get_column_letter(col)}{row+2}),"",ROUND('
-                    f'SUM({get_column_letter(col)}{row+3}:'
-                    f'{get_column_letter(col+19)}{row+3})/'
-                    f'SUM({get_column_letter(col)}{row+1}:'
-                    f'{get_column_letter(col+19)}{row+1}), 3))'
-                )
-                ws.cell(
-                    row=(row + 2),
-                    column=(col + 20),
-                    value=sem_cgpa_formula
-                )
-                # Total semester credit load cell
-                sem_cred_formula = (
-                    f"=SUM({get_column_letter(col)}{row+3}:"
-                    f"{get_column_letter(col+19)}{row+3})"
-                )
-                ws.cell(
-                    row=(row + 3), column=(col + 20), value=sem_cred_formula
-                )
-                _format_summary_block(row, col)
 
-                # prepare result dataframe for writing to excel
-                df_rows = dataframe_to_rows(
-                    semester_records, index=False, header=False
-                )
-
-                # working on the semester header
-                ws.cell(column=col, row=(row - 1), value=semester.upper())
-                header_start = get_column_letter(col) + str(row - 1)
-                _merge_row_wise(
-                    ws, row=(row - 1), col_start=col, col_end=(col + 19)
-                )
-                ws[header_start].alignment = CENTER_ALIGN
-                ws[header_start].fill = PatternFill(
-                    fgColor="50E2F2", fill_type="solid"
-                )
-                ws[header_start].font = Font(bold=True)
-
-                for r_idx, df_row in enumerate(df_rows, row):
-                    for all_col in range(col, (col + 20)):
-                        _ = ws.cell(column=all_col, row=r_idx)
-                        _.border = Border(
-                            left=Side(style="thin"),
-                            right=Side(style="thin"),
-                            top=Side(style="thin"),
-                            bottom=Side(style="thin"),
-                        )
-                        ws.column_dimensions[
-                            get_column_letter(all_col)
-                        ].width = 3
-                    for c_idx, df_value in enumerate(df_row, col):
-                        _ = ws.cell(column=c_idx, row=r_idx, value=df_value)
-                        _.alignment = Alignment(horizontal="center")
-                        if r_idx == row:
-                            _.alignment = Alignment(
-                                text_rotation=180, vertical="top"
-                            )
-                # Grade Point cells
-                for c in range(20):
-                    grd = get_column_letter(col+c) + str(row+2)  # letter grade cell
-                    un_ld = get_column_letter(col+c) + str(row+1)  # Unit load cell
-                    ws.cell(
-                        row=row+3,
-                        column=col+c,
-                        value=(
-                            f'=IF(ISBLANK({grd}),"",IF(({grd}="A"),"5",'
-                            f'IF(({grd}="B"),"4",IF(({grd}="C"),"3",'
-                            f'IF(({grd}="D"),"2",IF(({grd}="E"),"1",'
-                            f'IF(({grd}="F"),"0"," "))))))*{un_ld})'
-                        )
-                    )
-
-                col += 21
-
-            # collating and writing outstanding/failed courses
-            course_brk_dwn = failed_courses_breakdown(df)
-            failed_courses_first = course_brk_dwn["failed_courses_first"]
-            outstanding_cred_1st = course_brk_dwn["outstanding_cred_1st"]
-            outstanding_cred = course_brk_dwn["outstanding_credit_load"]
-            failed_courses_second = course_brk_dwn["failed_courses_second"]
-
-            _failed_crses_block(
-                failed_courses_first, outstanding_cred_1st, first_sem=True
-            )
             col += 21
 
-            _failed_crses_block(failed_courses_second, outstanding_cred)
+        # collating and writing outstanding/failed courses
+        course_brk_dwn = failed_courses_breakdown(df)
+        failed_courses_first = course_brk_dwn["failed_courses_first"]
+        outstanding_cred_1st = course_brk_dwn["outstanding_cred_1st"]
+        outstanding_cred = course_brk_dwn["outstanding_credit_load"]
+        failed_courses_second = course_brk_dwn["failed_courses_second"]
 
-            row += 5
-            serial_number += 1
+        _failed_crses_block(
+            failed_courses_first, outstanding_cred_1st, first_sem=True
+        )
+        col += 21
+
+        _failed_crses_block(failed_courses_second, outstanding_cred)
+
+        row += 5
+        serial_number += 1
 
     return wb
 

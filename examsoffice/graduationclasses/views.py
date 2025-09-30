@@ -37,8 +37,9 @@ def graduation_class_student_json_view(request, student_reg_no: str):
     student = student.first()
 
     if student.expected_yr_of_grad is None:
-        return HttpResponseBadRequest(
-            "Student's Expected Year of Graduation unknown"
+        return JsonResponse(
+            {"error": "Student's Expected Year of Graduation unknown"},
+            status=400
         )
 
     grad_class = GraduationClass(student.expected_yr_of_grad)
