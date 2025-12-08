@@ -9,12 +9,26 @@ from django.shortcuts import render
 import pandas as pd
 
 from result_analytics.models import AnalyticsData
-
+from results.models import Student
 
 # Create your views here.
 def dashboard(request):
     template: str = "result_analytics/dashboard.html"
     return render(request, template, None)
+
+
+def get_student_name(reg_no):
+    student = Student.objects.filter(student_reg_no=reg_no).first()
+    if student:
+        name_and_initials = (
+            (student.last_name.upper() if (student.last_name is not None) else "")
+            + " "
+            + (student.first_name[0].upper() if (student.first_name is not None) else "")
+            + ". "
+            + (student.other_names[0].upper() if (student.other_names is not None and student.other_names != "") else "")
+        )
+        return name_and_initials
+    return ""
 
 
 def export_pivot_csv(request):
@@ -37,14 +51,27 @@ def export_pivot_csv(request):
     response["Content-Disposition"] = 'attachment; filename="collated_results.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(["Reg No"] + result_names)
+    writer.writerow(["Name", "Reg No"] + result_names)
 
+    data = dict(sorted(
+        data.items(), key=lambda x: tuple(map(int, x[0].split("/"))),
+        reverse=True
+    ))
     # Rows: student reg_no + scores
+    student_results = []
     for reg_no, results_dict in data.items():
-        row = [reg_no]
+        row = [get_student_name(reg_no), reg_no]
         for rn in result_names:
             row.append(results_dict.get(rn, "XX"))
-        writer.writerow(row)
+        student_results.append(row)
+    student_results = sorted(
+        student_results,
+        key=lambda x: (
+            # int(x[1].split("/")[0]),
+            x[0]
+        )
+    )
+    writer.writerows(student_results)
     return response
 
 
