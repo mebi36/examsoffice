@@ -21,3 +21,5 @@ track each user's activities especially deletion and modification.
 - Testing
 - adapt other student registration number formats to make the app useable for any university
 
+added collated view in analytics dashboard
+add dashboard id, so that there can be more than one dashboards app instance

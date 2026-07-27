@@ -2,4 +2,4 @@
 psql -U username -d db_name -f filepath.sql
 
 #to backup a db
-ps_dump -U username -d db_name > filename.format
+pg_dump -U username -d db_name > filename.format

@@ -16,6 +16,46 @@ services:
     networks:
       - pgnet
 
+  db-backup:
+    image: postgres:16
+    container_name: postgres-backup
+    depends_on:
+      - db
+    restart: unless-stopped
+    environment:
+      PGHOST: db
+      PGPORT: 5432
+      PGDATABASE: studentDB
+      PGUSER: postgres
+      PGPASSWORD: examsoffice2021
+      BACKUP_INTERVAL: 21600   # 6 hours (in seconds)
+    volumes:
+      - /home/mebinwobi/Documents/examsoffice/postgres_backups:/backups
+      - /home/mebinwobi/Documents/examsoffice/backup.sh:/backup.sh:ro
+    command: ["/bin/bash", "/backup.sh"]
+    networks:
+      - pgnet
+
+  backup-sync:
+    image: rclone/rclone:latest
+    container_name: backup-sync
+    restart: unless-stopped
+    volumes:
+      - /home/mebinwobi/Documents/examsoffice/postgres_backups:/backups:ro
+      - /home/mebinwobi/.config/rclone:/config/rclone:ro
+    command: >
+      sh -c '
+      while true; do
+        echo "[$$(date)] Syncing backups...";
+        rclone copy /backups gdrive:studentDB_backups \
+          --config /config/rclone/rclone.conf \
+          --create-empty-src-dirs;
+        sleep 600;
+      done
+      '
+      networks:
+        - pgnet
+
   web:
       build:
         context: /home/mebinwobi/Documents/examsoffice
